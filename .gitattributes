@@ -1,3 +1,4 @@
+* text=auto eol=lf
 *.js linguist-vendored
 *.css linguist-vendored
 _locales/* linguist-generated=true
