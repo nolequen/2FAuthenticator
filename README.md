@@ -10,6 +10,7 @@ How it differs from the original:
 
 - its own name and extension ID in Chrome, Edge and Firefox;
 - no cloud backups (Google Drive, Dropbox, OneDrive): backups are exported to a file only;
+- the interface is in English and Russian only;
 - bug fixes.
 
 ## Installation
