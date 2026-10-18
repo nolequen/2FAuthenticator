@@ -1,4 +1,4 @@
-@import "ui";
+@use "ui" as *;
 
 // Structure
 
@@ -697,7 +697,8 @@ svg {
     text-decoration: none;
   }
 
-  .button {
+  .button,
+  .button-small {
     display: block;
   }
 
@@ -1110,7 +1111,8 @@ svg {
     border: 2px solid white !important;
   }
 
-  .button {
+  .button,
+  .button-small {
     background: #f2f2f2 !important;
     border: #f2f2f2 1px solid !important;
     color: black !important;
