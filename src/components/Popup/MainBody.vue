@@ -43,9 +43,6 @@
         <IconKey />
         <p>
           {{ i18n.no_entires }}
-          <a href="#" v-on:click="openLink('https://otp.ee/quickstart')">{{
-            i18n.learn_more
-          }}</a>
         </p>
       </div>
     </div>
@@ -80,10 +77,6 @@ export default Vue.extend({
   },
   computed,
   methods: {
-    openLink(url: string) {
-      window.open(url, "_blank");
-      return;
-    },
     isMatchedEntry(entry: OTPEntry) {
       for (const hash of this.$store.getters["accounts/matchedEntries"]) {
         if (entry.hash === hash) {

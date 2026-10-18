@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Authenticator",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "Authenticator",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "Feedback",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "Översätt",
-    "description": "Translate."
-  },
   "source": {
     "message": "Källkod",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "Visa alla poster",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "Varning: säkerhetskopior är okrypterade. Använd på egen risk.",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "Du måste ange rätt lösenord för att importera säkerhetskopior.",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "Redigera",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "Manuell säkerhetskopiering",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "Använd autofyll",
@@ -329,38 +317,9 @@
     "message": "Flat",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "Säkerhetskopiera dina data automatiskt till lagringstjänster från tredje part.",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "Webbläsarsynkronisering",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "Logga in",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "Logga in (Företag)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "Varför kräver företagskonton fler behörigheter?"
-  },
-  "log_out": {
-    "message": "Logga ut",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "Det var ett problem att ansluta till ditt $SERVICE$-konto, logga in igen.",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "Du har ett eller flera konton hos Steam eller Blizzard. Okrypterade säkerhetskopior kommer inte att använda ett standardiserat format för säkerhetskopior.",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "Du kan importera säkerhetskopior från vissa andra applikationer.",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "Lär dig mer",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "Laddar..."
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "Åtkomst till webbläsarlagring för att lagra kontodata."
   },
-  "permission_identity": {
-    "message": "Tillåt inloggning till lagringstjänster från tredje part."
-  },
   "permission_alarms": {
     "message": "Gör att automatisk låsning fungerar."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "Tillåter klocksynkronisering med Google."
-  },
-  "permission_dropbox": {
-    "message": "Tillåter säkerhetskopiering till Dropbox."
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "Du måste inaktivera Dropbox-säkerhetskopiering först."
-  },
-  "permission_drive": {
-    "message": "Tillåter säkerhetskopiering till Google Drive."
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "Du måste inaktivera Google Drive-säkerhetskopiering först."
-  },
-  "permission_onedrive": {
-    "message": "Tillåter säkerhetskopiering till OneDrive."
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "Du måste inaktivera OneDrive-säkerhetskopiering först."
   },
   "permission_unknown_permission": {
     "message": "Okänd behörighet. Om du ser detta meddelande, skicka en felrapport."

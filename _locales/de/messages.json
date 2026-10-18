@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Authentifizierung",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "Authenticator",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "Rückmeldung",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "Übersetzen",
-    "description": "Translate."
-  },
   "source": {
     "message": "Quellcode",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "Alle Einträge anzeigen",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "Vorsicht: Sicherungen, die in Dropbox gespeichert werden, sind nicht verschlüsselt. Benutzung auf eigene Gefahr.",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "Sie müssen das richtige Passwort angeben, um Sicherungsdateien zu importieren.",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "Bearbeiten",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "Manuelles Backup",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "Autofill verwenden",
@@ -329,38 +317,9 @@
     "message": "Flach",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "Automatische Sicherung auf Drittanbieter-Speicher.",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "Browser-Synchronisation",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "Anmelden",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "Anmelden (Geschäftskonto)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "Warum benötigen Geschäftskonten mehr Berechtigungen?"
-  },
-  "log_out": {
-    "message": "Abmelden",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "Es gab ein Problem beim Verbinden zu ihrem $SERVICE$ Konto, bitte melden sie sich neu an.",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "Du hast ein oder mehrere Steam- oder Blizzard-Konten. Unverschlüsselte Backups werden kein standardisiertes Backup-Format verwenden.",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "Sie können Backups aus einigen anderen Anwendungen importieren.",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "Weitere Informationen",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "Laden..."
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "Zugriff auf Browserspeicherung, um Kontodaten zu speichern."
   },
-  "permission_identity": {
-    "message": "Einloggen bei externen Speicherdiensten zulassen."
-  },
   "permission_alarms": {
     "message": "Allows auto-lock to work."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "Synchronisierung mit Google zulassen."
-  },
-  "permission_dropbox": {
-    "message": "Backup auf Dropbox zulassen."
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "Sie müssen zuerst das Dropbox-Backup deaktivieren."
-  },
-  "permission_drive": {
-    "message": "Backup auf OneDrive zulassen."
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "Sie müssen zuerst das Google-Backup deaktivieren."
-  },
-  "permission_onedrive": {
-    "message": "Backup auf OneDrive zulassen."
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "Sie müssen zuerst das OneDrive-Backup deaktivieren."
   },
   "permission_unknown_permission": {
     "message": "Unbekannte Berechtigung. Wenn Sie diese Nachricht sehen, senden Sie bitte einen Fehlerbericht."

@@ -7,8 +7,11 @@
   "description": "__MSG_extDesc__",
   "browser_specific_settings": {
     "gecko": {
-      "id": "authenticator@mymindstorm",
-      "strict_min_version": "126.0"
+      "id": "2fauthenticator@nolequen",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   },
   "icons": {
@@ -43,21 +46,13 @@
   "permissions": [
     "activeTab",
     "storage",
-    "identity",
     "alarms",
     "scripting",
     "contextMenus"
   ],
   "optional_permissions": ["clipboardWrite"],
-  "host_permissions": [
-    "https://www.google.com/",
-    "https://*.dropboxapi.com/*",
-    "https://www.googleapis.com/*",
-    "https://accounts.google.com/o/oauth2/revoke",
-    "https://graph.microsoft.com/me/*",
-    "https://login.microsoftonline.com/common/oauth2/v2.0/token"
-  ],
+  "host_permissions": ["https://www.google.com/"],
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; font-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src https://www.google.com/ https://*.dropboxapi.com https://www.googleapis.com/ https://accounts.google.com/o/oauth2/revoke https://login.microsoftonline.com/common/oauth2/v2.0/token https://graph.microsoft.com/; default-src 'none'"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; font-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src https://www.google.com/; default-src 'none'"
   }
 }

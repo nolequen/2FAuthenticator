@@ -86,22 +86,6 @@ svg {
   bottom: 0;
 }
 
-#i-sync {
-  position: absolute;
-  left: 70px;
-  bottom: 0;
-  cursor: default;
-  @include themify($themes) {
-    fill: themed("grey-2");
-  }
-
-  &:hover {
-    svg {
-      fill: inherit;
-    }
-  }
-}
-
 #i-plus,
 #i-qr {
   position: absolute;
@@ -1230,18 +1214,6 @@ svg {
     .icon {
       svg {
         fill: yellow;
-      }
-
-      &#i-sync {
-        svg {
-          fill: white;
-        }
-
-        &:hover {
-          svg {
-            fill: white;
-          }
-        }
       }
 
       &:hover {

@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Autentifikator",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "Autentifikator",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "Povratne informacije",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "Prevedi",
-    "description": "Translate."
-  },
   "source": {
     "message": "Izvorni kod",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "Prikaži sve unose",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "Upozorenje: sigurnose kopije nisu šifrirane. Koristi ih na vlastitu odgovornost.",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "Za uvoz sigurnosnih kopija moraš upisati ispravnu lozinku.",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "Uredi",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "Ručno spremljena sigurnosna kopija",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "Koristi automatsko ispunjavanje",
@@ -329,38 +317,9 @@
     "message": "Plošna",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "Automatski spremi sigurnosnu kopiju tvojih podataka u stranoj usluzi za spremanje podataka.",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "Sinkronizacija preglednika",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "Prijavi se",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "Prijavi se (poslovno)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "Zašto poslovni računi zahtijevaju više dozvola?"
-  },
-  "log_out": {
-    "message": "Odjava",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "Povezivanje na tvoj $SERVICE$ račun nije uspjelo. Prijavi se ponovo.",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "Imaš jedan ili više Steam ili Blizzard računa. Nešifrirane sigurnosne kopije neće koristiti standardni format sigurnosne kopije.",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "Možeš uvesti sigurnosne kopije iz drugih aplikacija.",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "Saznaj više",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "Učitavanje …"
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "Pristupi memoriji preglednika za spremanje podataka računa."
   },
-  "permission_identity": {
-    "message": "Dozvoljava prijavu na strane usluge spremanja podataka."
-  },
   "permission_alarms": {
     "message": "Omogućuje automatsko zaključavanje."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "Dozvoljava sinkroniziranje sata s Googleom."
-  },
-  "permission_dropbox": {
-    "message": "Dozvoljava spremanje sigurnosne kopije na Dropboxu."
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "Najprije moraš deaktivirati Dropbox sigurnosne kopije."
-  },
-  "permission_drive": {
-    "message": "Dozvoljava spremanje sigurnosne kopije na Google Driveu."
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "Najprije moraš deaktivirati Google Drive sigurnosne kopije."
-  },
-  "permission_onedrive": {
-    "message": "Dozvoljava spremanje sigurnosne kopije na OneDriveu."
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "Najprije moraš deaktivirati OneDrive sigurnosne kopije."
   },
   "permission_unknown_permission": {
     "message": "Nepoznata dozvola. Ako vidiš ovu poruku pošalji izvještaj o grešci."

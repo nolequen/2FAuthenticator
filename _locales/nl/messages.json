@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Authenticator",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "Authenticator",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "Feedback",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "Vertalen",
-    "description": "Translate."
-  },
   "source": {
     "message": "Broncode",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "Laat alle invoer zien",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "Waarschuwing: back-ups zijn niet versleuteld. Gebruik op eigen risico.",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "U moet het juiste wachtwoord opgeven om back-ups te importeren.",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "Bewerken",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "Handmatige back-up",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "Automatisch aanvullen gebruiken",
@@ -329,38 +317,9 @@
     "message": "Vlak",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "Automatisch een back-up maken van uw gegevens naar opslagdiensten van derden.",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "Browsersynchronisatie",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "Aanmelden",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "Aanmelden (Zakelijk)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "Waarom hebben zakelijke accounts meer toestemmingen nodig?"
-  },
-  "log_out": {
-    "message": "Afmelden",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "Er was een probleem met de verbinding naar uw $SERVICE$-account, meld u opnieuw aan.",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "U hebt een of meer Steam- of Blizzard-accounts. Niet-versleutelde back-ups zullen geen gestandaardiseerde backup-indeling gebruiken.",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "U kunt back-ups van enkele andere toepassingen importeren.",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "Meer info",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "Laden…"
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "Toegang tot browseropslag om accountgegevens op te slaan."
   },
-  "permission_identity": {
-    "message": "Aanmelden bij opslagdiensten van derden toestaan."
-  },
   "permission_alarms": {
     "message": "Staat automatisch vergrendelen toe."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "Tijdssynchronisatie met Google toestaan."
-  },
-  "permission_dropbox": {
-    "message": "Back-up naar Dropbox toestaan."
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "U moet eerst back-up naar Dropbox uitschakelen."
-  },
-  "permission_drive": {
-    "message": "Back-up naar Google Drive toestaan."
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "U moet eerst back-up naar Google Drive uitschakelen."
-  },
-  "permission_onedrive": {
-    "message": "Back-up naar OneDrive toestaan."
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "U moet eerst back-up naar OneDrive uitschakelen."
   },
   "permission_unknown_permission": {
     "message": "Onbekende toestemming. Indien dit bericht wordt weergegeven, stuur dan een bugrapport."

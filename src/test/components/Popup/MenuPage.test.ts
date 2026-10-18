@@ -10,7 +10,6 @@ import MenuPage from "../../../components/Popup/MenuPage.vue";
 
 import { Style } from "../../../store/Style";
 import { Accounts } from "../../../store/Accounts";
-import { Backup } from "../../../store/Backup";
 import { CurrentView } from "../../../store/CurrentView";
 import { Menu } from "../../../store/Menu";
 import { Notification } from "../../../store/Notification";
@@ -77,55 +76,33 @@ describe("MenuPage", () => {
     };
 
     beforeEach(() => {
+      chrome.tabs.create.resetHistory();
       wrapper = mount(MenuPage, {
         store,
         localVue,
       });
     });
 
-    it("should open a new tab to the Chrome help page when the feedback button is clicked and the user agent is Chrome", async () => {
-      mockUserAgent(
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"
-      );
+    it("should open a new tab to the issues page of the fork when the feedback button is clicked", async () => {
       await clickMenuPageButtonByTitle(wrapper, "Feedback");
       assert.ok(
-        chrome.tabs.create.withArgs({ url: "https://otp.ee/chromeissues" })
-          .calledOnce,
-        "Tab create should be called with the Chrome URL"
+        chrome.tabs.create.withArgs({
+          url: "https://github.com/nolequen/Authenticator/issues",
+        }).calledOnce,
+        "Tab create should be called with the issues URL"
       );
     });
 
-    it("should open a new tab to the Edge help page when the feedback button is clicked and the user agent is Edge", async () => {
-      mockUserAgent(
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.74 Safari/537.36 Edg/79.0.309.43"
-      );
-      await clickMenuPageButtonByTitle(wrapper, "Feedback");
-      assert.ok(
-        chrome.tabs.create.withArgs({ url: "https://otp.ee/edgeissues" })
-          .calledOnce,
-        "Tab create should be called with the Edge URL"
-      );
-    });
-
-    it("should open a new tab to the Firefox help page when the feedback button is clicked and the user agent is Firefox", async () => {
+    it("should open the same issues page when the user agent is Firefox", async () => {
       mockUserAgent(
         "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0"
       );
       await clickMenuPageButtonByTitle(wrapper, "Feedback");
       assert.ok(
-        chrome.tabs.create.withArgs({ url: "https://otp.ee/firefoxissues" })
-          .calledOnce,
-        "Tab create should be called with the Firefox URL"
-      );
-    });
-
-    it("should open a new tab to the Chrome help page when the feedback button is clicked and the user agent is unknown", async () => {
-      mockUserAgent("Unknown");
-      await clickMenuPageButtonByTitle(wrapper, "Feedback");
-      assert.ok(
-        chrome.tabs.create.withArgs({ url: "https://otp.ee/chromeissues" })
-          .called,
-        "Tab create should be called with the Chrome URL"
+        chrome.tabs.create.withArgs({
+          url: "https://github.com/nolequen/Authenticator/issues",
+        }).calledOnce,
+        "Tab create should be called with the issues URL"
       );
     });
 
@@ -133,12 +110,11 @@ describe("MenuPage", () => {
       beforeEach(async () => {
         try {
           chrome.storage.managed.get.yieldsAsync({
-            feedbackURL: "https://authenticator.cc",
+            feedbackURL: "https://example.com/feedback",
           });
 
           store = new Vuex.Store({
             modules: {
-              backup: await new Backup().getModule(),
               currentView: new CurrentView().getModule(),
               notification: new Notification().getModule(),
               qr: new Qr().getModule(),
@@ -162,7 +138,7 @@ describe("MenuPage", () => {
       it("should open a new tab to the page specified in ManagedStorage", async () => {
         await clickMenuPageButtonByTitle(wrapper, "Feedback");
         assert.ok(
-          chrome.tabs.create.withArgs({ url: "https://authenticator.cc" })
+          chrome.tabs.create.withArgs({ url: "https://example.com/feedback" })
             .called,
           "Tab create should be called with the feedback URL"
         );

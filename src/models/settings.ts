@@ -5,21 +5,8 @@ export enum StorageLocation {
 
 interface UserSettingsData {
   // local settings
-  driveEncrypted?: boolean;
-  driveFolder?: string;
-  driveRefreshToken?: string;
-  driveRevoked?: boolean;
-  driveToken?: string;
-  dropboxEncrypted?: boolean;
-  dropboxRevoked?: boolean;
-  dropboxToken?: string;
   lastRemindingBackupTime?: number;
   offset?: number;
-  oneDriveBusiness?: boolean;
-  oneDriveEncrypted?: boolean;
-  oneDriveRevoked?: boolean;
-  oneDriveRefreshToken?: string;
-  oneDriveToken?: string;
   storageLocation?: StorageLocation;
 
   // syncable settings
@@ -35,6 +22,12 @@ interface UserSettingsData {
 
 // Maybe we can have a better way to define this
 const LocalUserSettingsDataKeys = [
+  "lastRemindingBackupTime",
+  "offset",
+  "storageLocation",
+];
+
+const LegacyUserSettingsDataKeys = [
   "driveEncrypted",
   "driveFolder",
   "driveRefreshToken",
@@ -43,14 +36,11 @@ const LocalUserSettingsDataKeys = [
   "dropboxEncrypted",
   "dropboxRevoked",
   "dropboxToken",
-  "lastRemindingBackupTime",
-  "offset",
   "oneDriveBusiness",
   "oneDriveEncrypted",
   "oneDriveRevoked",
   "oneDriveRefreshToken",
   "oneDriveToken",
-  "storageLocation",
 ];
 
 export class UserSettings {
@@ -84,6 +74,10 @@ export class UserSettings {
   }
 
   static async commitItems() {
+    for (const key of LegacyUserSettingsDataKeys) {
+      delete UserSettings.items[key as keyof UserSettingsData];
+    }
+
     const storageLocation =
       UserSettings.items.storageLocation || StorageLocation.Local;
 
@@ -174,35 +168,14 @@ export class UserSettings {
   }
 }
 
-type BooleanOption =
-  | "autofill"
-  | "driveEncrypted"
-  | "driveRevoked"
-  | "dropboxEncrypted"
-  | "dropboxRevoked"
-  | "enableContextMenu"
-  | "oneDriveBusiness"
-  | "oneDriveEncrypted"
-  | "oneDriveRevoked"
-  | "smartFilter";
+type BooleanOption = "autofill" | "enableContextMenu" | "smartFilter";
 
 type NumberOption = "autolock" | "lastRemindingBackupTime" | "offset" | "zoom";
 
 type JSONOption = "advisorIgnoreList";
 
 function isBooleanOption(key: string): key is BooleanOption {
-  return [
-    "autofill",
-    "driveEncrypted",
-    "driveRevoked",
-    "dropboxEncrypted",
-    "dropboxRevoked",
-    "enableContextMenu",
-    "oneDriveBusiness",
-    "oneDriveEncrypted",
-    "oneDriveRevoked",
-    "smartFilter",
-  ].includes(key);
+  return ["autofill", "enableContextMenu", "smartFilter"].includes(key);
 }
 
 function isNumberOption(key: string): key is NumberOption {

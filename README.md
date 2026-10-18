@@ -1,54 +1,44 @@
-# Authenticator [![Build Status](https://travis-ci.com/Authenticator-Extension/Authenticator.svg?branch=dev)](https://travis-ci.com/Authenticator-Extension/Authenticator) [![Crowdin](https://d322cqt584bo4o.cloudfront.net/authenticator-firefox/localized.svg)](https://crowdin.com/project/authenticator-firefox) <img align="right" width="100" height="100" src="https://github.com/Authenticator-Extension/Authenticator/raw/dev/images/icon.svg">
+# 2FAuthenticator
 
-> Authenticator generates 2-Step Verification codes in your browser.
+2FAuthenticator generates two-factor authentication codes in your browser.
 
-## Available for Chrome, Firefox, and Microsoft Edge
+## About
 
-[<img src="https://raw.githubusercontent.com/wiki/Authenticator-Extension/Authenticator/readme-images/chrome-web-store.png" title="Chrome Web Store" width="170" height="48" />](https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai) [<img src="https://raw.githubusercontent.com/wiki/Authenticator-Extension/Authenticator/readme-images/firefox-add-ons.png" title="Firefox Add-ons" width="170" height="48" />](https://addons.mozilla.org/en-US/firefox/addon/auth-helper?src=external-github) [<img src="https://raw.githubusercontent.com/wiki/Authenticator-Extension/Authenticator/readme-images/microsoft-store.png" title="Microsoft Store" height="48">](https://microsoftedge.microsoft.com/addons/detail/ocglkepbibnalbgmbachknglpdipeoio)
+2FAuthenticator is a fork of [Authenticator](https://github.com/Authenticator-Extension/Authenticator) by Authenticator Extension, based on version 8.0.2 and distributed under the [MIT License](LICENSE).
 
+How it differs from the original:
 
-### Safari Edition
+- its own name and extension ID in Chrome, Edge and Firefox;
+- no cloud backups (Google Drive, Dropbox, OneDrive): backups are exported to a file only;
+- bug fixes.
 
-A Safari edition of Authenticator is available on the App Store. We do not provide official support for the Safari edition.
+## Installation
 
-[<img width="150" alt="Download on the App Store" src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"/>](https://apps.apple.com/us/app/authen/id1602945200?mt=12)
+Builds will be published on [GitHub Releases](https://github.com/nolequen/Authenticator/releases) starting with the first release.
 
-## Build Setup
+## Building
 
-``` bash
-# install development dependencies
-npm install
-# compile
-npm run [chrome, firefox, prod]
+You need Node.js 24 and npm. The commands work in PowerShell on Windows as well as on Linux and macOS.
+
 ```
-
-To reproduce a build:
-
-``` bash
 npm ci
-npm run prod
+npm run chrome
+npm run firefox
+npm run edge
 ```
 
-To reproduce a build for Safari, please follow contribution guidance in [Authenticator-Extension/Authen](https://github.com/Authenticator-Extension/Authen#how-to-contribute)
+Each command builds the extension into the `chrome/`, `firefox/` or `edge/` folder. `npm run prod` builds all three into `release/`.
 
-## Development (Chrome)
+`npm test` rebuilds the test build and runs the tests in a Chrome window opened by Puppeteer.
 
-``` bash
-# install development dependencies
-npm install
-# compiles the Chrome extension to the `./test/chrome` directory
-npm run dev:chrome
-# load the unpacked extension from the `./test/chrome/ directory in Chrome
-```
+`npm run lint` checks the code style, `npm run format` fixes it.
 
-Note that Windows users should download a tool like [Git Bash](https://git-scm.com/download/win) or [Cygwin](http://cygwin.com/) to build.
+## Development
 
-## Acknowledgment
+`npm run dev:chrome` and `npm run dev:firefox` rebuild the extension into `chrome/` or `firefox/` on every change.
 
-We would like to extend our heartfelt thanks to Laurent, the Chief Information Security Officer (CISO) of the University of Luxembourg, for the invaluable support and contribution to this project. During the development process, the CISO team provided critical security recommendations that helped us identify and address potential vulnerabilities, significantly enhancing the security and reliability of the project.
+`npm run start:firefox` starts Firefox with a temporary profile and the extension from `firefox/`. Run it together with `npm run dev:firefox` in a second terminal.
 
-We especially want to acknowledge the University of Luxembourg's information security team for their selfless contribution, which not only facilitated the progress of this project but also had a positive impact on the broader open-source community. We recognize that the success of open-source software depends heavily on collaboration and support from various stakeholders, and the involvement of the University of Luxembourg has allowed us to offer a more secure and dependable product to a wider audience.
+## Acknowledgements
 
-We understand that while open-source software is free, maintaining and improving these projects requires significant resources. The University of Luxembourg’s information security team has demonstrated their strong commitment to the open-source community, contributing not just within their university but to users and developers globally. We hope this acknowledgment will help them continue to secure the support and resources necessary to further advance open-source initiatives.
-
-Once again, we express our sincere gratitude to the University of Luxembourg's CISO team for their valuable advice and assistance.
+Thanks to the authors and contributors of the original [Authenticator](https://github.com/Authenticator-Extension/Authenticator).

@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Autentifikatorius",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "Autentifikatorius",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "Atsiliepimai",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "Versti",
-    "description": "Translate."
-  },
   "source": {
     "message": "Programinis kodas",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "Rodyti visus įrašus",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "Demesio: atsarginės kopijos yra nešifruojamos. Naudokite savo rizika.",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "Norėdami importuoti atsargines kopijas, turite nurodyti tinkamą slaptažodį.",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "Redaguoti",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "Rankinis atsarginis kopijavimas",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "Naudoti automatinį pildymą",
@@ -329,38 +317,9 @@
     "message": "Plokščias",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "Automatiškai kurkite atsargines duomenų kopijas į trečiųjų šalių saugojimo paslaugas.",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "Naršyklės sinchronizavimas",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "Prisijungti",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "Prisijungti (verslas)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "Kodėl verslo paskyroms reikia daugiau leidimų?"
-  },
-  "log_out": {
-    "message": "Atsijungti",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "Kilo problema jungiantis prie jūsų $SERVICE$ paskyros, bandykite dar kartą.",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "Turite vieną ar daugiau \"Steam\" arba \"Blizzard\" paskyrų. Neužšifruotoms atsarginėms kopijoms nebus naudojamas standartinis atsarginių kopijų formatas.",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "Galite importuoti atsargines kopijas iš kai kurių kitų programų.",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "Sužinokite daugiau",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "Kraunasi..."
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "Prieiga prie naršyklės saugyklos, kurioje saugomi paskyros duomenys."
   },
-  "permission_identity": {
-    "message": "Leidžia prisijungti prie trečiosios šalies saugojimo paslaugų."
-  },
   "permission_alarms": {
     "message": "Allows auto-lock to work."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "Leidžia sinchronizuoti laikrodį su \"Google\"."
-  },
-  "permission_dropbox": {
-    "message": "Leidžia kurti atsarginę kopiją į \"Dropbox\"."
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "Pirmiausia turite išjungti \"Dropbox\" atsarginę kopiją."
-  },
-  "permission_drive": {
-    "message": "Leidžia kurti atsarginę kopiją \"Google\" diske."
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "Pirmiausia turite išjungti \"Google Drive\" atsarginę kopiją."
-  },
-  "permission_onedrive": {
-    "message": "Leidžia kurti atsarginę kopiją \"OneDrive\"."
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "Pirmiausia turite išjungti \"OneDrive\" atsarginę kopiją."
   },
   "permission_unknown_permission": {
     "message": "Nežinomas leidimas. Jei matote šį pranešimą, atsiųskite pranešimą apie klaidą."

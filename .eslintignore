@@ -7,7 +7,6 @@ webpack.config.js
 webpack.prod.js
 webpack.dev.js
 src/test
-src/models/credentials.ts
 edge
 /test
 release

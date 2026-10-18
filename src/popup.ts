@@ -11,13 +11,11 @@ import CommonComponents from "./components/common/index";
 import { loadI18nMessages } from "./store/i18n";
 import { Style } from "./store/Style";
 import { Accounts } from "./store/Accounts";
-import { Backup } from "./store/Backup";
 import { CurrentView } from "./store/CurrentView";
 import { Menu } from "./store/Menu";
 import { Notification } from "./store/Notification";
 import { Qr } from "./store/Qr";
 import { Advisor } from "./store/Advisor";
-import { Dropbox, Drive, OneDrive } from "./models/backup";
 import { syncTimeWithGoogle } from "./syncTime";
 import { StorageLocation, UserSettings } from "./models/settings";
 
@@ -51,7 +49,6 @@ async function init() {
     modules: {
       accounts: await new Accounts().getModule(),
       advisor: await new Advisor().getModule(),
-      backup: await new Backup().getModule(),
       currentView: new CurrentView().getModule(),
       menu: await new Menu().getModule(),
       notification: new Notification().getModule(),
@@ -126,7 +123,9 @@ async function init() {
       clientTime - Number(UserSettings.items.lastRemindingBackupTime) >= 30 ||
       clientTime - Number(UserSettings.items.lastRemindingBackupTime) < 0
     ) {
-      runScheduledBackup(clientTime, instance);
+      instance.$store.commit("notification/alert", instance.i18n.remind_backup);
+      UserSettings.items.lastRemindingBackupTime = clientTime;
+      UserSettings.commitItems();
     }
     return;
   }, 5000);
@@ -199,138 +198,3 @@ async function init() {
 }
 
 init();
-
-async function runScheduledBackup(clientTime: number, instance: Vue) {
-  if (instance.$store.state.backup.dropboxToken) {
-    chrome.permissions.contains(
-      { origins: ["https://*.dropboxapi.com/*"] },
-      async (hasPermission) => {
-        if (hasPermission) {
-          try {
-            const dropbox = new Dropbox();
-            const res = await dropbox.upload(
-              instance.$store.state.accounts.encryption.get(
-                instance.$store.state.accounts.defaultEncryption
-              )
-            );
-            if (res) {
-              // we have uploaded backup to Dropbox
-              // no need to remind
-              UserSettings.items.lastRemindingBackupTime = clientTime;
-              UserSettings.commitItems();
-              return;
-            } else if (UserSettings.items.dropboxRevoked === true) {
-              instance.$store.commit(
-                "notification/alert",
-                chrome.i18n.getMessage("token_revoked", ["Dropbox"])
-              );
-              UserSettings.items.dropboxRevoked = undefined;
-              UserSettings.removeItem("dropboxRevoked");
-            }
-          } catch (error) {
-            // ignore
-          }
-        }
-        instance.$store.commit(
-          "notification/alert",
-          instance.i18n.remind_backup
-        );
-        UserSettings.items.lastRemindingBackupTime = clientTime;
-        UserSettings.commitItems();
-      }
-    );
-  }
-  if (instance.$store.state.backup.driveToken) {
-    chrome.permissions.contains(
-      {
-        origins: [
-          "https://www.googleapis.com/*",
-          "https://accounts.google.com/o/oauth2/revoke",
-        ],
-      },
-      async (hasPermission) => {
-        if (hasPermission) {
-          try {
-            const drive = new Drive();
-            const res = await drive.upload(
-              instance.$store.state.accounts.encryption.get(
-                instance.$store.state.accounts.defaultEncryption
-              )
-            );
-            if (res) {
-              UserSettings.items.lastRemindingBackupTime = clientTime;
-              UserSettings.commitItems();
-              return;
-            } else if (UserSettings.items.driveRevoked === true) {
-              instance.$store.commit(
-                "notification/alert",
-                chrome.i18n.getMessage("token_revoked", ["Google Drive"])
-              );
-              UserSettings.items.driveRevoked = undefined;
-              UserSettings.removeItem("driveRevoked");
-            }
-          } catch (error) {
-            // ignore
-          }
-        }
-        instance.$store.commit(
-          "notification/alert",
-          instance.i18n.remind_backup
-        );
-        UserSettings.items.lastRemindingBackupTime = clientTime;
-        UserSettings.commitItems();
-      }
-    );
-  }
-  if (instance.$store.state.backup.oneDriveToken) {
-    chrome.permissions.contains(
-      {
-        origins: [
-          "https://graph.microsoft.com/me/*",
-          "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-        ],
-      },
-      async (hasPermission) => {
-        if (hasPermission) {
-          try {
-            const onedrive = new OneDrive();
-            const res = await onedrive.upload(
-              instance.$store.state.accounts.encryption.get(
-                instance.$store.state.accounts.defaultEncryption
-              )
-            );
-            if (res) {
-              UserSettings.items.lastRemindingBackupTime = clientTime;
-              UserSettings.commitItems();
-              return;
-            } else if (UserSettings.items.oneDriveRevoked === true) {
-              instance.$store.commit(
-                "notification/alert",
-                chrome.i18n.getMessage("token_revoked", ["OneDrive"])
-              );
-              UserSettings.items.oneDriveRevoked = undefined;
-              UserSettings.removeItem("oneDriveRevoked");
-            }
-          } catch (error) {
-            // ignore
-          }
-        }
-        instance.$store.commit(
-          "notification/alert",
-          instance.i18n.remind_backup
-        );
-        UserSettings.items.lastRemindingBackupTime = clientTime;
-        UserSettings.commitItems();
-      }
-    );
-  }
-  if (
-    !instance.$store.state.backup.driveToken &&
-    !instance.$store.state.backup.dropboxToken &&
-    !instance.$store.state.backup.oneDriveToken
-  ) {
-    instance.$store.commit("notification/alert", instance.i18n.remind_backup);
-    UserSettings.items.lastRemindingBackupTime = clientTime;
-    UserSettings.commitItems();
-  }
-}

@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Authenticator",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "Authenticator",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "Kommentaar",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "Oersette",
-    "description": "Translate."
-  },
   "source": {
     "message": "Boarnekoade",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "Lit alle ynfier sjen",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "Warskôging: reservekopyen binne net fersifere. Brûk op eigen risiko.",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "Jo moatte it krekte wachtwurd opjaan om reservekopyen te ymportearjen.",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "Bewurkje",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "Hânmjittige reservekopy",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "Automatysk oanfolje brûke",
@@ -329,38 +317,9 @@
     "message": "Flak",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "Automatysk in reservekopy meitsje fan jo gegevens nei opslachtsjinsten fan tredden.",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "Browsersyngronisaasje",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "Oanmelde",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "Oanmelde (Saaklik)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "Wêrom hawwe saaklike accounts mear tastimming nedich?"
-  },
-  "log_out": {
-    "message": "Ofmelde",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "Der wie in probleem mei de ferbining nei jo $SERVICE$-account, meld jo opnij oan.",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "Jo hawwe ien of mear Steam- of Blizzard-accounts. Net-fersifere reservekopyen sille gjin standerdisearre reservekopy-yndieling brûke.",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "Jo kinne reservekopyen fan inkelde andere tapassingen ymportearje.",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "Mear ynfo",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "Lade…"
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "Tagong ta browserûnthâld om accountgegevens te bewarjen."
   },
-  "permission_identity": {
-    "message": "Oanmelden by ûnthâldtsjinsten fan tredden tastean."
-  },
   "permission_alarms": {
     "message": "Stiet automatysk beskoatteljen ta."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "Tiidssyngronisaasje mei Google tastean."
-  },
-  "permission_dropbox": {
-    "message": "Reservekopy nei Dropbox tastean."
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "Jo moatte earst reservekopy nei Dropbox útskeakelje."
-  },
-  "permission_drive": {
-    "message": "Reservekopy nei Google Drive tastean."
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "Jo moatte earst reservekopy nei Google Drive útskeakelje."
-  },
-  "permission_onedrive": {
-    "message": "Reservekopy nei OneDrive tastean."
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "Jo moatte earst reservekopy nei OneDrive útskeakelje."
   },
   "permission_unknown_permission": {
     "message": "Unbekende tastimming. As dit bericht werjûn wurdt, stjoer dan in bugrapport."

@@ -3,6 +3,7 @@
 import puppeteer from "puppeteer";
 import path from "path";
 import fs from "fs";
+import crypto from "crypto";
 import { execSync } from "child_process";
 import merge from "lodash/merge";
 
@@ -35,9 +36,20 @@ const colors = {
   red: "\x1b[31m",
 }
 
+function extensionId(manifestPath: string) {
+  const { key } = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  return crypto
+    .createHash("sha256")
+    .update(Buffer.from(key, "base64"))
+    .digest("hex")
+    .slice(0, 32)
+    .replace(/[0-9a-f]/g, (c) => String.fromCharCode(97 + parseInt(c, 16)));
+}
+
 async function runTests() {
+  const extensionDir = path.resolve(__dirname, "../test/chrome");
   const puppeteerArgs: string[] = [
-    `--load-extension=${path.resolve(__dirname, "../test/chrome")}`,
+    `--load-extension=${extensionDir}`,
     // for CI
     "--no-sandbox",
     "--lang=en-US,en"
@@ -52,7 +64,9 @@ async function runTests() {
   });
   const mochaPage = await browser.newPage();
   await mochaPage.goto(
-    "chrome-extension://bhghoamapcdpbohphigoooaddinpkbai/view/test.html"
+    `chrome-extension://${extensionId(
+      path.join(extensionDir, "manifest.json")
+    )}/view/test.html`
   );
 
   // by setting this env var, console logging works for both components and testing

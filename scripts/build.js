@@ -16,7 +16,6 @@ const BIN = {
   sass: "node_modules/sass/sass.js",
   licenses: "node_modules/npm-license-generator/build/npm-license-generator",
 };
-const CREDENTIALS_REGEX = /^.*".+".*".+".*".+".*".+".*".+".*$/;
 const LICENSES_TIMEOUT_SECONDS = 60;
 const LICENSES_ATTEMPTS = 4;
 
@@ -62,15 +61,6 @@ function lint() {
     fail("Run `npm run format` to fix code style.", result.status ?? 1);
   }
   runOrExit("eslint", [".", "--ext", ".js,.ts"]);
-}
-
-function checkCredentials() {
-  const credentials = fs
-    .readFileSync("src/models/credentials.ts", "utf8")
-    .replace(/[\r\n]/g, "");
-  if (!CREDENTIALS_REGEX.test(credentials)) {
-    warn("Warning: Missing info in credentials.ts");
-  }
 }
 
 function copyCssExtras(dir) {
@@ -167,7 +157,6 @@ function build(platform) {
   }
 
   lint();
-  checkCredentials();
   compile(platform);
 
   if (platform === "prod") {

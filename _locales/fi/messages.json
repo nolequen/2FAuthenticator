@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Authenticator",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "Authenticator",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "Palaute",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "Käännä",
-    "description": "Translate."
-  },
   "source": {
     "message": "Lähdekoodi",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "Näytä kaikki kohteet",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "Varoitus: varmuuskopiot ovat salaamattomia. Käytä toimintoa harkiten.",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "Syötä oikea salasana tuodaksesi varmuuskopiot.",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "Muokkaa",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "Manuaalinen varmuuskopiointi",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "Käytä automaattitäyttöä",
@@ -329,38 +317,9 @@
     "message": "Tasainen",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "Varmuuskopioi tietosi ulkoisiin tallennuspalveluihin automaattisesti.",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "Selaimen synkronointi",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "Kirjaudu",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "Kirjaudu (yritykset)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "Miksi yritystilit vaativat laajempia käyttöoikeuksia?"
-  },
-  "log_out": {
-    "message": "Kirjaudu ulos",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "Virhe yhdistettäessä palveluun $SERVICE$. Kirjaudu uudelleen.",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "Sinulla on ainakin yksi Steam- tai Blizzard-tili. Salaamattomat varmuuskopiot eivät ole normaalissa varmuuskopiomuodossa.",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "Voit tuoda myös joidenkin muiden sovellusten varmuuskopioita.",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "Lue lisää",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "Ladataan..."
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "Selaimen tallennustilan käyttöoikeus tilitietojen säilytykseen."
   },
-  "permission_identity": {
-    "message": "Sallii kirjautumisen ulkoisiin tallennuspalveluihin."
-  },
   "permission_alarms": {
     "message": "Allows auto-lock to work."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "Sallii kellon synkronoinnin Googlen kanssa."
-  },
-  "permission_dropbox": {
-    "message": "Sallii varmuuskopioinnin Dropboxiin."
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "Dropbox-varmuuskopiointi on ensin poistettava käytöstä."
-  },
-  "permission_drive": {
-    "message": "Sallii varmuuskopioinnin Google Driveen."
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "Google Drive -varmuuskopiointi on ensin poistettava käytöstä."
-  },
-  "permission_onedrive": {
-    "message": "Sallii varmuuskopioinnin OneDriveen."
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "OneDrive-varmuuskopiointi on ensin poistettava käytöstä."
   },
   "permission_unknown_permission": {
     "message": "Tuntematon käyttöoikeus. Jos näet tämän viestin, lähetä virheilmoitus."

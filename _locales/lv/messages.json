@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Divpakāpju kodu ģenerators",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "Divpakāpju kodu ģenerators",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "Atsauksmes",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "Tulkot",
-    "description": "Translate."
-  },
   "source": {
     "message": "Avota kods",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "Rādīt visus ierakstus",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "Brīdinājums: rezerves kopijas nav šifrētas. Izmantojiet uz pašu atbildības.",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "Lai importētu rezerves kopijas, ir jānorāda pareiza parole.",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "Rediģēt",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "Manuāla dublēšana",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "Izmantot automātisko aizpildīšanu",
@@ -329,38 +317,9 @@
     "message": "Plakanais",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "Automātiski veikt datu rezerves kopiju trešās puses krātuves pakalpojumos.",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "Pārlūkprogrammas sinhronizēšana",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "Autorizēties",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "Autorizēties (Uzņēmuma)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "Kāpēc uzņēmumu kontiem ir nepieciešamas vairāk atļauju?"
-  },
-  "log_out": {
-    "message": "Iziet",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "Radās problēma, veidojot savienojumu ar jūsu $SERVICE$ kontu. Lūdzu, autorizējieties vēlreiz.",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "Jums ir viens vai vairāki Steam vai Blizzard konti. Nešifrētās rezerves kopijas neizmantos standartizēto rezerves kopijas formātu.",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "Varat importēt rezerves kopijas no dažām citām programmām.",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "Uzzināt vairāk",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "Ielādē..."
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "Piekļuve pārlūkprogrammas krātuvei, lai varētu saglabāt konta datus."
   },
-  "permission_identity": {
-    "message": "Ļauj autorizēties trešās puses krātuves pakalpojumos."
-  },
   "permission_alarms": {
     "message": "Allows auto-lock to work."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "Atļauj sinhronizēt laiku ar Google."
-  },
-  "permission_dropbox": {
-    "message": "Atļauj veikt rezerves kopiju Dropbox."
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "Jums vispirms ir jāatslēdz Dropbox rezerves kopija."
-  },
-  "permission_drive": {
-    "message": "Atļauj veikt rezerves kopiju Google Drive."
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "Jums vispirms ir jāatslēdz Google Drive rezerves kopija."
-  },
-  "permission_onedrive": {
-    "message": "Atļauj veikt rezerves kopiju OneDrive."
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "Jums vispirms ir jāatslēdz OneDrive rezerves kopija."
   },
   "permission_unknown_permission": {
     "message": "Nezināma atļauja. Ja redzat šo ziņojumu, lūdzu, nosūtiet kļūdu ziņojumu."

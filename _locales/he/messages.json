@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "מאמת",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "מאמת",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "משוב",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "תרגם",
-    "description": "Translate."
-  },
   "source": {
     "message": "קוד מקור",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "הצג את כל הערכים",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "אזהרה: הגיבויים אינם מוצפנים. השתמש על אחריותך בלבד.",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "עליך לספק סיסמה נכונה כדי לייבא גיבויים.",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "עריכה",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "גיבוי ידני",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "השתמש במילוי אוטומטי",
@@ -329,38 +317,9 @@
     "message": "Flat",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "גבה אוטומטית את הנתונים שלך לשירותי אחסון של צד ג '.",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "סינכרון דפדפן",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "התחברות",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "Sign in (Business)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "Why do business accounts require more permissions?"
-  },
-  "log_out": {
-    "message": "צא מהמערכת",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "הייתה בעיה בהתחברות לחשבון $ SERVICE $ שלך, אנא היכנס שוב.",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "יש לך חשבון Steam או Blizzard אחד או יותר. גיבויים לא מוצפנים לא ישתמשו בתבנית גיבוי סטנדרטית.",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "ניתן לייבא גיבויים מיישומים אחרים.",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "למידע נוסף",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "טוען..."
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "Access to browser storage to store account data."
   },
-  "permission_identity": {
-    "message": "Allows sign in to 3rd party storage services."
-  },
   "permission_alarms": {
     "message": "Allows auto-lock to work."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "Allows clock sync with Google."
-  },
-  "permission_dropbox": {
-    "message": "Allows backup to Dropbox."
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "You must disable Dropbox backup first."
-  },
-  "permission_drive": {
-    "message": "Allows backup to Google Drive."
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "You must disable Google Drive backup first."
-  },
-  "permission_onedrive": {
-    "message": "Allows backup to OneDrive."
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "You must disable OneDrive backup first."
   },
   "permission_unknown_permission": {
     "message": "Unknown permission. If see this message, please send a bug report."

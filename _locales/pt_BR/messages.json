@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Autenticador",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "Autenticador",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "Dê sua opinião",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "Traduzir",
-    "description": "Translate."
-  },
   "source": {
     "message": "Código Fonte",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "Mostrar todas as entradas",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "Aviso: os backups estão descriptografados. Use a seu próprio risco.",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "Você deve fornecer a senha correta para importar os backups.",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "Editar",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "Backup manual",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "Usar o preenchimento automático",
@@ -329,38 +317,9 @@
     "message": "Plano",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "Automaticamente fazer backup dos seus dados para serviços de armazenamento de terceiros.",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "Sincronização do Navegador",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "Iniciar sessão",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "Entrar (Empresas)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "Por que as contas empresariais requerem mais permissões?"
-  },
-  "log_out": {
-    "message": "Encerrar sessão",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "Houve um problema na conexão com sua conta do $SERVICE$, por favor tente novamente.",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "Você tem uma ou mais contas Steam ou Blizzard. Os backups não criptografados não usarão o formato padronizado de backup.",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "Você pode importar os backups de alguns outros aplicativos.",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "Saiba mais",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "Carregando..."
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "Acesso ao armazenamento do navegador para armazenar os dados da conta."
   },
-  "permission_identity": {
-    "message": "Permite iniciar sessão em serviços de armazenamento de terceiros."
-  },
   "permission_alarms": {
     "message": "Permitir o bloqueio automático."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "Permite a sincronização de relógio com o Google."
-  },
-  "permission_dropbox": {
-    "message": "Permite backup para o Dropbox."
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "Você deve desativar o backup do Dropbox primeiro."
-  },
-  "permission_drive": {
-    "message": "Permite backup para o Google Drive."
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "Você deve desativar o backup do Google Drive primeiro."
-  },
-  "permission_onedrive": {
-    "message": "Permite backup para o OneDrive."
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "Você deve desativar o backup do OneDrive primeiro."
   },
   "permission_unknown_permission": {
     "message": "Permissão desconhecida. Se você ver esta mensagem, por favor envie um relatório de erros."

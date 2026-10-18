@@ -50,14 +50,8 @@
           <span><IconComments /></span>{{ i18n.feedback }}
         </p>
         <p
-          v-bind:title="i18n.translate"
-          v-on:click="openLink('https://otp.ee/translate')"
-        >
-          <span><IconGlobe /></span>{{ i18n.translate }}
-        </p>
-        <p
           v-bind:title="i18n.source"
-          v-on:click="openLink('https://otp.ee/sourcecode')"
+          v-on:click="openLink('https://github.com/nolequen/Authenticator')"
         >
           <span><IconCode /></span>{{ i18n.source }}
         </p>
@@ -84,7 +78,6 @@ import IconSync from "../../../svg/sync.svg";
 import IconWrench from "../../../svg/wrench.svg";
 import IconAdvisor from "../../../svg/lightbulb.svg";
 import IconComments from "../../../svg/comments.svg";
-import IconGlobe from "../../../svg/globe.svg";
 import IconCode from "../../../svg/code.svg";
 import IconClipboardCheck from "../../../svg/clipboard-check.svg";
 import { isFirefox, isSafari } from "../../browser";
@@ -101,7 +94,6 @@ export default Vue.extend({
     IconWrench,
     IconAdvisor,
     IconComments,
-    IconGlobe,
     IconCode,
     IconClipboardCheck,
   },
@@ -120,13 +112,7 @@ export default Vue.extend({
       this.$store.commit("style/hideMenu");
     },
     openHelp() {
-      let url = "https://otp.ee/chromeissues";
-
-      if (navigator.userAgent.indexOf("Firefox") !== -1) {
-        url = "https://otp.ee/firefoxissues";
-      } else if (navigator.userAgent.indexOf("Edg") !== -1) {
-        url = "https://otp.ee/edgeissues";
-      }
+      let url = "https://github.com/nolequen/Authenticator/issues";
 
       const feedbackURL = this.$store.state.menu.feedbackURL;
       if (typeof feedbackURL === "string" && feedbackURL) {

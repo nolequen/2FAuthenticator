@@ -1,7 +1,7 @@
 {
-  "name": "authenticator-extension",
+  "name": "2fauthenticator",
   "version": "0.1.0",
-  "description": "Authenticator generates 2-Step Verification codes in your browser.",
+  "description": "2FAuthenticator generates two-factor authentication codes in your browser.",
   "scripts": {
     "compile": "node scripts/build.js firefox",
     "dev:chrome": "node scripts/build.js chrome --watch",
@@ -18,14 +18,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Authenticator-Extension/Authenticator.git"
+    "url": "git+https://github.com/nolequen/Authenticator.git"
   },
-  "author": "Authenticator Extension",
+  "author": "nolequen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Authenticator-Extension/Authenticator/issues"
+    "url": "https://github.com/nolequen/Authenticator/issues"
   },
-  "homepage": "https://github.com/Authenticator-Extension/Authenticator#readme",
+  "homepage": "https://github.com/nolequen/Authenticator#readme",
   "devDependencies": {
     "@types/argon2-browser": "^1.18.1",
     "@types/chai": "^4.2.14",

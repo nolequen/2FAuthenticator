@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "অথেন্টিকেটর",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "অথেন্টিকেটর",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "মতামত",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "অনুবাদ",
-    "description": "Translate."
-  },
   "source": {
     "message": "সোর্স কোড",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "সকল এন্ট্রি দেখান",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "সাবধানঃ ব্যাকআপগুলো এনক্রিপ্টেড নয়। নিজের ঝুঁকিতে ব্যবহার করুন।",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "ব্যাকআপগুলো আমদানি করতে আপনাকে সঠিক পাসওয়ার্ড প্রবেশ করাতে হবে।",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "সম্পাদন করুন",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "ম্যানুয়াল ব্যাকআপ",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "অটোফিল ব্যবহার করুন",
@@ -329,38 +317,9 @@
     "message": "Flat",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "তৃতীয় পক্ষের স্টোরেজ সেবাসমূহে আপনার ডেটা স্বয়ংক্রিয়ভাবে ব্যাকআপ করুন।",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "ব্রাউজার সিঙ্ক",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "সাইন ইন করুন",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "সাইন ইন করুন (ব্যবসায়িক)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "ব্যবসায়িক একাউন্টগুলোতে বেশি অনুমতির প্রয়োজন পড়ে কেন?"
-  },
-  "log_out": {
-    "message": "লগআউট করুন",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "আপনার $SERVICE$ অ্যাকাউন্টে সংযোগ প্রদানে একটি সমস্যা সংঘটিত হয়েছে, অনুগ্রহ করে আবার সাইন ইন করুন।",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "আপনার কাছে এক বা একাধিক স্টিম অথবা ব্লিজার্ড অ্যাকাউন্ট আছে। খোলা বা আনএনক্রিপ্টেড ব্যাকআপগুলো প্রমিত ব্যাকআপ ফরমেট ব্যবহার করবে না।",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "অন্য কিছু অ্যাপ্লিকেশনগুলো থেকে আপনি ব্যাকআপ আমদানি করতে পারবেন।",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "আরো জানুন",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "লোড করা হচ্ছে..."
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "অ্যাকাউন্টের সকল তথ্য সংরক্ষণ এর জন্য ব্রাউজারের স্টোরএজ অ্যাক্সেস করুন।"
   },
-  "permission_identity": {
-    "message": "তৃতীয় পক্ষের ক্লাউড স্টোরএজ সেবায় যুক্ত হওয়ার অনুমতি। "
-  },
   "permission_alarms": {
     "message": "Allows auto-lock to work."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "গুগল এর সাথে ঘড়ি সিঙ্ক করুন।"
-  },
-  "permission_dropbox": {
-    "message": "ড্রপবক্সের ব্যাকআপ চালু করুন।"
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "আপনাকে অবশ্যই ড্রপবক্সের ব্যাকআপ বন্ধ করতে হবে"
-  },
-  "permission_drive": {
-    "message": "গুগল ড্রাইভের ব্যাকআপ চালু করুন।"
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "আপনাকে অবশ্যই গুগ্রল ড্রাইভের ব্যাকআপ বন্ধ করতে হবে।"
-  },
-  "permission_onedrive": {
-    "message": "ওয়ানড্রাইভ এর ব্যাকআপ চালু করুন।"
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "আপনাকে অবশ্যই ওয়ানড্রাইভ এর ব্যাকআপ বন্ধ করতে হবে."
   },
   "permission_unknown_permission": {
     "message": "অনুমতি অজানা। আপনি যদি এই লেখাটি দেখে থাকেন, তাহলে দয়া করে বাগ রিপোর্ট পাঠান"

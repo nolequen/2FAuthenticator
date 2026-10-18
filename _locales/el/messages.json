@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Επαληθευτής",
+    "message": "2FAuthenticator",
     "description": "Extension Name."
   },
   "extShortName": {
-    "message": "Επαληθευτής",
+    "message": "2FAuthenticator",
     "description": "Extension Short Name."
   },
   "extDesc": {
@@ -157,10 +157,6 @@
     "message": "Αξιολογήστε μας",
     "description": "Feedback."
   },
-  "translate": {
-    "message": "Συνεισφέρετε στη μετάφραση",
-    "description": "Translate."
-  },
   "source": {
     "message": "Πηγαίος κώδικας",
     "description": "Source Code."
@@ -253,10 +249,6 @@
     "message": "Εμφάνιση όλων των λογαριασμών",
     "description": "Show all entries."
   },
-  "dropbox_risk": {
-    "message": "Προσοχή: τα αντίγραφα ασφαλείας δεν είναι κρυπτογραφημένα. Χρησιμοποιήστε τα με δική σας ευθύνη.",
-    "description": "Backup risk warning."
-  },
   "import_error_password": {
     "message": "Ο κωδικός πρόσβασης πρέπει να είναι σωστός για να εισαχθούν τα αντίγραφα ασφαλείας.",
     "description": "Error password warning when import backups."
@@ -288,10 +280,6 @@
   "edit": {
     "message": "Επεξεργασία",
     "description": "Edit"
-  },
-  "manual_dropbox": {
-    "message": "Χειροκίνητη δημιουργία αντιγράφων ασφαλείας",
-    "description": "Manual backup"
   },
   "use_autofill": {
     "message": "Αυτόματη συμπλήρωση",
@@ -329,38 +317,9 @@
     "message": "Απλό",
     "description": "Flat theme"
   },
-  "storage_sync_info": {
-    "message": "Δημιουργήστε αυτόματα αντίγραφα ασφαλείας των δεδομένων σας σε υπηρεσίες αποθήκευσης τρίτων.",
-    "description": "3rd party backup info"
-  },
   "browser_sync": {
     "message": "Συγχρονισμός δεδομένων",
     "description": "Storage location"
-  },
-  "sign_in": {
-    "message": "Σύνδεση",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "sign_in_business": {
-    "message": "Σύνδεση (Επιχείρηση)",
-    "description": "Sign in to 3rd party storage services"
-  },
-  "onedrive_business_perms": {
-    "message": "Γιατί οι λογαριασμοί των επιχειρήσεων χρειάζονται περισσότερα δικαιώματα για να λειτουργήσουν σωστά;"
-  },
-  "log_out": {
-    "message": "Αποσύνδεση",
-    "description": "Sign out of 3rd party storage services"
-  },
-  "token_revoked": {
-    "message": "Υπήρξε ένα πρόβλημα στην σύνδεση με τον λογαριασμό σας $SERVICE$. Προσπαθήστε να συνδεθείτε ξανά.",
-    "description": "Error authenticating to backup service. $SERVICE$ will be replaced with a proper noun (E.g.: 'Google Drive' or 'Dropbox')",
-    "placeholders": {
-      "service": {
-        "content": "$1",
-        "example": "Google Drive"
-      }
-    }
   },
   "otp_unsupported_warn": {
     "message": "Έχετε έναν ή παραπάνω Steam ή Blizzard λογαριασμούς. Τα αντίγραφα ασφαλείας που δεν έχουν κρυπτογραφηθεί δε θα ακολουθήσουν τη συνηθισμένη μορφή των άλλων αντιγράφων.",
@@ -369,10 +328,6 @@
   "otp_backup_inform": {
     "message": "Μπορείτε να εισάγετε αντίγραφα ασφαλείας από άλλες εφαρμογές.",
     "description": "Info text on import page"
-  },
-  "otp_backup_learn": {
-    "message": "Μάθετε περισσότερα",
-    "description": "learn more link on import page. Placed after otp_backup_inform"
   },
   "loading": {
     "message": "Φόρτωση..."
@@ -476,9 +431,6 @@
   "permission_storage": {
     "message": "Πρόσβαση στον αποθηκευτικό χώρο του προγράμματος περιήγησης για την αποθήκευση δεδομένων του λογαριασμού σας."
   },
-  "permission_identity": {
-    "message": "Επιτρέπει τη σύνδεση σε υπηρεσίες αποθήκευσης τρίτων."
-  },
   "permission_alarms": {
     "message": "Επιτρέπει το αυτόματο κλείδωμα να λειτουργήσει."
   },
@@ -493,24 +445,6 @@
   },
   "permission_sync_clock": {
     "message": "Επιτρέπει τον συγχρονισμό ρολογιού με την Google."
-  },
-  "permission_dropbox": {
-    "message": "Επιτρέπει τη δημιουργία αντιγράφων ασφαλείας στο Dropbox."
-  },
-  "permission_dropbox_cannot_revoke": {
-    "message": "Πρέπει πρώτα να απενεργοποιήσετε τη δημιουργία αντιγράφων ασφαλείας του Dropbox."
-  },
-  "permission_drive": {
-    "message": "Επιτρέπει τη δημιουργία αντιγράφων ασφαλείας στο Google Drive."
-  },
-  "permission_drive_cannot_revoke": {
-    "message": "Πρέπει πρώτα να απενεργοποιήσετε τη δημιουργία αντιγράφων ασφαλείας του Google Drive."
-  },
-  "permission_onedrive": {
-    "message": "Επιτρέπει τη δημιουργία αντιγράφων ασφαλείας στο OneDrive."
-  },
-  "permission_onedrive_cannot_revoke": {
-    "message": "Πρέπει πρώτα να απενεργοποιήσετε τα αντίγραφα ασφαλείας του OneDrive."
   },
   "permission_unknown_permission": {
     "message": "Άγνωστο δικαίωμα. Αν δείτε αυτό το μήνυμα, στείλτε μας μια αναφορά σφάλματος."
