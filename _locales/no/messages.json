@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator genererer to-faktor autentiseringskoder i nettleseren din.",
     "description": "Extension Description."
@@ -46,10 +38,6 @@
   "close": {
     "message": "Lukk",
     "description": "Close."
-  },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
   },
   "yes": {
     "message": "Ja",
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Nåværende passord",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Nytt passord",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Passord",
@@ -168,10 +152,6 @@
   "sync_clock": {
     "message": "Synkroniser klokke med Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Husk Passord",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Forsiktig! Din lokale klokke er for langt unna. Vennligst fiks den før du fortsetter.",
@@ -285,10 +265,6 @@
     "message": "Bruk Autofyll",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Bruk Høykontrast",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Tema",
     "description": "Theme"
@@ -312,10 +288,6 @@
   "theme_high_contrast": {
     "message": "Høy kontrast",
     "description": "High Contrast theme"
-  },
-  "theme_flat": {
-    "message": "Flat",
-    "description": "Flat theme"
   },
   "browser_sync": {
     "message": "Synkroniser nettlesere",
@@ -344,9 +316,6 @@
   "period": {
     "message": "Periode"
   },
-  "type": {
-    "message": "Type"
-  },
   "invalid": {
     "message": "Ugyldig"
   },
@@ -355,9 +324,6 @@
   },
   "algorithm": {
     "message": "Algoritme"
-  },
-  "smart_filter": {
-    "message": "Smart Filter"
   },
   "backup": {
     "message": "Sikkerhetskopi"
@@ -397,9 +363,6 @@
   },
   "warning": {
     "message": "Advarsel"
-  },
-  "info": {
-    "message": "Info"
   },
   "dismiss": {
     "message": "Avvis"

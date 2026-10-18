@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator genereert 2-stapsverificatiecodes in uw browser.",
     "description": "Extension Description."
@@ -59,10 +51,6 @@
     "message": "Nee",
     "description": "No."
   },
-  "account": {
-    "message": "Account",
-    "description": "Account."
-  },
   "accountName": {
     "message": "Gebruikersnaam",
     "description": "Account Name."
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Huidig ​​wachtwoord",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Nieuw wachtwoord",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Wachtwoord",
@@ -153,10 +137,6 @@
     "message": "Gekopieerd",
     "description": "Copied."
   },
-  "feedback": {
-    "message": "Feedback",
-    "description": "Feedback."
-  },
   "source": {
     "message": "Broncode",
     "description": "Source Code."
@@ -168,10 +148,6 @@
   "sync_clock": {
     "message": "Klok synchroniseren met Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Wachtwoord onthouden",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Let op! De klok van uw lokale computer is te ver voor/achter, gelieve het te herstellen voordat u doorgaat.",
@@ -285,10 +261,6 @@
     "message": "Automatisch aanvullen gebruiken",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Hoog contrast gebruiken",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Thema",
     "description": "Theme"
@@ -304,10 +276,6 @@
   "theme_simple": {
     "message": "Eenvoudig",
     "description": "Simple theme"
-  },
-  "theme_compact": {
-    "message": "Compact",
-    "description": "Compact theme"
   },
   "theme_high_contrast": {
     "message": "Hoog contrast",
@@ -344,14 +312,8 @@
   "period": {
     "message": "Periode"
   },
-  "type": {
-    "message": "Type"
-  },
   "invalid": {
     "message": "Ongeldig"
-  },
-  "digits": {
-    "message": "Digits"
   },
   "algorithm": {
     "message": "Algoritme"

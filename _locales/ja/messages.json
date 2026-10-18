@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator はお使いのブラウザーで2段階認証コードを生成します。",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "現在のパスワード",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "新しいパスワード",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "パスワード",
     "description": "Passphrase."
@@ -168,10 +156,6 @@
   "sync_clock": {
     "message": "Google と時刻を同期\n",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "パスワードを記憶させる",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "危険！お使いの環境の日時が実際の日時と離れすぎています。続ける前にまずは修正してください。",
@@ -284,10 +268,6 @@
   "use_autofill": {
     "message": "自動入力を使用する",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "高コントラストにする",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "テーマ",
@@ -448,9 +428,6 @@
   },
   "permission_unknown_permission": {
     "message": "不明な権限です。このメッセージが表示される場合はバグレポートを送信してください。"
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
   },
   "activate_auto_filter": {
     "message": "警告：スマートフィルタはアカウントのドメイン名とほぼ一致します。常にあなたが正しいウェブサイトにいることを確認してください！"

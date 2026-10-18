@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator génère des codes d'authentification à deux facteurs dans votre navigateur.",
     "description": "Extension Description."
@@ -47,10 +39,6 @@
     "message": "Fermer",
     "description": "Close."
   },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
-  },
   "yes": {
     "message": "Oui",
     "description": "Yes."
@@ -70,10 +58,6 @@
   "issuer": {
     "message": "Émetteur",
     "description": "Issuer."
-  },
-  "secret": {
-    "message": "Secret",
-    "description": "Secret."
   },
   "updateSuccess": {
     "message": "Succès.",
@@ -98,10 +82,6 @@
   "current_phrase": {
     "message": "Mot de passe actuel",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Nouveau mot de passe",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Mot de passe",
@@ -168,10 +148,6 @@
   "sync_clock": {
     "message": "Synchroniser l'horloge avec celle de Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Enregistrer le mot de passe",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Attention ! Un décalage trop important existe avec votre horloge locale, réglez ce problème avant de continuer.",
@@ -285,10 +261,6 @@
     "message": "Utiliser le remplissage automatique",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Utiliser le contraste élevé",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Thème",
     "description": "Theme"
@@ -300,14 +272,6 @@
   "theme_dark": {
     "message": "Sombre",
     "description": "Dark theme"
-  },
-  "theme_simple": {
-    "message": "Simple",
-    "description": "Simple theme"
-  },
-  "theme_compact": {
-    "message": "Compact",
-    "description": "Compact theme"
   },
   "theme_high_contrast": {
     "message": "Contraste élevé",
@@ -335,17 +299,11 @@
   "autolock": {
     "message": "Verrouiller après"
   },
-  "minutes": {
-    "message": "minutes"
-  },
   "advanced": {
     "message": "Avancé"
   },
   "period": {
     "message": "Période"
-  },
-  "type": {
-    "message": "Type"
   },
   "invalid": {
     "message": "Invalide"
@@ -392,9 +350,6 @@
   "no_insight_available": {
     "message": "Aucun aperçu trouvé, tout semble bien!"
   },
-  "danger": {
-    "message": "Danger"
-  },
   "warning": {
     "message": "Attention"
   },
@@ -412,9 +367,6 @@
   },
   "no_entires": {
     "message": "Aucun compte à afficher. Ajoutez votre premier compte maintenant."
-  },
-  "permissions": {
-    "message": "Permissions"
   },
   "permission_revoke": {
     "message": "Révoquer"

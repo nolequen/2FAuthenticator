@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "აუთენთიფიკატორი აგენერირებს ორფაქტორიან აუთენთიფიკაციის კოდებს თქვენს ბრაუზერში.",
     "description": "Extension Description."
@@ -46,10 +38,6 @@
   "close": {
     "message": "დახურვა",
     "description": "Close."
-  },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
   },
   "yes": {
     "message": "დიახ",
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "მიმდინარე პაროლი",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "ახალი პაროლი",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "პაროლი",
@@ -168,10 +152,6 @@
   "sync_clock": {
     "message": "საათის Google-თან სინქრონიზაცია",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "პაროლის დამახსოვრება",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "ყურადღება! თქვენი ადგილობრივი დრო არასწორია. გაგრძელებამდე, გთხოვთ, გაასწოროთ საათი.",
@@ -284,10 +264,6 @@
   "use_autofill": {
     "message": "ავტომატური შევსების გამოყენება",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "მაღალი კონტრასტის გამოყენება",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "თემა",
@@ -431,12 +407,6 @@
   "permission_storage": {
     "message": "წვდომა ბრაუზერის შენახვის ადგილზე ანგარიშის ინფორმაციის შესანახად."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "ანიჭებს მხოლოდ ჩაწერის წვდომას გაცვლის ბუფერზე, რათა დააკოპიროთ კოდები, ანგარიშზე დაჭერის დროს."
   },
@@ -448,11 +418,5 @@
   },
   "permission_unknown_permission": {
     "message": "უცნობი ნებართვა. თუ ამ შეტყობინებას ხედავთ, გთხოვთ, შეგვატყობინოთ პრობლემის შესახებ."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

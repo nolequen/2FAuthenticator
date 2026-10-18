@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "A Hitelesítő kétlépcsős ellenőrző kódokat generál a böngészőben.",
     "description": "Extension Description."
@@ -18,10 +10,6 @@
   "errorqr": {
     "message": "Ismeretlen QR-kód.",
     "description": "QR Error."
-  },
-  "errorsecret": {
-    "message": "Invalid account secret",
-    "description": "Secret Error."
   },
   "add_code": {
     "message": "Fiók hozzáadása",
@@ -99,10 +87,6 @@
     "message": "Jelenlegi jelszó",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Új jelszó",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Jelszó",
     "description": "Passphrase."
@@ -169,10 +153,6 @@
     "message": "Előzmények szinkronizálása Google-val",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Jelszó megjegyzése",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Vigyázat! A helyi óra túl pontatlan, javítsa a folytatás előtt.",
     "description": "Local Time is Too Far Off"
@@ -225,17 +205,9 @@
     "message": "QR kód biztonsági mentés importálása",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Szöveges biztonsági mentés importálása",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "Sikeresen importálva, de néhány QR-kód nem ismerhető fel.",
@@ -285,10 +257,6 @@
     "message": "Automatikus kitöltés használata",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Nagy kontraszt használata",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Téma",
     "description": "Theme"
@@ -312,10 +280,6 @@
   "theme_high_contrast": {
     "message": "Nagy kontrasztú",
     "description": "High Contrast theme"
-  },
-  "theme_flat": {
-    "message": "Flat",
-    "description": "Flat theme"
   },
   "browser_sync": {
     "message": "Böngésző szinronizálása",
@@ -431,12 +395,6 @@
   "permission_storage": {
     "message": "Böngésző tárhely elérése fiók adatok tárolásához."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "A vágólapon csak írásra jogosító engedélyt biztosít, hogy a kódok a vágólapra kerüljenek a fiókra való kattintáskor."
   },
@@ -448,11 +406,5 @@
   },
   "permission_unknown_permission": {
     "message": "Ismeretlen engedély. Ha ez az üzenet jelenik meg, kérem küldjön hibajelentést!"
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

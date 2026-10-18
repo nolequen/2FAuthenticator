@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator menghasilkan kode verifikasi 2 langkah di browser anda.",
     "description": "Extension Description."
@@ -46,10 +38,6 @@
   "close": {
     "message": "Tutup",
     "description": "Close."
-  },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
   },
   "yes": {
     "message": "Ya",
@@ -99,10 +87,6 @@
     "message": "Kata sandi saat ini",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Kata sandi baru",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Kata sandi",
     "description": "Passphrase."
@@ -118,9 +102,6 @@
   "confirm_delete_all": {
     "message": "Saya mengerti bahwa semua data saya tidak dapat dikembalikan setelah dihapus.",
     "description": "Message that user is required to acknowledge before clearing all data."
-  },
-  "delete_all": {
-    "message": "Reset Authenticator"
   },
   "delete_all_warning": {
     "message": "Tindakan ini akan menghapus semua data dan mereset ulang Autentikator. Anda tidak dapat mengembalikan data yang sudah terhapus! Pastikan anda membuat Backup terlebih dahulu sebelum mereset ulang Authentikator."
@@ -168,10 +149,6 @@
   "sync_clock": {
     "message": "Sinkronisasi riwayat dengan Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Ingat kata sandi",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Hati hati! Jam lokal anda terlalu jauh, tolong perbarui sebelum melanjutkan.",
@@ -284,10 +261,6 @@
   "use_autofill": {
     "message": "IsiOtomatis",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Gunakan Kontras yang Tinggi",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Tema",
@@ -416,9 +389,6 @@
   "permissions": {
     "message": "Perizinan"
   },
-  "permission_revoke": {
-    "message": "Revoke"
-  },
   "permission_show_required_permissions": {
     "message": "Menampilkan ijin yang tidak bisa dibatalkan"
   },
@@ -448,11 +418,5 @@
   },
   "permission_unknown_permission": {
     "message": "Izin tidak diketahui. Jika melihat pesan ini, kirimkan laporan kesalahan."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

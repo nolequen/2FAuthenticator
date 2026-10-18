@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator erzeugt Zwei-Faktor-Authentifizierungscodes in Ihrem Browser.",
     "description": "Extension Description."
@@ -46,10 +38,6 @@
   "close": {
     "message": "Schließen",
     "description": "Close."
-  },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
   },
   "yes": {
     "message": "Ja",
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Aktuelles Passwort",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Neues Passwort",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Passwort",
@@ -168,10 +152,6 @@
   "sync_clock": {
     "message": "Zeitgeber mit Google synchronisieren",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Passwort merken",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Achtung! Ihre lokale Uhrzeit hat eine zu große Abweichung, bitte beheben bevor Sie fortfahren.",
@@ -285,10 +265,6 @@
     "message": "Autofill verwenden",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Hohen Kontrast benutzen",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Farbschema",
     "description": "Theme"
@@ -398,9 +374,6 @@
   "warning": {
     "message": "Warnung"
   },
-  "info": {
-    "message": "Info"
-  },
   "dismiss": {
     "message": "Verwerfen"
   },
@@ -431,12 +404,6 @@
   "permission_storage": {
     "message": "Zugriff auf Browserspeicherung, um Kontodaten zu speichern."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "Gewährt Schreibzugriff auf die Zwischenablage, um Codes in die Zwischenablage zu kopieren, wenn Sie auf das Konto klicken."
   },
@@ -448,11 +415,5 @@
   },
   "permission_unknown_permission": {
     "message": "Unbekannte Berechtigung. Wenn Sie diese Nachricht sehen, senden Sie bitte einen Fehlerbericht."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

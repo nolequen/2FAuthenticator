@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "ऑथेंटिकेटर आपके ब्राउज़र में \"टू-फैक्टर ऑथेंटिकेशन\" कोड जेनरेट करता है।",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "वर्तमान पासवर्ड",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "नया पासवर्ड",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "पासवर्ड",
     "description": "Passphrase."
@@ -169,10 +157,6 @@
     "message": "घड़ी को Google के साथ सिंक करें",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "पासवर्ड याद रखें",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "आपकी स्थानीय घड़ी बहुत दूर है, कृपया जारी रखने से पहले इसे ठीक कर लें।",
     "description": "Local Time is Too Far Off"
@@ -225,17 +209,9 @@
     "message": "क्यूआर छवि बैकअप आयात करें",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "टेक्स्ट बैकअप आयात करें",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "आयात सफल रहा, लेकिन कुछ क्यूआर कोड पहचाने नहीं जा सके।",
@@ -284,10 +260,6 @@
   "use_autofill": {
     "message": "स्वतः भरण का उपयोग करें",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "अधिक कंट्रास्ट",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "थीम",
@@ -431,12 +403,6 @@
   "permission_storage": {
     "message": "खाता डेटा संग्रहीत करने के लिए ब्राउज़र संग्रहण तक पहुंच।"
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "जब आप खाते पर क्लिक करते हैं तो कोड को क्लिपबोर्ड पर कॉपी करने के लिए क्लिपबोर्ड पर केवल-लिखने की पहुंच प्रदान करता है।"
   },
@@ -448,11 +414,5 @@
   },
   "permission_unknown_permission": {
     "message": "अज्ञात अनुमति। यदि आप यह संदेश देखते हैं, तो कृपया एक बग रिपोर्ट भेजें।"
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator-laajennus tuottaa kaksivaiheisen todennuksen tunnuslukuja selaimessasi.",
     "description": "Extension Description."
@@ -46,10 +38,6 @@
   "close": {
     "message": "Sulje",
     "description": "Close."
-  },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
   },
   "yes": {
     "message": "Kyllä",
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Nykyinen salasana",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Uusi salasana",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Salasana",
@@ -169,10 +153,6 @@
     "message": "Synkronoi kello Googlen kanssa",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Muista salasana",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Varoitus! Aseta kellosi oikeaan aikaan ennen jatkamista.",
     "description": "Local Time is Too Far Off"
@@ -225,17 +205,9 @@
     "message": "Tuo QR-kuvan varmuuskopio",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Tuo tekstivarmuuskopio",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "Tuonti onnistui, mutta joitakin QR-koodeja ei tunnistettu.",
@@ -284,10 +256,6 @@
   "use_autofill": {
     "message": "Käytä automaattitäyttöä",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Suuri kontrasti",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Teema",
@@ -431,12 +399,6 @@
   "permission_storage": {
     "message": "Selaimen tallennustilan käyttöoikeus tilitietojen säilytykseen."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "Myöntää pelkän kirjoitusoikeuden leikepöydälle koodien kopiointiin tilejä painettaessa."
   },
@@ -448,11 +410,5 @@
   },
   "permission_unknown_permission": {
     "message": "Tuntematon käyttöoikeus. Jos näet tämän viestin, lähetä virheilmoitus."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

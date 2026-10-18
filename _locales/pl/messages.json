@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator generuje w przeglądarce kody uwierzytelniania dwuskładnikowego.",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "Obecne hasło",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Nowe hasło",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Hasło",
     "description": "Passphrase."
@@ -168,10 +156,6 @@
   "sync_clock": {
     "message": "Synchronizuj zegar z Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Zapamiętaj hasło",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Uwaga! Twój lokalny zegar jest zbyt niedokładny, należy go ustawić przed kontynuowaniem.",
@@ -284,10 +268,6 @@
   "use_autofill": {
     "message": "Użyj autowypełniania",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Użyj dużego kontrastu",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Motyw",

@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "המאמת מחולל קודי אימות דו שלבי ישירות מהדפדפן.",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "סיסמה נוכחית",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "סיסמה חדשה",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "סיסמה",
     "description": "Passphrase."
@@ -169,10 +157,6 @@
     "message": "סינכרון שעון עם גוגל",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "זכור את הסיסמה",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "זהירות! השעון המקומי שלך רחוק מדי, יש לתקן אותו לפני שנמשיך.",
     "description": "Local Time is Too Far Off"
@@ -225,21 +209,9 @@
     "message": "יבוא תמונת גיבוי QR",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "ייבא גיבוי כטקסט",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
-  },
-  "import_backup_qr_partly_failed": {
-    "message": "Import successful, but some QR codes could not be recognized.",
-    "description": "Import successful, but some QR image cannot be recognized."
   },
   "import_backup_qr_in_batches": {
     "message": "ניתן לבחור מספר קבצים כדי לייבא גיבויים באצוות.",
@@ -285,10 +257,6 @@
     "message": "השתמש במילוי אוטומטי",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "השתמש בניגודיות גבוהה",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "עיצוב",
     "description": "Theme"
@@ -301,21 +269,9 @@
     "message": "כהה",
     "description": "Dark theme"
   },
-  "theme_simple": {
-    "message": "Simple",
-    "description": "Simple theme"
-  },
-  "theme_compact": {
-    "message": "Compact",
-    "description": "Compact theme"
-  },
   "theme_high_contrast": {
     "message": "ניגודיות גבוהה",
     "description": "High Contrast theme"
-  },
-  "theme_flat": {
-    "message": "Flat",
-    "description": "Flat theme"
   },
   "browser_sync": {
     "message": "סינכרון דפדפן",
@@ -368,9 +324,6 @@
   "password_policy_default_hint": {
     "message": "הסיסמא שסיפקת אינו עומדת בדרישות האבטחה של ארגונך. למידע נוסף, צור קשר עם המנהל."
   },
-  "advisor": {
-    "message": "Advisor"
-  },
   "advisor_insight_password_not_set": {
     "message": "הגדר סיסמא כדי לשמור על המידע שלך."
   },
@@ -379,80 +332,5 @@
   },
   "advisor_insight_browser_sync_not_enabled": {
     "message": "סנכרון בין דפדפנים מבוטל. אפשר זאת כדי לאפשר סנכרון חשבונות בין דפדפנים."
-  },
-  "advisor_insight_auto_fill_not_enabled": {
-    "message": "Autofill can be enabled to automatically fill codes into websites."
-  },
-  "advisor_insight_smart_filter_not_enabled": {
-    "message": "Enabling smart filter allows for quick access to accounts."
-  },
-  "show_all_insights": {
-    "message": "Show all insights."
-  },
-  "no_insight_available": {
-    "message": "No insights found, everything looks good!"
-  },
-  "danger": {
-    "message": "Danger"
-  },
-  "warning": {
-    "message": "Warning"
-  },
-  "info": {
-    "message": "Info"
-  },
-  "dismiss": {
-    "message": "Dismiss"
-  },
-  "learn_more": {
-    "message": "Learn more"
-  },
-  "enable_context_menu": {
-    "message": "Add to context menu"
-  },
-  "no_entires": {
-    "message": "No accounts to display. Add your first account now."
-  },
-  "permissions": {
-    "message": "Permissions"
-  },
-  "permission_revoke": {
-    "message": "Revoke"
-  },
-  "permission_show_required_permissions": {
-    "message": "Show non-revocable permissions"
-  },
-  "permission_required": {
-    "message": "This is a required permission and cannot be revoked."
-  },
-  "permission_active_tab": {
-    "message": "Access to the current tab to scan QR codes."
-  },
-  "permission_storage": {
-    "message": "Access to browser storage to store account data."
-  },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
-  "permission_clipboard_write": {
-    "message": "Grants write-only access to the clipboard to copy codes to clipboard when you click on the account."
-  },
-  "permission_context_menus": {
-    "message": "Adds Authenticator to context menu."
-  },
-  "permission_sync_clock": {
-    "message": "Allows clock sync with Google."
-  },
-  "permission_unknown_permission": {
-    "message": "Unknown permission. If see this message, please send a bug report."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

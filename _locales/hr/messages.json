@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Autentifikator generira dvofaktorske autentifikacijske kodove u tvom pregledniku.",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "Trenutačna lozinka",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Nova lozinka",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Lozinka",
     "description": "Passphrase."
@@ -168,10 +156,6 @@
   "sync_clock": {
     "message": "Sinkroniziraj sat s Google-om",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Zapamti lozinku",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Pažnja! Tvoj lokalni sat nije usklađen. Najmjesti ga prije nastavljanja.",
@@ -284,10 +268,6 @@
   "use_autofill": {
     "message": "Koristi automatsko ispunjavanje",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Koristi visoki kontrast",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Tema",

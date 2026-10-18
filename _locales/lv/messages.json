@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Divpakāpju kodu ģenerators atvieglo darbu ar 2FA (divpakāpju) autentifikācijas kodu izveidošanu un aizpildīšanu jūsu pārlūkprogrammā",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "Pašreizējā parole",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Jaunā parole",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Parole",
     "description": "Passphrase."
@@ -169,10 +157,6 @@
     "message": "Sinhronizēt laiku ar Google",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Atcerēties paroli",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Uzmanību bīstami! Jūsu vietējais laiks ir ar pārāk lielu laika nobīdi. Lūdzu, sinhronizējiet laiku ar kādu laika serveri, pirms turpināt.",
     "description": "Local Time is Too Far Off"
@@ -225,17 +209,9 @@
     "message": "Importēt kvadrātkoda (QR) attēla rezerves kopiju",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Importēt teksta rezerves kopiju",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "Importēšana bija veiksmīga, taču dažus kvadrātkodus (QR kodus) nevarēja atpazīt.",
@@ -284,10 +260,6 @@
   "use_autofill": {
     "message": "Izmantot automātisko aizpildīšanu",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Izmantot spilgtu kontrastu",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Izskats",
@@ -431,12 +403,6 @@
   "permission_storage": {
     "message": "Piekļuve pārlūkprogrammas krātuvei, lai varētu saglabāt konta datus."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "Piešķir tikai rakstīšanas piekļuvi starpliktuvei, lai varētu kopēt kodus starpliktuvē, kad noklikšķināt uz konta."
   },
@@ -448,11 +414,5 @@
   },
   "permission_unknown_permission": {
     "message": "Nezināma atļauja. Ja redzat šo ziņojumu, lūdzu, nosūtiet kļūdu ziņojumu."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

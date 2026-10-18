@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Автентифікатор генерує коди двофакторної аутентифікації у вашому браузері.",
     "description": "Extension Description."
@@ -75,10 +67,6 @@
     "message": "Ключ",
     "description": "Secret."
   },
-  "updateSuccess": {
-    "message": "Success.",
-    "description": "Update Success."
-  },
   "updateFailure": {
     "message": "Невдача.",
     "description": "Update Failure."
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Поточний пароль",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Новий пароль",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Пароль",
@@ -169,10 +153,6 @@
     "message": "Синхронізувати годинник з Google",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Запам'ятати пароль",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Увага! Ваш місцевий годинник налаштовано неправильно. Будь ласка, виправте його, перш ніж продовжити.",
     "description": "Local Time is Too Far Off"
@@ -184,10 +164,6 @@
   "capture_failed": {
     "message": "Помилка захоплення, будь ласка, оновіть сторінку та спробуйте знову.",
     "description": "Capture Failed"
-  },
-  "capture_local_file_failed": {
-    "message": "Are you trying to scan QR code from a local file? Use Import QR Image Backup instead.",
-    "description": "Import QR image backup instead of scan local image"
   },
   "based_on_time": {
     "message": "На підставі часу",
@@ -285,10 +261,6 @@
     "message": "Використовувати автозаповнення",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Використовувати високу контрастність",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Тема",
     "description": "Theme"
@@ -316,10 +288,6 @@
   "theme_flat": {
     "message": "Фіат",
     "description": "Flat theme"
-  },
-  "browser_sync": {
-    "message": "Browser Sync",
-    "description": "Storage location"
   },
   "otp_unsupported_warn": {
     "message": "У вас є один або кілька облікових записів Steam або Blizzard. Незашифровані резервні копії не будуть використовувати стандартизований формат.",
@@ -358,12 +326,6 @@
   },
   "smart_filter": {
     "message": "Розумний фільтр"
-  },
-  "backup": {
-    "message": "Backup"
-  },
-  "backup_file_info": {
-    "message": "Backup your data to a file."
   },
   "password_policy_default_hint": {
     "message": "Ваш пароль не відповідає вимогам безпеки вашої організації. Для отримання додаткової інформації зверніться до адміністратора."
@@ -415,9 +377,6 @@
   },
   "permissions": {
     "message": "Дозволи"
-  },
-  "permission_revoke": {
-    "message": "Revoke"
   },
   "permission_show_required_permissions": {
     "message": "Показати дозволи, які не можна відкликати"

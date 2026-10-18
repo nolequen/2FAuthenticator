@@ -99,10 +99,6 @@
     "message": "Current Password",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "New Password",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Password",
     "description": "Passphrase."
@@ -168,10 +164,6 @@
   "sync_clock": {
     "message": "Sync Clock with Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Remember Password",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Caution! Your local clock is too far off, please fix it before continuing.",
@@ -284,10 +276,6 @@
   "use_autofill": {
     "message": "Use Autofill",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Use High Contrast",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Theme",

@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "يقوم المصادق بإنشاء رموز المصادقة ذات عاملين في المتصفح الخاص بك.",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "كلمة المرور الحالية",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "كلمة السرّ الجديدة",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "كلمة المرور",
     "description": "Passphrase."
@@ -169,10 +157,6 @@
     "message": "مزامنة الساعة مع جوجل",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "تذكر كلمة السر",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "تحذير! التوقيت المحلي بعيد جدًا، الرجاء إصلاحه قبل المتابعة.",
     "description": "Local Time is Too Far Off"
@@ -185,17 +169,9 @@
     "message": "فشل في التقاط الرمز, يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى.",
     "description": "Capture Failed"
   },
-  "capture_local_file_failed": {
-    "message": "Are you trying to scan QR code from a local file? Use Import QR Image Backup instead.",
-    "description": "Import QR image backup instead of scan local image"
-  },
   "based_on_time": {
     "message": "على أساس الوقت",
     "description": "Time Based"
-  },
-  "based_on_counter": {
-    "message": "Counter Based",
-    "description": "Counter Based"
   },
   "resize_popup_page": {
     "message": "التفضيلات",
@@ -284,10 +260,6 @@
   "use_autofill": {
     "message": "استخدام الملء التلقائي",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "استخدام التباين العالي",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "السمة",
@@ -448,9 +420,6 @@
   },
   "permission_unknown_permission": {
     "message": "صلاحية غير معروفة. إذا وجدت هذه الرسالة، يرجى إرسال تقرير عن الأخطاء."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
   },
   "activate_auto_filter": {
     "message": "تحذير: يقوم المدقق الذكي بمطابقة اسم الاختصاص مع الحساب بشكل غير جيد. تأكد دائمًا من أنك على موقع التبويب الصحيح قبل إدخال الرمز!"

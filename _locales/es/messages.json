@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator genera códigos de autenticación de dos factores en su navegador.",
     "description": "Extension Description."
@@ -55,10 +47,6 @@
     "message": "Sí",
     "description": "Yes."
   },
-  "no": {
-    "message": "No",
-    "description": "No."
-  },
   "account": {
     "message": "Cuenta",
     "description": "Account."
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Contraseña actual",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Nueva contraseña",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Contraseña",
@@ -169,10 +153,6 @@
     "message": "Sincronizar el reloj con Google",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Recordar la contraseña",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "¡Peligro! Tu reloj local está demasiado desfasado, corrígelo antes de continuar.",
     "description": "Local Time is Too Far Off"
@@ -225,17 +205,9 @@
     "message": "Importar copia de seguridad de imagen QR",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Importar el Texto de la Copia de Seguridad",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "Se importó correctamente, sin embargo, algunas imágenes QR no pudieron ser reconocidas.",
@@ -285,10 +257,6 @@
     "message": "Usar auto-completado",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Utilizar contraste alto",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Tema",
     "description": "Theme"
@@ -300,10 +268,6 @@
   "theme_dark": {
     "message": "Oscuro",
     "description": "Dark theme"
-  },
-  "theme_simple": {
-    "message": "Simple",
-    "description": "Simple theme"
   },
   "theme_compact": {
     "message": "Compacto",
@@ -431,12 +395,6 @@
   "permission_storage": {
     "message": "Acceder al almacenamiento del navegador para guardar los datos de la cuenta."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "Otorga acceso de sólo escritura al portapapeles para copiar codigos al portapapeles cuando haga clic en la cuenta."
   },
@@ -448,11 +406,5 @@
   },
   "permission_unknown_permission": {
     "message": "Permiso desconocido. Si ve este mensaje, por favor envíe un informe de error."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

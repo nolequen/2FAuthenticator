@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator generuje kódy dvoufázového ověření ve Vašem prohlížeči.",
     "description": "Extension Description."
@@ -47,10 +39,6 @@
     "message": "Zavřít",
     "description": "Close."
   },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
-  },
   "yes": {
     "message": "Ano",
     "description": "Yes."
@@ -70,10 +58,6 @@
   "issuer": {
     "message": "Vydavatel",
     "description": "Issuer."
-  },
-  "secret": {
-    "message": "Secret",
-    "description": "Secret."
   },
   "updateSuccess": {
     "message": "Úspěch.",
@@ -98,10 +82,6 @@
   "current_phrase": {
     "message": "Stávající heslo",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Nové heslo",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Heslo",
@@ -169,10 +149,6 @@
     "message": "Synchronizovat hodiny s Google",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Zapamatovat si heslo",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Pozor! Váš místní čas se velmi liší, před pokračováním jej prosím opravte.",
     "description": "Local Time is Too Far Off"
@@ -221,10 +197,6 @@
     "message": "Importovat záložní soubor",
     "description": "Import backup file."
   },
-  "import_backup_qr": {
-    "message": "Import QR Image Backup",
-    "description": "Import qr image backup."
-  },
   "import_qr_images": {
     "message": "Importovat QR obrázky",
     "description": "Import qr images. Shown as add account method."
@@ -244,10 +216,6 @@
   "import_backup_qr_in_batches": {
     "message": "Můžete vybrat více souborů pro dávkový import záloh.",
     "description": "You can select multiple image files to import backup in batches."
-  },
-  "show_all_entries": {
-    "message": "Show all entries",
-    "description": "Show all entries."
   },
   "import_error_password": {
     "message": "Je nutné zadat správné heslo pro import zálohy.",
@@ -285,10 +253,6 @@
     "message": "Použití automatického vyplňování",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Použít vysoký kontrast",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Motiv",
     "description": "Theme"
@@ -317,17 +281,9 @@
     "message": "Ploché",
     "description": "Flat theme"
   },
-  "browser_sync": {
-    "message": "Browser Sync",
-    "description": "Storage location"
-  },
   "otp_unsupported_warn": {
     "message": "Máte jeden nebo více Steam nebo Blizzard účtů. Nešifrované zálohy nebudou využívat standardní formát.",
     "description": "Warning if using account that is not supported by standard backup format."
-  },
-  "otp_backup_inform": {
-    "message": "You can import backups from some other applications.",
-    "description": "Info text on import page"
   },
   "loading": {
     "message": "Načítání..."
@@ -374,14 +330,8 @@
   "advisor_insight_password_not_set": {
     "message": "Nastavte si heslo pro ochranu vašich dat."
   },
-  "advisor_insight_auto_lock_not_set": {
-    "message": "Enable auto-lock to protect your data."
-  },
   "advisor_insight_browser_sync_not_enabled": {
     "message": "Synchronizace prohlížeče je vypnuta. Zapnutím zapnete synchronizaci účtu napříč prohlížeči."
-  },
-  "advisor_insight_auto_fill_not_enabled": {
-    "message": "Autofill can be enabled to automatically fill codes into websites."
   },
   "advisor_insight_smart_filter_not_enabled": {
     "message": "Povolení smart filtru umožňuje rychlý přístup k účtům."
@@ -397,9 +347,6 @@
   },
   "warning": {
     "message": "Varování"
-  },
-  "info": {
-    "message": "Info"
   },
   "dismiss": {
     "message": "Zavřít"

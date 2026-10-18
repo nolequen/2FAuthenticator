@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "O autenticador gera códigos de autenticação de dois factores no seu navegador.",
     "description": "Extension Description."
@@ -19,10 +11,6 @@
     "message": "Código QR não reconhecido.",
     "description": "QR Error."
   },
-  "errorsecret": {
-    "message": "Invalid account secret",
-    "description": "Secret Error."
-  },
   "add_code": {
     "message": "Adicionar conta",
     "description": "Add account."
@@ -34,14 +22,6 @@
   "add_secret": {
     "message": "Entrada manual",
     "description": "Manual Entry."
-  },
-  "migration_fail": {
-    "message": "Import failed. If you are migrating data from Google Authenticator, please re-export your data from Google Authenticator and try again.",
-    "description": "Import migration data failed."
-  },
-  "migration_partly_fail": {
-    "message": "Some account data was not imported successfully.",
-    "description": "Some migration data is broken."
   },
   "close": {
     "message": "Fechar",
@@ -99,10 +79,6 @@
     "message": "Palavra-passe atual",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Nova palavra-passe",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Palavra-passe",
     "description": "Passphrase."
@@ -153,10 +129,6 @@
     "message": "Copiado",
     "description": "Copied."
   },
-  "feedback": {
-    "message": "Feedback",
-    "description": "Feedback."
-  },
   "source": {
     "message": "Código fonte",
     "description": "Source Code."
@@ -169,10 +141,6 @@
     "message": "Sincronizar relógio com Google",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Lembrar palavra-passe",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Cuidado! O seu relógio está atrasado, por favor corrija antes de continuar.",
     "description": "Local Time is Too Far Off"
@@ -184,10 +152,6 @@
   "capture_failed": {
     "message": "A captura falhou, por favor recarregue a página e tente novamente.",
     "description": "Capture Failed"
-  },
-  "capture_local_file_failed": {
-    "message": "Are you trying to scan QR code from a local file? Use Import QR Image Backup instead.",
-    "description": "Import QR image backup instead of scan local image"
   },
   "based_on_time": {
     "message": "Baseado no Tempo",
@@ -225,21 +189,9 @@
     "message": "Importar código QR",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Importar código de segurança",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
-  },
-  "import_backup_qr_partly_failed": {
-    "message": "Import successful, but some QR codes could not be recognized.",
-    "description": "Import successful, but some QR image cannot be recognized."
   },
   "import_backup_qr_in_batches": {
     "message": "Pode selecionar vários ficheiros para importar cópias de segurança em lotes.",
@@ -285,10 +237,6 @@
     "message": "Utilizar preenchimento automático",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Utilizar alto contraste",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Tema",
     "description": "Theme"
@@ -301,25 +249,9 @@
     "message": "Escuro",
     "description": "Dark theme"
   },
-  "theme_simple": {
-    "message": "Simple",
-    "description": "Simple theme"
-  },
-  "theme_compact": {
-    "message": "Compact",
-    "description": "Compact theme"
-  },
   "theme_high_contrast": {
     "message": "Alto Contraste",
     "description": "High Contrast theme"
-  },
-  "theme_flat": {
-    "message": "Flat",
-    "description": "Flat theme"
-  },
-  "browser_sync": {
-    "message": "Browser Sync",
-    "description": "Storage location"
   },
   "otp_unsupported_warn": {
     "message": "Você tem uma ou mais contas Steam ou Blizzard. As cópias de segurança não encriptadas não utilizarão o formato padrão de backup.",
@@ -358,101 +290,5 @@
   },
   "smart_filter": {
     "message": "Filtro Inteligente"
-  },
-  "backup": {
-    "message": "Backup"
-  },
-  "backup_file_info": {
-    "message": "Backup your data to a file."
-  },
-  "password_policy_default_hint": {
-    "message": "Your password does not meet your organization's security requirements. Contact your administrator for more information."
-  },
-  "advisor": {
-    "message": "Advisor"
-  },
-  "advisor_insight_password_not_set": {
-    "message": "Set a password to protect your data."
-  },
-  "advisor_insight_auto_lock_not_set": {
-    "message": "Enable auto-lock to protect your data."
-  },
-  "advisor_insight_browser_sync_not_enabled": {
-    "message": "Browser sync is disabled. Enabling it allows accounts to be synced across browsers."
-  },
-  "advisor_insight_auto_fill_not_enabled": {
-    "message": "Autofill can be enabled to automatically fill codes into websites."
-  },
-  "advisor_insight_smart_filter_not_enabled": {
-    "message": "Enabling smart filter allows for quick access to accounts."
-  },
-  "show_all_insights": {
-    "message": "Show all insights."
-  },
-  "no_insight_available": {
-    "message": "No insights found, everything looks good!"
-  },
-  "danger": {
-    "message": "Danger"
-  },
-  "warning": {
-    "message": "Warning"
-  },
-  "info": {
-    "message": "Info"
-  },
-  "dismiss": {
-    "message": "Dismiss"
-  },
-  "learn_more": {
-    "message": "Learn more"
-  },
-  "enable_context_menu": {
-    "message": "Add to context menu"
-  },
-  "no_entires": {
-    "message": "No accounts to display. Add your first account now."
-  },
-  "permissions": {
-    "message": "Permissions"
-  },
-  "permission_revoke": {
-    "message": "Revoke"
-  },
-  "permission_show_required_permissions": {
-    "message": "Show non-revocable permissions"
-  },
-  "permission_required": {
-    "message": "This is a required permission and cannot be revoked."
-  },
-  "permission_active_tab": {
-    "message": "Access to the current tab to scan QR codes."
-  },
-  "permission_storage": {
-    "message": "Access to browser storage to store account data."
-  },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
-  "permission_clipboard_write": {
-    "message": "Grants write-only access to the clipboard to copy codes to clipboard when you click on the account."
-  },
-  "permission_context_menus": {
-    "message": "Adds Authenticator to context menu."
-  },
-  "permission_sync_clock": {
-    "message": "Allows clock sync with Google."
-  },
-  "permission_unknown_permission": {
-    "message": "Unknown permission. If see this message, please send a bug report."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Удостоверителя генерира 2-фактурна защита, за вашият браузър.",
     "description": "Extension Description."
@@ -35,10 +27,6 @@
     "message": "Ръчно въвеждане",
     "description": "Manual Entry."
   },
-  "migration_fail": {
-    "message": "Import failed. If you are migrating data from Google Authenticator, please re-export your data from Google Authenticator and try again.",
-    "description": "Import migration data failed."
-  },
   "migration_partly_fail": {
     "message": "Някои данни за акаунта не бяха импортирани успешно.",
     "description": "Some migration data is broken."
@@ -62,10 +50,6 @@
   "account": {
     "message": "Профил",
     "description": "Account."
-  },
-  "accountName": {
-    "message": "Username",
-    "description": "Account Name."
   },
   "issuer": {
     "message": "Издател",
@@ -98,10 +82,6 @@
   "current_phrase": {
     "message": "Сегашна парола",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Нова парола",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Парола",
@@ -168,10 +148,6 @@
   "sync_clock": {
     "message": "Синхронизиране на часовника с Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Запомни паролата",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Внимание! Вашият часовник не е верен, моля го оправя преди да продължите.",
@@ -284,10 +260,6 @@
   "use_autofill": {
     "message": "Използване на автоматичното попълване",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Висок контраст",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Тема",

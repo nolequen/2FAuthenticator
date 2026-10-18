@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator genera codis d'autenticació en dos passos al vostre navegador.",
     "description": "Extension Description."
@@ -55,10 +47,6 @@
     "message": "Sí",
     "description": "Yes."
   },
-  "no": {
-    "message": "No",
-    "description": "No."
-  },
   "account": {
     "message": "Compte",
     "description": "Account."
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Contrasenya actual",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Nova contrasenya",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Contrasenya",
@@ -169,10 +153,6 @@
     "message": "Sincronitzar el rellotge amb Google",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Recorda la contrasenya",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Compte! El rellotge del vostre sistema està massa desajustat, solucioneu-ho abans de continuar.",
     "description": "Local Time is Too Far Off"
@@ -225,17 +205,9 @@
     "message": "Importa còpia d'imatge QR",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Importa còpia de seguretat com a text pla",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "S'ha importat correctament, però alguns codis QR no s'han reconegut.",
@@ -284,10 +256,6 @@
   "use_autofill": {
     "message": "Utilitza l'emplenament automàtic",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Contrast alt",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Tema",
@@ -431,12 +399,6 @@
   "permission_storage": {
     "message": "Accés a l'emmagatzematge del navegador per emmagatzemar les dades del compte."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "Atorga accés només d'escriptura al porta-retalls per copiar codis al porta-retalls quan feu clic al compte."
   },
@@ -448,11 +410,5 @@
   },
   "permission_unknown_permission": {
     "message": "Permís desconegut. Si veieu aquest missatge, envieu un informe d'error."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

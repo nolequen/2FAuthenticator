@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Autentifikatorius generuoja dviejų veiksnių autentifikavimo kodus naršyklėje.",
     "description": "Extension Description."
@@ -46,10 +38,6 @@
   "close": {
     "message": "Uždaryti",
     "description": "Close."
-  },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
   },
   "yes": {
     "message": "Taip",
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Dabartinis slaptažodis",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Naujas slaptažodis",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Slaptažodis",
@@ -169,10 +153,6 @@
     "message": "Laikrodžio sinchronizavimas su \"Google",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Įsiminti slaptažodį",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Dėmesio! Jūsų vietinis laikrodis yra per daug nutolęs, prieš tęsdami darbą jį pataisykite.",
     "description": "Local Time is Too Far Off"
@@ -225,17 +205,9 @@
     "message": "Importuoti QR atvaizdo atsarginę kopiją",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Importuoti teksto atsarginę kopiją",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "Importas pavyko, tačiau kai kurių QR kodų nepavyko atpažinti.",
@@ -284,10 +256,6 @@
   "use_autofill": {
     "message": "Naudoti automatinį pildymą",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Naudokite didelį kontrastą",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Tema",
@@ -431,12 +399,6 @@
   "permission_storage": {
     "message": "Prieiga prie naršyklės saugyklos, kurioje saugomi paskyros duomenys."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "Suteikiama tik rašymo prieiga prie iškarpinės, kad, spustelėjus paskyrą, kodai būtų kopijuojami į iškarpinę."
   },
@@ -448,11 +410,5 @@
   },
   "permission_unknown_permission": {
     "message": "Nežinomas leidimas. Jei matote šį pranešimą, atsiųskite pranešimą apie klaidą."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

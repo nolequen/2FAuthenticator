@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator genererar 2-stegs verifieringskoder i din webbläsare.",
     "description": "Extension Description."
@@ -46,10 +38,6 @@
   "close": {
     "message": "Stäng",
     "description": "Close."
-  },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
   },
   "yes": {
     "message": "Ja",
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Nuvarande lösenord",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Nytt lösenord",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Lösenord",
@@ -153,10 +137,6 @@
     "message": "Kopierad",
     "description": "Copied."
   },
-  "feedback": {
-    "message": "Feedback",
-    "description": "Feedback."
-  },
   "source": {
     "message": "Källkod",
     "description": "Source Code."
@@ -168,10 +148,6 @@
   "sync_clock": {
     "message": "Synka Klockan med Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Kom ihåg lösenord",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Varning! Din lokala klocka är för långt ifrån, snälla fixa den innan du fortsätter.",
@@ -285,10 +261,6 @@
     "message": "Använd autofyll",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Använd hög kontrast",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Tema",
     "description": "Theme"
@@ -313,10 +285,6 @@
     "message": "Hög kontrast",
     "description": "High Contrast theme"
   },
-  "theme_flat": {
-    "message": "Flat",
-    "description": "Flat theme"
-  },
   "browser_sync": {
     "message": "Webbläsarsynkronisering",
     "description": "Storage location"
@@ -340,9 +308,6 @@
   },
   "advanced": {
     "message": "Avancerat"
-  },
-  "period": {
-    "message": "Period"
   },
   "type": {
     "message": "Typ"
@@ -398,9 +363,6 @@
   "warning": {
     "message": "Varning"
   },
-  "info": {
-    "message": "Info"
-  },
   "dismiss": {
     "message": "Avfärda"
   },
@@ -451,8 +413,5 @@
   },
   "phrase_wrong": {
     "message": "Lösenord felaktigt"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

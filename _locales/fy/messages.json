@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator generearret 2-stapsferifikaasjekoades yn jo browser.",
     "description": "Extension Description."
@@ -59,10 +51,6 @@
     "message": "Nee",
     "description": "No."
   },
-  "account": {
-    "message": "Account",
-    "description": "Account."
-  },
   "accountName": {
     "message": "Brûkersnamme",
     "description": "Account Name."
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Aktueel ​​wachtwurd",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Nij wachtwurd",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Wachtwurd",
@@ -168,10 +152,6 @@
   "sync_clock": {
     "message": "Klok syngronisearje mei Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Wachtwurd ûnthâlde",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Let op! De klok fan jo lokale kompjûter is te fier foar/efter, werstel dit eardat jo trochgean.",
@@ -285,10 +265,6 @@
     "message": "Automatysk oanfolje brûke",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Heech kontrast brûke",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Tema",
     "description": "Theme"
@@ -344,14 +320,8 @@
   "period": {
     "message": "Perioade"
   },
-  "type": {
-    "message": "Type"
-  },
   "invalid": {
     "message": "Unjildich"
-  },
-  "digits": {
-    "message": "Digits"
   },
   "algorithm": {
     "message": "Algoritme"

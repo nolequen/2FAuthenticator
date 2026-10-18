@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Аутентификатор генерирует коды двухфакторной аутентификации в вашем браузере.",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "Текущий пароль",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Новый Пароль",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Пароль",
     "description": "Passphrase."
@@ -169,10 +157,6 @@
     "message": "Синхронизировать время с Google",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Запомнить пароль",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Внимание! Ваши данные местного времени не совпадают, пожалуйста синхронизируйте время перед тем как продолжить.",
     "description": "Local Time is Too Far Off"
@@ -225,17 +209,9 @@
     "message": "Импортировать резервную копию QR изображений",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Восстановить  из текста.",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "Импорт успешный, но некоторые QR-коды не могут быть распознаны.",
@@ -285,10 +261,6 @@
     "message": "Автозаполнение",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Высокая контрастность",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Тема",
     "description": "Theme"
@@ -316,10 +288,6 @@
   "theme_flat": {
     "message": "Плоская",
     "description": "Flat theme"
-  },
-  "browser_sync": {
-    "message": "Browser Sync",
-    "description": "Storage location"
   },
   "otp_unsupported_warn": {
     "message": "У вас есть один или несколько аккаунтов Steam или Blizzard. Не зашифрованные резервные копии не будут использовать стандартный формат резервного копирования.",
@@ -361,9 +329,6 @@
   },
   "backup": {
     "message": "Резервная копия"
-  },
-  "backup_file_info": {
-    "message": "Backup your data to a file."
   },
   "password_policy_default_hint": {
     "message": "Ваш пароль не соответствует требованием безопасности вашей организации. Свяжитесь с вашим администратором для получения дополнительной информации."

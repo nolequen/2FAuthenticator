@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator สำหรับสร้างรหัสยืนยัน 2 ชั้นบนเบราว์เซอร์",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "รหัสผ่านปัจจุบัน",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "รหัสผ่านใหม่",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "รหัสผ่าน",
     "description": "Passphrase."
@@ -169,10 +157,6 @@
     "message": "ซิงค์เวลาผ่าน Google",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "จดจำรหัสผ่าน",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "ระวัง! เวลาของคุณไม่ถูกต้อง โปรดแก้ไขก่อนดำเนินการขั้นต่อไป",
     "description": "Local Time is Too Far Off"
@@ -188,14 +172,6 @@
   "capture_local_file_failed": {
     "message": "คุณกำลังพยายามสแกนคิวอาร์โค้ดจากไฟล์ในเครื่องหรือไม่? ใช้นำเข้ารูปคิวอาร์โค้ดที่สำรองไว้แทน",
     "description": "Import QR image backup instead of scan local image"
-  },
-  "based_on_time": {
-    "message": "Time Based",
-    "description": "Time Based"
-  },
-  "based_on_counter": {
-    "message": "Counter Based",
-    "description": "Counter Based"
   },
   "resize_popup_page": {
     "message": "การตั้งค่า",
@@ -285,10 +261,6 @@
     "message": "ใช้งานการป้อนอัตโนมัติ",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "ใช้งานความคมชัดสูง",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "ธีม",
     "description": "Theme"
@@ -377,12 +349,6 @@
   "advisor_insight_auto_lock_not_set": {
     "message": "เปิดใช้งาน การล็อกอัตโนมัติ เพื่อป้องกันข้อมูลของคุณ"
   },
-  "advisor_insight_browser_sync_not_enabled": {
-    "message": "Browser sync is disabled. Enabling it allows accounts to be synced across browsers."
-  },
-  "advisor_insight_auto_fill_not_enabled": {
-    "message": "Autofill can be enabled to automatically fill codes into websites."
-  },
   "advisor_insight_smart_filter_not_enabled": {
     "message": "เปิดใช้งานตัวกรองอัจฉริยะช่วยให้เข้าถึงบัญชีได้อย่างรวดเร็ว."
   },
@@ -431,12 +397,6 @@
   "permission_storage": {
     "message": "เข้าถึงที่เก็บข้อมูลของเบราว์เซอร์เพื่อเก็บข้อมูลบัญชี"
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "ให้สิทธิ์การเข้าถึงแบบเขียนอย่างเดียวในคลิปบอร์ดเพื่อคัดลอกรหัสไปยังคลิปบอร์ดเมื่อคุณคลิกที่บัญชี"
   },
@@ -448,11 +408,5 @@
   },
   "permission_unknown_permission": {
     "message": "ไม่ทราบการอนุญาต หากเห็นข้อความนี้ โปรดส่งรายงานข้อบกพร่อง"
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

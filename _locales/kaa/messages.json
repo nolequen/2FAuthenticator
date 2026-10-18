@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Autentifikator brauzerińizde eki faktorlı autentifikaciya kodların payda etedi.",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "Házirgi Parol",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Jańa parol",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Parol",
     "description": "Passphrase."
@@ -169,10 +157,6 @@
     "message": "Saattı Google menen sinxronlaw",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Paroldi eslep qalıw",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Dıqqat! Orındaģı saatıńız júdá uzaqta, dawam etiwden aldın onı tuwırlań.",
     "description": "Local Time is Too Far Off"
@@ -225,17 +209,9 @@
     "message": "QR súwret qosımsha qor nusqasın import qılıń",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Tekst qosımshasın import qılıw",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "Import tabıslı ámelge asırıldı, biraq ayırım QR-kodlardı tanıw múmkin bolmadı.",
@@ -284,10 +260,6 @@
   "use_autofill": {
     "message": "Avtomatik toltırıwdan paydalanıń",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Joqarı Kontrasttan paydalanıń",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Tema",
@@ -431,12 +403,6 @@
   "permission_storage": {
     "message": "Esap maģlıwmatların saqlaw ushın brauzer yadına kiriw."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "Esap betin basqanıńızda kodlardı almastırıw buferine nusqalaw ushın tek ģana jazıw ushın buferge ruxsat beredi."
   },
@@ -448,11 +414,5 @@
   },
   "permission_unknown_permission": {
     "message": "Belgisiz ruxsat. Eger usı xabardı kórseńiz, qátelik haqqında esabat jiberiń."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

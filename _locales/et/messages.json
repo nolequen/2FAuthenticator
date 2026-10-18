@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Autentikaator genereerib teie brauseris mitmikautentimise koode.",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "Kehtiv salasõna",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Uus salasõna",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Salasõna",
     "description": "Passphrase."
@@ -169,10 +157,6 @@
     "message": "Sünkrooni kell Google'ga",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Mäleta salasõna",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Ettevaatust! Teie kohalik kell liiga mööda, palun parandage enne jätkamist.",
     "description": "Local Time is Too Far Off"
@@ -184,10 +168,6 @@
   "capture_failed": {
     "message": "Jäädvustus ebaõnnestus, laadige leht uuesti ja proovige uuesti.",
     "description": "Capture Failed"
-  },
-  "capture_local_file_failed": {
-    "message": "Are you trying to scan QR code from a local file? Use Import QR Image Backup instead.",
-    "description": "Import QR image backup instead of scan local image"
   },
   "based_on_time": {
     "message": "Ajapõhine",
@@ -225,17 +205,9 @@
     "message": "Impordi QR pildi varukoopia",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Impordi tekst-varukoopia",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "Importimine õnnestus, kuid mõnesid QR'i koode ei suudetud tuvastada.",
@@ -284,10 +256,6 @@
   "use_autofill": {
     "message": "Automaatne täitmine",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Kõrge kontrastsus",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Teema",
@@ -374,41 +342,17 @@
   "advisor_insight_password_not_set": {
     "message": "Määrake enda andmete kaitsmiseks salasõna."
   },
-  "advisor_insight_auto_lock_not_set": {
-    "message": "Enable auto-lock to protect your data."
-  },
-  "advisor_insight_browser_sync_not_enabled": {
-    "message": "Browser sync is disabled. Enabling it allows accounts to be synced across browsers."
-  },
-  "advisor_insight_auto_fill_not_enabled": {
-    "message": "Autofill can be enabled to automatically fill codes into websites."
-  },
-  "advisor_insight_smart_filter_not_enabled": {
-    "message": "Enabling smart filter allows for quick access to accounts."
-  },
-  "show_all_insights": {
-    "message": "Show all insights."
-  },
-  "no_insight_available": {
-    "message": "No insights found, everything looks good!"
-  },
   "danger": {
     "message": "Oht"
   },
   "warning": {
     "message": "Hoiatus"
   },
-  "info": {
-    "message": "Info"
-  },
   "dismiss": {
     "message": "Sulge"
   },
   "learn_more": {
     "message": "Lisateave"
-  },
-  "enable_context_menu": {
-    "message": "Add to context menu"
   },
   "no_entires": {
     "message": "Pole kontosid, mida kuvada. Lisage enda esimene konto."
@@ -418,41 +362,5 @@
   },
   "permission_revoke": {
     "message": "Võta tagasi"
-  },
-  "permission_show_required_permissions": {
-    "message": "Show non-revocable permissions"
-  },
-  "permission_required": {
-    "message": "This is a required permission and cannot be revoked."
-  },
-  "permission_active_tab": {
-    "message": "Access to the current tab to scan QR codes."
-  },
-  "permission_storage": {
-    "message": "Access to browser storage to store account data."
-  },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
-  "permission_clipboard_write": {
-    "message": "Grants write-only access to the clipboard to copy codes to clipboard when you click on the account."
-  },
-  "permission_context_menus": {
-    "message": "Adds Authenticator to context menu."
-  },
-  "permission_sync_clock": {
-    "message": "Allows clock sync with Google."
-  },
-  "permission_unknown_permission": {
-    "message": "Unknown permission. If see this message, please send a bug report."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

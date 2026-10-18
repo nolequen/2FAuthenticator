@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "افزونه Authenticator کدهای تأیید هویت دو مرحله‌ای را در مرورگر شما تولید می‌کند.",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "کلمه عبور فعلی",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "کلمه عبور جدید",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "کلمه عبور",
     "description": "Passphrase."
@@ -168,10 +156,6 @@
   "sync_clock": {
     "message": "همگام‌سازی ساعت با گوگل",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "به خاطر سپردن کلمه عبور",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "اخطار! ساعت محلی شما نادرست است، لطفا قبل از ادامه آن را تصحیح نمایید.",
@@ -284,10 +268,6 @@
   "use_autofill": {
     "message": "استفاده از قابلیت تکمیل خودکار",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "استفاده از کنتراست بالا",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "تم",
@@ -448,11 +428,5 @@
   },
   "permission_unknown_permission": {
     "message": "مجوز نامعلوم. در صورت مشاهده این پیام، لطفاً یک گزارش اشکال ارسال کنید."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Ο επαληθευτής δημιουργεί κωδικούς ταυτότητας δυο παραγόντων στο πρόγραμμα περιήγησής σας.",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "Τρέχον Κωδικός",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Νέος κωδικός πρόσβασης",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Κωδικός πρόσβασης",
     "description": "Passphrase."
@@ -169,10 +157,6 @@
     "message": "Συγχρονισμός ρολογιού με την Google",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Απομνημόνευση κωδικού πρόσβασης",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Προσοχή! Τοπικό ρολόι σας απέχει πάρα πολύ από την πραγματική ώρα. Διορθώστε το για να συνεχίσετε.",
     "description": "Local Time is Too Far Off"
@@ -216,10 +200,6 @@
   "import_backup": {
     "message": "Εισαγωγή αντιγράφου ασφαλείας",
     "description": "Import backup."
-  },
-  "import_backup_file": {
-    "message": "Import Backup File",
-    "description": "Import backup file."
   },
   "import_backup_qr": {
     "message": "Εισαγωγή αντιγράφου ασφαλείας εικόνας QR",
@@ -284,10 +264,6 @@
   "use_autofill": {
     "message": "Αυτόματη συμπλήρωση",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Χρήση υψηλής αντίθεσης",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Θέμα",

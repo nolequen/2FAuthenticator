@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator genererer to-faktor autentificeringskoder i din browser.",
     "description": "Extension Description."
@@ -46,10 +38,6 @@
   "close": {
     "message": "Luk",
     "description": "Close."
-  },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
   },
   "yes": {
     "message": "Ja",
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Nuværende Adgangskode",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Ny adgangskode",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Adgangskode",
@@ -153,10 +137,6 @@
     "message": "Kopieret",
     "description": "Copied."
   },
-  "feedback": {
-    "message": "Feedback",
-    "description": "Feedback."
-  },
   "source": {
     "message": "Kildekode",
     "description": "Source Code."
@@ -168,10 +148,6 @@
   "sync_clock": {
     "message": "Synk. historik med Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Husk adgangskoder",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Advarsel!!!! Dit lokale ur er for langt væk, du skal rette det, inden du fortsætter.",
@@ -225,17 +201,9 @@
     "message": "Importér QR-billedsikkerhedskopi",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Importer sikkerhedskopiering af tekst",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "Import lykkedes, men nogle QR-koder kunne ikke genkendes.",
@@ -284,10 +252,6 @@
   "use_autofill": {
     "message": "Brug autofyld",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Brug høj kontrast",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Tema",
@@ -344,9 +308,6 @@
   "period": {
     "message": "Periode"
   },
-  "type": {
-    "message": "Type"
-  },
   "invalid": {
     "message": "Ugyldigt"
   },
@@ -355,9 +316,6 @@
   },
   "algorithm": {
     "message": "Algoritme"
-  },
-  "smart_filter": {
-    "message": "Smart Filter"
   },
   "backup": {
     "message": "Sikkerhedskopi"
@@ -431,12 +389,6 @@
   "permission_storage": {
     "message": "Adgang til browserlagring for at gemme kontodata."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "Giver skrivebeskyttet adgang til udklipsholderen for at kopiere koder til udklipsholderen, når du klikker på kontoen."
   },
@@ -448,11 +400,5 @@
   },
   "permission_unknown_permission": {
     "message": "Ukendt tilladelse. Hvis du ser denne besked, så send venligst en fejlrapport."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

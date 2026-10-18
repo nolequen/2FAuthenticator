@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator genera codici di verifica a due fattori nel tuo browser.",
     "description": "Extension Description."
@@ -47,21 +39,9 @@
     "message": "Chiudi",
     "description": "Close."
   },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
-  },
   "yes": {
     "message": "Sì",
     "description": "Yes."
-  },
-  "no": {
-    "message": "No",
-    "description": "No."
-  },
-  "account": {
-    "message": "Account",
-    "description": "Account."
   },
   "accountName": {
     "message": "Nome Utente",
@@ -98,14 +78,6 @@
   "current_phrase": {
     "message": "Password corrente",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Nuova password",
-    "description": "New Passphrase."
-  },
-  "phrase": {
-    "message": "Password",
-    "description": "Passphrase."
   },
   "confirm_phrase": {
     "message": "Conferma password",
@@ -153,10 +125,6 @@
     "message": "Copiato",
     "description": "Copied."
   },
-  "feedback": {
-    "message": "Feedback",
-    "description": "Feedback."
-  },
   "source": {
     "message": "Codice Sorgente",
     "description": "Source Code."
@@ -168,10 +136,6 @@
   "sync_clock": {
     "message": "Sincronizzazione orologio con Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Ricorda la Password",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Attenzione! C'è una differenza troppo grande con l'orologio locale, risolvere prima di continuare.",
@@ -285,10 +249,6 @@
     "message": "Usa Autocompletamento",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Usa Alto Contrasto",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Tema",
     "description": "Theme"
@@ -312,10 +272,6 @@
   "theme_high_contrast": {
     "message": "Contrasto Elevato",
     "description": "High Contrast theme"
-  },
-  "theme_flat": {
-    "message": "Flat",
-    "description": "Flat theme"
   },
   "browser_sync": {
     "message": "Sincronizzazione Browser",
@@ -359,9 +315,6 @@
   "smart_filter": {
     "message": "Filtro Intelligente"
   },
-  "backup": {
-    "message": "Backup"
-  },
   "backup_file_info": {
     "message": "Fai il backup dei tuoi dati su un file."
   },
@@ -398,9 +351,6 @@
   "warning": {
     "message": "Attenzione"
   },
-  "info": {
-    "message": "Info"
-  },
   "dismiss": {
     "message": "Scarta"
   },
@@ -431,12 +381,6 @@
   "permission_storage": {
     "message": "Accedi all'archiviazione del browser per memorizzare i dati del profilo."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "Concedi l'accesso di sola scrittura agli appunti per copiarvi i codici quando clicchi sul profilo."
   },
@@ -448,11 +392,5 @@
   },
   "permission_unknown_permission": {
     "message": "Autorizzazione sconosciuta. Se vedi questo messaggio, sei pregato di inviare una segnalazione di bug."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

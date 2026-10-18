@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "O autenticador gera códigos de verificação em dois fatores no seu navegador.",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "Senha Atual",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Nova Senha",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Senha",
     "description": "Passphrase."
@@ -168,10 +156,6 @@
   "sync_clock": {
     "message": "Sincronizar Relógio com o Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Lembrar Senha",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Cuidado! Seu relógio local está parado há muito tempo, por favor ajuste-o antes de continuar.",
@@ -285,10 +269,6 @@
     "message": "Usar o preenchimento automático",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Usar alto contraste",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Tema",
     "description": "Theme"
@@ -358,9 +338,6 @@
   },
   "smart_filter": {
     "message": "Filtro inteligente"
-  },
-  "backup": {
-    "message": "Backup"
   },
   "backup_file_info": {
     "message": "Faça backup dos seus dados para um arquivo."

@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator generează coduri de verificare pentru al doilea pas în browserul tău.",
     "description": "Extension Description."
@@ -46,10 +38,6 @@
   "close": {
     "message": "Închide",
     "description": "Close."
-  },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
   },
   "yes": {
     "message": "Da",
@@ -98,10 +86,6 @@
   "current_phrase": {
     "message": "Parola curentă",
     "description": "Current Passphrase."
-  },
-  "new_phrase": {
-    "message": "Parolă nouă",
-    "description": "New Passphrase."
   },
   "phrase": {
     "message": "Parolă",
@@ -169,10 +153,6 @@
     "message": "Sincronizează ceasul cu Google",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Memorează parola",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Atenție! Ceasul local are o abatere foarte mare. Te rugăm să remediezi problema înainte de a continua.",
     "description": "Local Time is Too Far Off"
@@ -225,17 +205,9 @@
     "message": "Importă copie de rezervă a imaginii QR",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Importă copie de siguranță sub formă de text",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "Importul a reușit, dar unele coduri QR nu au putut fi recunoscute.",
@@ -285,10 +257,6 @@
     "message": "Folosește Autocompletarea",
     "description": "Use Autofill"
   },
-  "use_high_contrast": {
-    "message": "Folosește contrast sporit",
-    "description": "Use High Contrast"
-  },
   "theme": {
     "message": "Temă",
     "description": "Theme"
@@ -305,17 +273,9 @@
     "message": "simplă",
     "description": "Simple theme"
   },
-  "theme_compact": {
-    "message": "Compact",
-    "description": "Compact theme"
-  },
   "theme_high_contrast": {
     "message": "Contrast sporit",
     "description": "High Contrast theme"
-  },
-  "theme_flat": {
-    "message": "Flat",
-    "description": "Flat theme"
   },
   "browser_sync": {
     "message": "Sincronizare date browser",
@@ -346,9 +306,6 @@
   },
   "type": {
     "message": "Tip"
-  },
-  "invalid": {
-    "message": "Invalid"
   },
   "digits": {
     "message": "Cifre"
@@ -431,28 +388,7 @@
   "permission_storage": {
     "message": "Accesul la spațiul de stocare al browserului pentru a stoca datele contului."
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "Oferă acces doar la scriere în clipboard pentru a copia coduri în clipboard atunci când faceți clic pe cont."
-  },
-  "permission_context_menus": {
-    "message": "Adds Authenticator to context menu."
-  },
-  "permission_sync_clock": {
-    "message": "Allows clock sync with Google."
-  },
-  "permission_unknown_permission": {
-    "message": "Unknown permission. If see this message, please send a bug report."
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

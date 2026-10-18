@@ -1,16 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
-  "extDesc": {
-    "message": "Authenticator generates two-factor authentication codes in your browser.",
-    "description": "Extension Description."
-  },
   "added": {
     "message": " հաշիվը հաջողությամբ ավելացվել է։",
     "description": "Added Account."
@@ -99,10 +87,6 @@
     "message": "Այժմյա Գաղտնաբառ",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Նոր Գաղտնաբառ",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Գաղտնաբառ",
     "description": "Passphrase."
@@ -169,10 +153,6 @@
     "message": "Համաժամեցնել Google-ից",
     "description": "Sync Clock"
   },
-  "remember_phrase": {
-    "message": "Հիշել գաղտնաբառերը",
-    "description": "Remember Passphrase"
-  },
   "clock_too_far_off": {
     "message": "Զգուշացում՝ Ձեր լոկալ ժամացույցը չափազանց սխալ է։ Խնդրում ենք ուղղել այն՝ շարունակելուց առաջ։",
     "description": "Local Time is Too Far Off"
@@ -225,17 +205,9 @@
     "message": "Ներմուծել QR-կոդային Կրկնօրինակում",
     "description": "Import qr image backup."
   },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
   "import_backup_code": {
     "message": "Ներմուծել Տեքստային Կրկնօրինակում",
     "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
   },
   "import_backup_qr_partly_failed": {
     "message": "Ներմուծումը հաջողությամբ կատարվեց։ Որոշ QR-կոդեր չեն ճանաչվել։",
@@ -284,10 +256,6 @@
   "use_autofill": {
     "message": "Ավտոմուտքագրում",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Բարձր Կոնտրաստ",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Գեղատեսք",
@@ -431,12 +399,6 @@
   "permission_storage": {
     "message": "Կայքզննարկիչի հիշողության օգտագործում՝ որպես հաշիվների տվյալների պահեստ"
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "Թույլատրում է փոփոխություններ կատարել կցատարում՝ հաշիվների կոդերը պատճենելու համար"
   },
@@ -448,11 +410,5 @@
   },
   "permission_unknown_permission": {
     "message": "Անհայտ թույլտվություն։ Խնդրում ենք կապնվել ծրագրի մշակողների հետ։"
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }

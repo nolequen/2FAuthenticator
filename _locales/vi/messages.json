@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator tạo mã xác thực hai yếu tố trong trình duyệt của bạn",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "Mật khẩu hiện tại",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "Mật khẩu mới",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "Mật khẩu",
     "description": "Passphrase."
@@ -133,14 +121,6 @@
     "message": "Cập nhật",
     "description": "Update."
   },
-  "phrase_incorrect": {
-    "message": "You cannot add a new account until all accounts are decrypted. Please enter the correct password before continuing.",
-    "description": "Passphrase Incorrect."
-  },
-  "phrase_incorrect_export": {
-    "message": "Accounts that were not able to be decrypted will not be included in this backup.",
-    "description": "Skip Unable-decripted Data."
-  },
   "phrase_not_match": {
     "message": "Mật khẩu không khớp.",
     "description": "Passphrase Not Match."
@@ -168,10 +148,6 @@
   "sync_clock": {
     "message": "Đồng bộ đồng hồ với Google",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "Nhớ mật khẩu",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "Chú ý! Đồng hồ trên máy của bạn bị sai, xin hãy điều chỉnh lại trước khi tiếp tục.",
@@ -224,10 +200,6 @@
   "import_backup_qr": {
     "message": "Nhập sao lưu hình ảnh QR",
     "description": "Import qr image backup."
-  },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
   },
   "import_backup_code": {
     "message": "Nhập bản sao lưu",
@@ -284,10 +256,6 @@
   "use_autofill": {
     "message": "Sử dụng tự động điền",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "Độ tương phản cao",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "Chủ đề",
@@ -413,41 +381,11 @@
   "no_entires": {
     "message": "Không có tài khoản nào để hiển thị. Hãy thêm tài khoản của bạn."
   },
-  "permissions": {
-    "message": "Permissions"
-  },
-  "permission_revoke": {
-    "message": "Revoke"
-  },
-  "permission_show_required_permissions": {
-    "message": "Show non-revocable permissions"
-  },
-  "permission_required": {
-    "message": "This is a required permission and cannot be revoked."
-  },
-  "permission_active_tab": {
-    "message": "Access to the current tab to scan QR codes."
-  },
-  "permission_storage": {
-    "message": "Access to browser storage to store account data."
-  },
   "permission_alarms": {
     "message": "Cho phép khóa tự động."
   },
   "permission_scripting": {
     "message": "Đưa tệp lệnh vào tab hiện tại để quét mã QR và cho phép tự động điền."
-  },
-  "permission_clipboard_write": {
-    "message": "Grants write-only access to the clipboard to copy codes to clipboard when you click on the account."
-  },
-  "permission_context_menus": {
-    "message": "Adds Authenticator to context menu."
-  },
-  "permission_sync_clock": {
-    "message": "Allows clock sync with Google."
-  },
-  "permission_unknown_permission": {
-    "message": "Unknown permission. If see this message, please send a bug report."
   },
   "phrase_wrong": {
     "message": "Mật khẩu sai"

@@ -1,12 +1,4 @@
 {
-  "extName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Name."
-  },
-  "extShortName": {
-    "message": "2FAuthenticator",
-    "description": "Extension Short Name."
-  },
   "extDesc": {
     "message": "Authenticator 在你的瀏覽器中生成兩步驟驗證碼。",
     "description": "Extension Description."
@@ -99,10 +91,6 @@
     "message": "當前密碼",
     "description": "Current Passphrase."
   },
-  "new_phrase": {
-    "message": "新密碼",
-    "description": "New Passphrase."
-  },
   "phrase": {
     "message": "密碼",
     "description": "Passphrase."
@@ -168,10 +156,6 @@
   "sync_clock": {
     "message": "通過Google校準時間",
     "description": "Sync Clock"
-  },
-  "remember_phrase": {
-    "message": "記住密碼",
-    "description": "Remember Passphrase"
   },
   "clock_too_far_off": {
     "message": "注意！您的本地時鐘時間差異過大，請於效準時間後再進行操作。",
@@ -284,10 +268,6 @@
   "use_autofill": {
     "message": "啟用自動填充",
     "description": "Use Autofill"
-  },
-  "use_high_contrast": {
-    "message": "高對比",
-    "description": "Use High Contrast"
   },
   "theme": {
     "message": "主題",
@@ -431,12 +411,6 @@
   "permission_storage": {
     "message": "存取瀏覽器空間以便存放帳戶資訊"
   },
-  "permission_alarms": {
-    "message": "Allows auto-lock to work."
-  },
-  "permission_scripting": {
-    "message": "Inject scripts into he current tab to scan QR codes and allow auto-fill to work."
-  },
   "permission_clipboard_write": {
     "message": "授權點選帳戶時複製驗證碼到剪貼簿。"
   },
@@ -448,11 +422,5 @@
   },
   "permission_unknown_permission": {
     "message": "未知的權限。您如果看到這個訊息，請回報程式異常。"
-  },
-  "phrase_wrong": {
-    "message": "Password incorrect"
-  },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
   }
 }
