@@ -24,6 +24,48 @@ export enum OTPAlgorithm {
   GOST3411_2012_512,
 }
 
+function parseEnumValue(
+  values: Record<string, string | number>,
+  value: unknown
+): number | undefined {
+  if (typeof value === "string" && /^\d+$/.test(value)) {
+    return parseEnumValue(values, Number(value));
+  }
+
+  if (typeof value === "number") {
+    return typeof values[value] === "string" ? value : undefined;
+  }
+
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const lowerCaseValue = value.toLowerCase();
+  const name = Object.keys(values).find(
+    (key) =>
+      typeof values[key] === "number" && key.toLowerCase() === lowerCaseValue
+  );
+  return name === undefined ? undefined : Number(values[name]);
+}
+
+export function parseOTPType(value: unknown): OTPType | undefined {
+  return parseEnumValue(OTPType, value);
+}
+
+export function parseOTPAlgorithm(value: unknown): OTPAlgorithm | undefined {
+  return parseEnumValue(OTPAlgorithm, value);
+}
+
+export function parseOTPCounter(value: unknown): number {
+  const counter =
+    typeof value === "string" && /^\d+$/.test(value) ? Number(value) : value;
+  return typeof counter === "number" &&
+    Number.isSafeInteger(counter) &&
+    counter >= 0
+    ? counter
+    : 0;
+}
+
 export enum DataType {
   OTPStorage = "OTPStorage",
   EncOTPStorage = "EncOTPStorage",
@@ -153,7 +195,10 @@ export class OTPEntry implements OTPEntryInterface {
     } else {
       this.pinned = false;
     }
-    if (this.type === OTPType.totp && entry.period) {
+    if (
+      (this.type === OTPType.totp || this.type === OTPType.hex) &&
+      entry.period
+    ) {
       this.period = entry.period;
     } else {
       this.period = 30;
@@ -215,16 +260,15 @@ export class OTPEntry implements OTPEntryInterface {
     }
 
     this.account = decryptedData.account || "";
-    // @ts-expect-error need a better way to do this
-    this.algorithm = OTPAlgorithm[decryptedData.algorithm] || OTPAlgorithm.SHA1;
+    this.algorithm =
+      parseOTPAlgorithm(decryptedData.algorithm) ?? OTPAlgorithm.SHA1;
     this.counter = decryptedData.counter || 0;
     this.digits = decryptedData.digits || 6;
     this.issuer = decryptedData.issuer || "";
     this.period = decryptedData.period || 30;
     this.pinned = decryptedData.pinned || false;
     this.secret = decryptedData.secret;
-    // @ts-expect-error need a better way to do this
-    this.type = OTPType[decryptedData.type] || OTPType.totp;
+    this.type = parseOTPType(decryptedData.type) ?? OTPType.totp;
 
     if (this.type !== OTPType.hotp && this.type !== OTPType.hhex) {
       this.generate();

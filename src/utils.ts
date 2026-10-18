@@ -1,11 +1,14 @@
 export async function getSiteName() {
   const tab = await getCurrentTab();
-  const query = new URLSearchParams(document.location.search.substring(1));
+  const query =
+    typeof document === "undefined"
+      ? null
+      : new URLSearchParams(document.location.search.substring(1));
 
   let title: string | null;
   let url: string | null;
-  const titleFromQuery = query.get("title");
-  const urlFromQuery = query.get("url");
+  const titleFromQuery = query?.get("title");
+  const urlFromQuery = query?.get("url");
 
   if (titleFromQuery && urlFromQuery) {
     title = decodeURIComponent(titleFromQuery);

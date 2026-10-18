@@ -116,9 +116,9 @@ export default Vue.extend({
       }
 
       const defaultEncyptionKey = this.$store.state.accounts.defaultEncryption;
-      const encryption = this.$store.state.accounts.encryption[
+      const encryption = this.$store.state.accounts.encryption.get(
         defaultEncyptionKey
-      ];
+      );
 
       const entry = new OTPEntry(
         {

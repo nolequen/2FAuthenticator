@@ -6,6 +6,7 @@ const { ProvidePlugin } = require("webpack");
 module.exports = merge(common, {
   entry: {
     test: "./src/test.ts",
+    "site-name.worker": "./src/test/workers/site-name.worker.ts",
   },
   // Polyfills for mocha and sinon
   resolve: {

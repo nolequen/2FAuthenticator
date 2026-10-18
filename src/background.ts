@@ -11,8 +11,10 @@ import {
 import { CodeState } from "./models/otp";
 
 import { getOTPAuthPerLineFromOPTAuthMigration } from "./models/migration";
+import { parseOTPAuthURI } from "./models/otpauth";
 import { isChrome, isFirefox } from "./browser";
 import { UserSettings } from "./models/settings";
+import { addContextMenuListener, updateContextMenu } from "./contextMenu";
 
 let contentTab: chrome.tabs.Tab | undefined;
 
@@ -118,125 +120,42 @@ async function getTotp(text: string, silent = false) {
       return true;
     }
   } else {
-    let uri = text.split("otpauth://")[1];
-    let type = uri.substr(0, 4).toLowerCase();
-    uri = uri.substr(5);
-    let label = uri.split("?")[0];
-    const parameterPart = uri.split("?")[1];
-    if (!label || !parameterPart) {
-      !silent && chrome.tabs.sendMessage(id, { action: "errorqr" });
-      return false;
-    } else {
-      let secret = "";
-      let account: string | undefined;
-      let issuer: string | undefined;
-      let algorithm: string | undefined;
-      let period: number | undefined;
-      let digits: number | undefined;
-
-      try {
-        label = decodeURIComponent(label);
-      } catch (error) {
-        console.error(error);
-      }
-      if (label.indexOf(":") !== -1) {
-        issuer = label.split(":")[0];
-        account = label.split(":")[1];
+    const result = parseOTPAuthURI(text);
+    if ("error" in result) {
+      if (result.error === "secret") {
+        !silent &&
+          chrome.tabs.sendMessage(id, {
+            action: "secretqr",
+            secret: result.secret,
+          });
       } else {
-        account = label;
-      }
-      const parameters = parameterPart.split("&");
-      const {
-        cachedPassphrase,
-        cachedKeyId,
-      } = await chrome.storage.session.get();
-      parameters.forEach((item) => {
-        const parameter = item.split("=");
-        if (parameter[0].toLowerCase() === "secret") {
-          secret = parameter[1];
-        } else if (parameter[0].toLowerCase() === "issuer") {
-          try {
-            issuer = decodeURIComponent(parameter[1]);
-          } catch {
-            issuer = parameter[1];
-          }
-          issuer = issuer.replace(/\+/g, " ");
-        } else if (parameter[0].toLowerCase() === "counter") {
-          // let counter = Number(parameter[1]);
-          // counter = isNaN(counter) || counter < 0 ? 0 : counter;
-        } else if (parameter[0].toLowerCase() === "period") {
-          period = Number(parameter[1]);
-          period =
-            isNaN(period) || period < 0 || period > 60 || 60 % period !== 0
-              ? undefined
-              : period;
-        } else if (parameter[0].toLowerCase() === "digits") {
-          digits = Number(parameter[1]);
-          digits = isNaN(digits) || digits === 0 ? 6 : digits;
-        } else if (parameter[0].toLowerCase() === "algorithm") {
-          algorithm = parameter[1];
-        }
-      });
-
-      if (!secret) {
         !silent && chrome.tabs.sendMessage(id, { action: "errorqr" });
-        return false;
-      } else if (
-        !/^[0-9a-f]+$/i.test(secret) &&
-        !/^[2-7a-z]+=*$/i.test(secret)
-      ) {
-        !silent && chrome.tabs.sendMessage(id, { action: "secretqr", secret });
-        return false;
-      } else {
-        const encryption = new Encryption(cachedPassphrase, cachedKeyId);
-        const hash = crypto.randomUUID();
-        if (
-          !/^[2-7a-z]+=*$/i.test(secret) &&
-          /^[0-9a-f]+$/i.test(secret) &&
-          type === "totp"
-        ) {
-          type = "hex";
-        } else if (
-          !/^[2-7a-z]+=*$/i.test(secret) &&
-          /^[0-9a-f]+$/i.test(secret) &&
-          type === "hotp"
-        ) {
-          type = "hhex";
-        }
-        const entryData: { [hash: string]: RawOTPStorage } = {};
-        entryData[hash] = {
-          account,
-          hash,
-          issuer,
-          secret,
-          type,
-          encrypted: false,
-          index: 0,
-          counter: 0,
-          pinned: false,
-        };
-        if (period) {
-          entryData[hash].period = period;
-        }
-        if (digits) {
-          entryData[hash].digits = digits;
-        }
-        if (algorithm) {
-          entryData[hash].algorithm = algorithm;
-        }
-        if (
-          // If the entries are encrypted and we aren't unlocked, error.
-          (await EntryStorage.hasEncryptionKey()) !==
-          encryption.getEncryptionStatus()
-        ) {
-          !silent && chrome.tabs.sendMessage(id, { action: "errorenc" });
-          return false;
-        }
-        await EntryStorage.import(encryption, entryData);
-        !silent && chrome.tabs.sendMessage(id, { action: "added", account });
-        return true;
       }
+      return false;
     }
+
+    const {
+      cachedPassphrase,
+      cachedKeyId,
+    } = await chrome.storage.session.get();
+    const encryption = new Encryption(cachedPassphrase, cachedKeyId);
+    if (
+      // If the entries are encrypted and we aren't unlocked, error.
+      (await EntryStorage.hasEncryptionKey()) !==
+      encryption.getEncryptionStatus()
+    ) {
+      !silent && chrome.tabs.sendMessage(id, { action: "errorenc" });
+      return false;
+    }
+    await EntryStorage.import(encryption, {
+      [result.entry.hash]: result.entry,
+    });
+    !silent &&
+      chrome.tabs.sendMessage(id, {
+        action: "added",
+        account: result.entry.account,
+      });
+    return true;
   }
 }
 
@@ -497,12 +416,14 @@ chrome.commands.onCommand.addListener(async (command: string) => {
 
         const siteName = await getSiteName();
         const entries = await EntryStorage.get();
+        const encryption = new Encryption(cachedPassphrase, cachedKeyId);
+        for (const entry of entries) {
+          entry.applyEncryption(encryption);
+        }
         const matchedEntries = getMatchedEntries(siteName, entries);
 
         if (matchedEntries && matchedEntries.length === 1) {
           const entry = matchedEntries[0];
-          const encryption = new Encryption(cachedPassphrase, cachedKeyId);
-          entry.applyEncryption(encryption);
 
           if (
             entry.code !== CodeState.Encrypted &&
@@ -547,51 +468,5 @@ async function setAutolock() {
   }
 }
 
-async function updateContextMenu() {
-  chrome.permissions.contains(
-    {
-      permissions: ["contextMenus"],
-    },
-    (result) => {
-      if (result) {
-        if (UserSettings.items.enableContextMenu === true) {
-          chrome.contextMenus.removeAll();
-          chrome.contextMenus.create({
-            id: "otpContextMenu",
-            title: chrome.i18n.getMessage("extName"),
-            contexts: ["all"],
-          });
-          chrome.contextMenus.onClicked.addListener((info, tab) => {
-            let popupUrl = "view/popup.html?popup=true";
-            if (tab && tab.url && tab.title) {
-              popupUrl +=
-                "&url=" +
-                encodeURIComponent(tab.url) +
-                "&title=" +
-                encodeURIComponent(tab.title);
-            }
-            let windowType;
-            if (isFirefox) {
-              windowType = "detached_panel";
-            } else {
-              windowType = "panel";
-            }
-            chrome.windows.create({
-              url: chrome.runtime.getURL(popupUrl),
-              type: windowType as chrome.windows.createTypeEnum,
-              height: 400,
-              width: 320,
-            });
-
-            // https://stackoverflow.com/a/56483156
-            return true;
-          });
-        } else {
-          chrome.contextMenus.removeAll();
-        }
-      }
-    }
-  );
-}
-
+addContextMenuListener();
 updateContextMenu();

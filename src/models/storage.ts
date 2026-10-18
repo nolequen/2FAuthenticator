@@ -1,5 +1,13 @@
 import { Encryption } from "./encryption";
-import { OTPEntry, OTPType, OTPAlgorithm, CodeState } from "./otp";
+import {
+  OTPEntry,
+  OTPType,
+  OTPAlgorithm,
+  CodeState,
+  parseOTPAlgorithm,
+  parseOTPCounter,
+  parseOTPType,
+} from "./otp";
 import { StorageLocation, UserSettings } from "./settings";
 import { DataType } from "./otp";
 export class BrowserStorage {
@@ -463,7 +471,6 @@ export class EntryStorage {
         continue;
       }
 
-      const rawAlgorithm = data[hash].algorithm;
       const entryData: {
         account: string;
         encrypted: false;
@@ -478,18 +485,16 @@ export class EntryStorage {
         algorithm: OTPAlgorithm;
         pinned: boolean;
       } = {
-        type: (parseInt(data[hash].type) as OTPType) || OTPType[OTPType.totp],
+        type: parseOTPType(data[hash].type) ?? OTPType.totp,
         index: data[hash].index || 0,
         issuer: data[hash].issuer || "",
         account: data[hash].account || "",
         encrypted: false,
         secret: data[hash].secret,
-        counter: data[hash].counter || 0,
+        counter: parseOTPCounter(data[hash].counter),
         period: data[hash].period || 30,
         digits: data[hash].digits || 6,
-        algorithm: rawAlgorithm
-          ? (parseInt(rawAlgorithm) as OTPAlgorithm)
-          : OTPAlgorithm.SHA1,
+        algorithm: parseOTPAlgorithm(data[hash].algorithm) ?? OTPAlgorithm.SHA1,
         pinned: data[hash].pinned || false,
         hash: data[hash].hash || hash,
       };
@@ -501,11 +506,6 @@ export class EntryStorage {
       // If invalid digits, then use default.
       if (entryData.digits > 10 || entryData.digits < 1) {
         entryData.digits = 6;
-      }
-
-      // If invalid algorithm, then use default
-      if (!OTPAlgorithm[entryData.algorithm]) {
-        entryData.algorithm = OTPAlgorithm.SHA1;
       }
 
       if (/^(blz-|bliz-)/.test(entryData.secret)) {
@@ -616,30 +616,11 @@ export class EntryStorage {
         entryData.hash = hash;
       }
 
-      if (!entryData.type) {
-        entryData.type = OTPType[OTPType.totp];
-      }
-
-      let type: OTPType;
-      switch (entryData.type) {
-        case "totp":
-        case "hotp":
-        case "battle":
-        case "steam":
-        case "hex":
-        case "hhex":
-          type = OTPType[entryData.type];
-          break;
-        default:
-          // we need correct the type here
-          // and save it
-          type = OTPType.totp;
-          entryData.type = OTPType[OTPType.totp];
-      }
+      const type = parseOTPType(entryData.type) ?? OTPType.totp;
 
       let period: number | undefined;
       if (
-        entryData.type === OTPType[OTPType.totp] &&
+        (type === OTPType.totp || type === OTPType.hex) &&
         entryData.period &&
         entryData.period > 0
       ) {
@@ -657,8 +638,7 @@ export class EntryStorage {
         counter: entryData.counter,
         period,
         digits: entryData.digits ? Number(entryData.digits) : undefined,
-        // @ts-expect-error - it's fine if this ends up undefined
-        algorithm: OTPAlgorithm[entryData.algorithm],
+        algorithm: parseOTPAlgorithm(entryData.algorithm),
         pinned: entryData.pinned,
       });
 

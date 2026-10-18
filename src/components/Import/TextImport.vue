@@ -28,10 +28,8 @@ otpauth://hotp/...
 <script lang="ts">
 import * as CryptoJS from "crypto-js";
 import Vue from "vue";
-import {
-  decryptBackupData,
-  getEntryDataFromOTPAuthPerLine,
-} from "../../import";
+import { decryptBackupData } from "../../import";
+import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
 import { EntryStorage } from "../../models/storage";
 import { Encryption } from "../../models/encryption";
 
