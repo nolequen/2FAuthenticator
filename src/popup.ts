@@ -154,15 +154,7 @@ async function init() {
   );
 
   // Show search box if more than 10 entries
-  if (
-    instance.$store.state.accounts.entries.length >= 10 &&
-    !(
-      instance.$store.getters["accounts/shouldFilter"] &&
-      instance.$store.state.accounts.filter
-    )
-  ) {
-    instance.$store.commit("accounts/showSearch");
-  }
+  instance.$store.dispatch("accounts/showSearchIfNeeded");
 
   const query = new URLSearchParams(document.location.search.substring(1));
   // Resize window to proper size if popup

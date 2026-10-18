@@ -4,6 +4,7 @@ import jsQR from "jsqr";
 
 // @ts-expect-error - injected by vue-svg-loader
 import scanGIF from "../images/scan.gif";
+import { getAlertText } from "./contentAlerts";
 
 if (!document.getElementById("__ga_grayLayout__")) {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -21,27 +22,6 @@ if (!document.getElementById("__ga_grayLayout__")) {
           message.info.captureBoxHeight
         );
         break;
-      case "errorsecret":
-        alert(chrome.i18n.getMessage("errorsecret") + message.secret);
-        break;
-      case "errorenc":
-        alert(chrome.i18n.getMessage("phrase_incorrect"));
-        break;
-      case "added":
-        alert(message.account + chrome.i18n.getMessage("added"));
-        break;
-      case "text":
-        alert(message.text);
-        break;
-      case "migrationfail":
-        alert(chrome.i18n.getMessage("migration_fail"));
-        break;
-      case "migrationpartlyfail":
-        alert(chrome.i18n.getMessage("migration_partly_fail"));
-        break;
-      case "migrationsuccess":
-        alert(chrome.i18n.getMessage("updateSuccess"));
-        break;
       case "pastecode":
         pasteCode(message.code);
         break;
@@ -57,9 +37,14 @@ if (!document.getElementById("__ga_grayLayout__")) {
         }
         break;
       }
-      default:
+      default: {
+        const alertText = getAlertText(message);
+        if (alertText !== undefined) {
+          alert(alertText);
+        }
         // invalid command, ignore it
         break;
+      }
     }
 
     // https://stackoverflow.com/a/56483156

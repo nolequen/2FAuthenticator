@@ -109,4 +109,55 @@ describe("KeyUtilities", () => {
       ).should.equal("94287082");
     });
   });
+
+  describe("base32 secrets", () => {
+    let clock: sinon.SinonFakeTimers | undefined;
+
+    beforeEach(() => {
+      clock = sinon.useFakeTimers({
+        now: 1700000000 * 1000,
+        toFake: ["Date"],
+      });
+    });
+
+    afterEach(() => {
+      clock?.restore();
+      clock = undefined;
+    });
+
+    function totp(secret: string) {
+      return KeyUtilities.generate(
+        OTPType.totp,
+        secret,
+        0,
+        30,
+        6,
+        OTPAlgorithm.SHA1
+      );
+    }
+
+    it("should ignore the trailing bits of a secret", () => {
+      KeyUtilities.generate(
+        OTPType.hex,
+        "4eed64576f9992f857b00204",
+        0,
+        30,
+        6,
+        OTPAlgorithm.SHA1
+      ).should.equal("363254");
+      totp("J3WWIV3PTGJPQV5QAICM").should.equal("363254");
+    });
+
+    it("should accept padding, lower case and spaces", () => {
+      totp("J3WWIV3PTGJPQV5QAICM====").should.equal("363254");
+      totp("j3wwiv3ptgjpqv5qaicm").should.equal("363254");
+      totp("J3WW IV3P TGJP QV5Q AICM").should.equal("363254");
+    });
+
+    it("should reject a character outside the base32 alphabet", () => {
+      chai
+        .expect(() => totp("J3WWIV3PTGJPQV5QAIC1"))
+        .to.throw("Invalid Base32 string");
+    });
+  });
 });

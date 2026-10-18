@@ -38,46 +38,26 @@ export class KeyUtilities {
 
   private static base32tohex(base32: string): string {
     const base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+    const normalized = base32.replace(/[\s=]/g, "").toUpperCase();
     let bits = "";
     let hex = "";
-    let padding = 0;
 
-    for (let i = 0; i < base32.length; i++) {
-      if (base32.charAt(i) === "=") {
-        bits += "00000";
-        padding++;
-      } else {
-        const val = base32chars.indexOf(base32.charAt(i).toUpperCase());
-        bits += this.leftpad(val.toString(2), 5, "0");
+    for (let i = 0; i < normalized.length; i++) {
+      const val = base32chars.indexOf(normalized.charAt(i));
+      if (val === -1) {
+        throw new Error("Invalid Base32 string");
       }
+      bits += this.leftpad(val.toString(2), 5, "0");
     }
 
-    for (let i = 0; i + 4 <= bits.length; i += 4) {
-      const chunk = bits.substr(i, 4);
-      hex = hex + Number(`0b${chunk}`).toString(16);
+    for (let i = 0; i + 8 <= bits.length; i += 8) {
+      const chunk = bits.substr(i, 8);
+      hex = hex + this.leftpad(Number(`0b${chunk}`).toString(16), 2, "0");
     }
 
     // if (hex.length % 2 && hex[hex.length - 1] === '0') {
     //   hex = hex.substr(0, hex.length - 1);
     // }
-    switch (padding) {
-      case 0:
-        break;
-      case 6:
-        hex = hex.substr(0, hex.length - 8);
-        break;
-      case 4:
-        hex = hex.substr(0, hex.length - 6);
-        break;
-      case 3:
-        hex = hex.substr(0, hex.length - 4);
-        break;
-      case 1:
-        hex = hex.substr(0, hex.length - 2);
-        break;
-      default:
-        throw new Error("Invalid Base32 string");
-    }
 
     return hex;
   }

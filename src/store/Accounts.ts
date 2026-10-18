@@ -86,11 +86,11 @@ export class Accounts implements Module {
         updateCodes(state: AccountsState) {
           let second = new Date().getSeconds();
           if (UserSettings.items.offset) {
-            // prevent second from negative
-            second += Number(UserSettings.items.offset) + 60;
+            second += Number(UserSettings.items.offset);
           }
 
-          second = second % 60;
+          // prevent second from negative
+          second = ((second % 60) + 60) % 60;
           state.second = second;
 
           let currentlyEncrypted = false;
@@ -395,13 +395,9 @@ export class Accounts implements Module {
               await entry.changeEncryption(newEncryption);
 
               // if not uuidv4 regen
-              if (
-                /[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}/i.test(
-                  entry.hash
-                )
-              ) {
-                entry.genUUID();
+              if (!isUUIDv4(entry.hash)) {
                 toRemove.push(entry.hash);
+                entry.genUUID();
               }
             }
 
@@ -493,13 +489,16 @@ export class Accounts implements Module {
 
             const linkedKeys = new Map<string, undefined>();
             for (const entry of state.state.entries) {
+              if (!entry.secret) {
+                if (entry.keyId) {
+                  linkedKeys.set(entry.keyId, undefined);
+                }
+                continue;
+              }
+
               await entry.changeEncryption(new Encryption(saltedHash, key.id));
               // if not uuidv4 regen
-              if (
-                /[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}/i.test(
-                  entry.hash
-                )
-              ) {
+              if (!isUUIDv4(entry.hash)) {
                 removeKeys.push(entry.hash);
                 entry.genUUID();
               }
@@ -604,7 +603,16 @@ export class Accounts implements Module {
             keys: await BrowserStorage.getKeys(),
           });
           state.commit("initComplete");
+          await state.dispatch("showSearchIfNeeded");
           return;
+        },
+        showSearchIfNeeded: (state: ActionContext<AccountsState, object>) => {
+          if (
+            state.state.entries.length >= 10 &&
+            !(state.getters.shouldFilter && state.state.filter)
+          ) {
+            state.commit("showSearch");
+          }
         },
         clearFilter: (state: ActionContext<AccountsState, object>) => {
           state.commit("stopFilter");
@@ -712,4 +720,10 @@ async function genHash(value: string) {
       iframe.contentWindow.postMessage(message, "*");
     }
   });
+}
+
+function isUUIDv4(hash: string) {
+  return /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i.test(
+    hash
+  );
 }

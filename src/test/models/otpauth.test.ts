@@ -130,6 +130,56 @@ describe("parseOTPAuthURI", () => {
     });
   });
 
+  it("should keep colons in the account part of the label", () => {
+    const entry = parsedEntry(
+      parseOTPAuthURI(`otpauth://totp/Example:alice:work?secret=${SECRET}`)
+    );
+
+    (entry.issuer as string).should.equal("Example");
+    (entry.account as string).should.equal("alice:work");
+  });
+
+  it("should keep a plus sign encoded in the issuer", () => {
+    const entry = parsedEntry(
+      parseOTPAuthURI(`otpauth://totp/user?secret=${SECRET}&issuer=C%2B%2B`)
+    );
+
+    (entry.issuer as string).should.equal("C++");
+  });
+
+  it("should read a plus sign in the issuer as a space", () => {
+    const entry = parsedEntry(
+      parseOTPAuthURI(`otpauth://totp/user?secret=${SECRET}&issuer=Big+Co`)
+    );
+
+    (entry.issuer as string).should.equal("Big Co");
+  });
+
+  it("should remove spaces from the secret", () => {
+    const entry = parsedEntry(
+      parseOTPAuthURI("otpauth://totp/user?secret=JBSW%20Y3DP+EHPK3PXP")
+    );
+
+    entry.secret.should.equal(SECRET);
+  });
+
+  it("should read a lower case secret in upper case", () => {
+    const entry = parsedEntry(
+      parseOTPAuthURI("otpauth://totp/user?secret=jbswy3dpehpk3pxp")
+    );
+
+    entry.secret.should.equal(SECRET);
+    entry.type.should.equal("totp");
+  });
+
+  it("should remove the padding from the secret", () => {
+    const entry = parsedEntry(
+      parseOTPAuthURI("otpauth://totp/user?secret=J3WWIV3PTGJPQV5QAICM====")
+    );
+
+    entry.secret.should.equal("J3WWIV3PTGJPQV5QAICM");
+  });
+
   it("should report a secret that is neither base32 nor hex", () => {
     parseOTPAuthURI(
       "otpauth://totp/user?secret=not-a-secret!"

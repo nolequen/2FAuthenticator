@@ -260,7 +260,7 @@ export default Vue.extend({
 // TODO: move most of this to a models file and reuse for backup stuff
 function getQrUrl(entry: OTPEntry) {
   const label = entry.issuer
-    ? entry.issuer + ":" + entry.account
+    ? entry.issuer.split("::")[0] + ":" + entry.account
     : entry.account;
   const type =
     entry.type === OTPType.hex

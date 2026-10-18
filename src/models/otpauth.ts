@@ -33,24 +33,29 @@ export function parseOTPAuthURI(text: string): OTPAuthParseResult {
   } catch (error) {
     console.error(error);
   }
-  if (label.indexOf(":") !== -1) {
-    issuer = label.split(":")[0];
-    account = label.split(":")[1];
+  const labelSeparator = label.indexOf(":");
+  if (labelSeparator !== -1) {
+    issuer = label.slice(0, labelSeparator);
+    account = label.slice(labelSeparator + 1);
   } else {
     account = label;
   }
   const parameters = parameterPart.split("&");
   parameters.forEach((item) => {
-    const parameter = item.split("=");
+    const separator = item.indexOf("=");
+    const parameter =
+      separator === -1
+        ? [item]
+        : [item.slice(0, separator), item.slice(separator + 1)];
     if (parameter[0].toLowerCase() === "secret") {
       secret = parameter[1];
     } else if (parameter[0].toLowerCase() === "issuer") {
+      const value = (parameter[1] ?? "").replace(/\+/g, " ");
       try {
-        issuer = decodeURIComponent(parameter[1]);
+        issuer = decodeURIComponent(value);
       } catch {
-        issuer = parameter[1];
+        issuer = value;
       }
-      issuer = issuer.replace(/\+/g, " ");
     } else if (parameter[0].toLowerCase() === "counter") {
       counter = parseOTPCounter(parameter[1]);
     } else if (parameter[0].toLowerCase() === "period") {
@@ -69,19 +74,24 @@ export function parseOTPAuthURI(text: string): OTPAuthParseResult {
 
   if (!secret) {
     return { error: "invalid" };
-  } else if (!/^[0-9a-f]+$/i.test(secret) && !/^[2-7a-z]+=*$/i.test(secret)) {
+  }
+  const normalizedSecret = normalizeSecret(secret);
+  if (
+    !/^[0-9a-f]+$/i.test(normalizedSecret) &&
+    !/^[2-7a-z]+=*$/i.test(normalizedSecret)
+  ) {
     return { error: "secret", secret };
   }
 
   if (
-    !/^[2-7a-z]+=*$/i.test(secret) &&
-    /^[0-9a-f]+$/i.test(secret) &&
+    !/^[2-7a-z]+=*$/i.test(normalizedSecret) &&
+    /^[0-9a-f]+$/i.test(normalizedSecret) &&
     type === "totp"
   ) {
     type = "hex";
   } else if (
-    !/^[2-7a-z]+=*$/i.test(secret) &&
-    /^[0-9a-f]+$/i.test(secret) &&
+    !/^[2-7a-z]+=*$/i.test(normalizedSecret) &&
+    /^[0-9a-f]+$/i.test(normalizedSecret) &&
     type === "hotp"
   ) {
     type = "hhex";
@@ -92,7 +102,7 @@ export function parseOTPAuthURI(text: string): OTPAuthParseResult {
     account,
     hash,
     issuer,
-    secret,
+    secret: normalizedSecret,
     type,
     encrypted: false,
     index: 0,
@@ -110,6 +120,16 @@ export function parseOTPAuthURI(text: string): OTPAuthParseResult {
   }
 
   return { entry };
+}
+
+function normalizeSecret(secret: string) {
+  let decodedSecret = secret;
+  try {
+    decodedSecret = decodeURIComponent(secret);
+  } catch (error) {
+    console.error(error);
+  }
+  return decodedSecret.replace(/[+\s]/g, "").replace(/=+$/, "").toUpperCase();
 }
 
 export async function getEntryDataFromOTPAuthPerLine(importCode: string) {

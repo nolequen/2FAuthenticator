@@ -68,16 +68,121 @@ function wordArrayToByteArray(wordArray: CryptoJS.lib.WordArray) {
   return byteArray;
 }
 
-function byteArray2String(bytes: number[]) {
-  return String.fromCharCode.apply(null, bytes);
+class ProtobufReader {
+  private offset = 0;
+
+  constructor(private readonly bytes: number[]) {}
+
+  hasMore() {
+    return this.offset < this.bytes.length;
+  }
+
+  readKey() {
+    const key = this.readVarint();
+    return { field: Math.floor(key / 8), wireType: key % 8 };
+  }
+
+  readVarint() {
+    let value = 0;
+    for (let shift = 0; shift < 70; shift += 7) {
+      if (!this.hasMore()) {
+        throw new Error("Truncated varint");
+      }
+      const byte = this.bytes[this.offset++];
+      value += (byte & 0x7f) * 2 ** shift;
+      if (byte < 0x80) {
+        return value;
+      }
+    }
+    throw new Error("Malformed varint");
+  }
+
+  readBytes() {
+    const length = this.readVarint();
+    const start = this.offset;
+    this.advance(length);
+    return this.bytes.slice(start, this.offset);
+  }
+
+  skip(wireType: number) {
+    switch (wireType) {
+      case 0:
+        this.readVarint();
+        break;
+      case 1:
+        this.advance(8);
+        break;
+      case 2:
+        this.readBytes();
+        break;
+      case 5:
+        this.advance(4);
+        break;
+      default:
+        throw new Error(`Unsupported wire type ${wireType}`);
+    }
+  }
+
+  private advance(length: number) {
+    if (this.offset + length > this.bytes.length) {
+      throw new Error("Truncated field");
+    }
+    this.offset += length;
+  }
 }
 
-function subBytesArray(bytes: number[], start: number, length: number) {
-  const subBytes: number[] = [];
-  for (let i = 0; i < length; i++) {
-    subBytes.push(bytes[start + i]);
+function utf8(bytes: number[]) {
+  return new TextDecoder().decode(new Uint8Array(bytes));
+}
+
+function getOTPAuthLine(parameters: number[]) {
+  const reader = new ProtobufReader(parameters);
+  let secret: number[] = [];
+  let name = "";
+  let issuer = "";
+  let algorithm = 0;
+  let digits = 0;
+  let type = 0;
+  let counter: number | undefined;
+  while (reader.hasMore()) {
+    const { field, wireType } = reader.readKey();
+    if (field === 1 && wireType === 2) {
+      secret = reader.readBytes();
+    } else if (field === 2 && wireType === 2) {
+      name = utf8(reader.readBytes());
+    } else if (field === 3 && wireType === 2) {
+      issuer = utf8(reader.readBytes());
+    } else if (field === 4 && wireType === 0) {
+      algorithm = reader.readVarint();
+    } else if (field === 5 && wireType === 0) {
+      digits = reader.readVarint();
+    } else if (field === 6 && wireType === 0) {
+      type = reader.readVarint();
+    } else if (field === 7 && wireType === 0) {
+      counter = reader.readVarint();
+    } else {
+      reader.skip(wireType);
+    }
   }
-  return subBytes;
+
+  const otpType = ["totp", "hotp", "totp"][type] ?? "totp";
+  const label =
+    issuer &&
+    name.indexOf(":") !== -1 &&
+    !name.toLowerCase().startsWith(`${issuer.toLowerCase()}:`)
+      ? `${encodeURIComponent(issuer)}:${encodeURIComponent(name)}`
+      : encodeURIComponent(name);
+  let line = `otpauth://${otpType}/${label}?secret=${byteArray2Base32(secret)}`;
+  if (issuer) {
+    line += `&issuer=${encodeURIComponent(issuer)}`;
+  }
+  line += `&algorithm=${
+    ["SHA1", "SHA1", "SHA256", "SHA512", "MD5"][algorithm] ?? "SHA1"
+  }&digits=${[6, 6, 8][digits] ?? 6}`;
+  if (otpType === "hotp") {
+    line += `&counter=${counter ?? 1}`;
+  }
+  return line;
 }
 
 export function getOTPAuthPerLineFromOPTAuthMigration(migrationUri: string) {
@@ -85,45 +190,32 @@ export function getOTPAuthPerLineFromOPTAuthMigration(migrationUri: string) {
     return [];
   }
 
-  const base64Data = decodeURIComponent(migrationUri.split("data=")[1]);
+  const data = migrationUri.match(/[?&]data=([^&]*)/);
+  if (!data) {
+    return [];
+  }
+
+  let base64Data: string;
+  try {
+    base64Data = decodeURIComponent(data[1]);
+  } catch {
+    return [];
+  }
+
   const wordArrayData = CryptoJS.enc.Base64.parse(base64Data);
-  const byteData = wordArrayToByteArray(wordArrayData);
+  const reader = new ProtobufReader(wordArrayToByteArray(wordArrayData));
   const lines: string[] = [];
-  let offset = 0;
-  while (offset < byteData.length) {
-    if (byteData[offset] !== 10) {
-      break;
-    }
-    const lineLength = byteData[offset + 1];
-    const secretStart = offset + 4;
-    const secretLength = byteData[offset + 3];
-    const secretBytes = subBytesArray(byteData, secretStart, secretLength);
-    const secret = byteArray2Base32(secretBytes);
-    const accountStart = secretStart + secretLength + 2;
-    const accountLength = byteData[secretStart + secretLength + 1];
-    const accountBytes = subBytesArray(byteData, accountStart, accountLength);
-    const account = byteArray2String(accountBytes);
-    const isserStart = accountStart + accountLength + 2;
-    const isserLength = byteData[accountStart + accountLength + 1];
-    const issuerBytes = subBytesArray(byteData, isserStart, isserLength);
-    const issuer = byteArray2String(issuerBytes);
-    const algorithm = ["SHA1", "SHA1", "SHA256", "SHA512", "MD5"][
-      byteData[isserStart + isserLength + 1]
-    ];
-    const digits = [6, 6, 8][byteData[isserStart + isserLength + 3]];
-    const type = ["totp", "hotp", "totp"][
-      byteData[isserStart + isserLength + 5]
-    ];
-    let line = `otpauth://${type}/${account}?secret=${secret}&issuer=${issuer}&algorithm=${algorithm}&digits=${digits}`;
-    if (type === "hotp") {
-      let counter = 1;
-      if (isserStart + isserLength + 7 <= lineLength) {
-        counter = byteData[isserStart + isserLength + 7];
+  try {
+    while (reader.hasMore()) {
+      const { field, wireType } = reader.readKey();
+      if (field === 1 && wireType === 2) {
+        lines.push(getOTPAuthLine(reader.readBytes()));
+      } else {
+        reader.skip(wireType);
       }
-      line += `&counter=${counter}`;
     }
-    lines.push(line);
-    offset += lineLength + 2;
+  } catch (error) {
+    console.warn("Malformed migration data.", error);
   }
   return lines;
 }

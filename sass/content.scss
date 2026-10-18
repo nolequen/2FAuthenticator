@@ -8,6 +8,7 @@
   z-index: 2147483647;
   display: none;
   cursor: crosshair;
+  pointer-events: auto !important;
 }
 
 #__ga_grayLayout__ .scan {
