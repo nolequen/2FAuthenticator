@@ -40,7 +40,14 @@
     "page": "view/options.html",
     "open_in_tab": false
   },
-  "permissions": ["activeTab", "storage", "identity", "alarms", "scripting"],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "identity",
+    "alarms",
+    "scripting",
+    "contextMenus"
+  ],
   "optional_permissions": ["clipboardWrite"],
   "host_permissions": [
     "https://www.google.com/",

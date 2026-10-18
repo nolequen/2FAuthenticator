@@ -143,7 +143,7 @@ export default Vue.extend({
     },
     isSupported: {
       get(): boolean {
-        return !isFirefox && !isSafari;
+        return !isSafari;
       },
     },
   },
@@ -188,6 +188,12 @@ export default Vue.extend({
         };
     },
     requireContextMenuPermission() {
+      if (isFirefox) {
+        chrome.runtime.sendMessage({
+          action: "updateContextMenu",
+        });
+        return;
+      }
       chrome.permissions.request(
         {
           permissions: ["contextMenus"],

@@ -45,7 +45,8 @@
         "<all_urls>",
         "clipboardWrite",
         "storage",
-        "identity"
+        "identity",
+        "contextMenus"
     ],
     "optional_permissions": [
         "clipboardWrite",

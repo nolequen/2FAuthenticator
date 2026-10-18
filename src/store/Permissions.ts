@@ -1,3 +1,4 @@
+import { isFirefox } from "../browser";
 import { Permission } from "../models/permission";
 import { UserSettings } from "../models/settings";
 
@@ -35,7 +36,7 @@ const permissions: Permission[] = [
   {
     id: "contextMenus",
     description: chrome.i18n.getMessage("permission_context_menus"),
-    revocable: true,
+    revocable: !isFirefox,
   },
   {
     id: "https://www.google.com/*",
