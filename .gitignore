@@ -1,8 +1,8 @@
 node_modules
 build
-chrome*
-firefox*
-edge*
+/chrome*
+/firefox*
+/edge*
 dist
 .vscode
 .atom-build.yml
@@ -13,3 +13,5 @@ view/licenses.html
 scripts/test-runner.js
 /release
 *.pem
+/artifacts
+/web-ext-artifacts

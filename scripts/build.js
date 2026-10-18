@@ -123,11 +123,17 @@ function generateLicenses() {
   fail("Licenses generation keeps timing out. Check the network and retry.");
 }
 
+function readJson(file) {
+  return JSON.parse(fs.readFileSync(file, "utf8"));
+}
+
 function copyManifests(platform, dir, testing) {
   const suffix = testing ? "-testing" : "";
-  fs.copyFileSync(
-    `manifests/manifest-${platform}${suffix}.json`,
-    path.join(dir, "manifest.json")
+  const manifest = readJson(`manifests/manifest-${platform}${suffix}.json`);
+  manifest.version = readJson("package.json").version;
+  fs.writeFileSync(
+    path.join(dir, "manifest.json"),
+    JSON.stringify(manifest, null, 2) + "\n"
   );
   if (platform === "chrome" || platform === "edge") {
     fs.copyFileSync(
