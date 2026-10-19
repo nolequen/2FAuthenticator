@@ -111,7 +111,7 @@ export default Vue.extend({
             this.$store.commit("notification/alert", this.i18n[message]);
           }
           return;
-        }
+        },
       );
       return;
     },

@@ -9,7 +9,7 @@ const WATCH_PLATFORMS = ["chrome", "firefox", "edge"];
 const STYLE_FILES = ["src/**/*.{ts,vue}", "sass/*.scss"];
 const STATIC_FILES = ["images", "_locales", "LICENSE", "view"];
 const BIN = {
-  prettier: "node_modules/prettier/bin-prettier.js",
+  prettier: "node_modules/prettier/bin/prettier.cjs",
   eslint: "node_modules/eslint/bin/eslint.js",
   webpack: "node_modules/webpack-cli/bin/cli.js",
   tsc: "node_modules/typescript/bin/tsc",

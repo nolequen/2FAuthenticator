@@ -112,7 +112,7 @@ export default Vue.extend({
     },
     getTabindex(entry: OTPEntry) {
       const firstEntry = this.entries.find((entry) =>
-        this.isEntryVisible(entry)
+        this.isEntryVisible(entry),
       );
 
       return entry === firstEntry ? 0 : -1;
@@ -124,7 +124,7 @@ export default Vue.extend({
 
       const activeIndex = Array.prototype.indexOf.call(
         document.querySelectorAll(".entry"),
-        document.activeElement
+        document.activeElement,
       );
       if (activeIndex === -1) {
         return -1;
@@ -137,7 +137,7 @@ export default Vue.extend({
         (entry, index) =>
           index >
             (reverse ? this.entries.length - 1 - activeIndex : activeIndex) &&
-          this.isEntryVisible(entry)
+          this.isEntryVisible(entry),
       );
 
       if (nextIndex === -1) {
@@ -186,7 +186,7 @@ export default Vue.extend({
           to: dropIndex,
         });
         await EntryStorage.set(this.$store.state.accounts.entries);
-      }
+      },
     );
   },
   components: {

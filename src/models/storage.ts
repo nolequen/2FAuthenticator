@@ -144,22 +144,22 @@ export class BrowserStorage {
 function isKey(key: unknown): key is Key {
   return Boolean(
     key &&
-      typeof key === "object" &&
-      "dataType" in key &&
-      "id" in key &&
-      "salt" in key &&
-      key.dataType === "Key" &&
-      key.id &&
-      key.salt &&
-      typeof key.id === "string" &&
-      typeof key.salt === "string"
+    typeof key === "object" &&
+    "dataType" in key &&
+    "id" in key &&
+    "salt" in key &&
+    key.dataType === "Key" &&
+    key.id &&
+    key.salt &&
+    typeof key.id === "string" &&
+    typeof key.salt === "string",
   );
 }
 
 export class EntryStorage {
   private static getOTPStorageFromEntry(
     entry: OTPEntry,
-    unencrypted?: boolean
+    unencrypted?: boolean,
   ): OTPStorage {
     let secret: string;
     if (!entry.secret && entry.encData && entry.keyId) {
@@ -232,7 +232,7 @@ export class EntryStorage {
       entry.encryption.getEncryptionKeyId()
     ) {
       const encData = entry.encryption.getEncryptedString(
-        JSON.stringify(storageItem)
+        JSON.stringify(storageItem),
       );
       return {
         dataType: DataType.EncOTPStorage,
@@ -277,7 +277,7 @@ export class EntryStorage {
 
         return mergedData;
       },
-      {}
+      {},
     );
 
     return newData;
@@ -297,7 +297,7 @@ export class EntryStorage {
 
   private static isValidEntry(
     _data: { [hash: string]: OTPStorage },
-    hash: string
+    hash: string,
   ) {
     if (typeof _data[hash] !== "object") {
       console.log('Key "' + hash + '" is not an object');
@@ -335,7 +335,7 @@ export class EntryStorage {
 
   static async import(
     encryption: Encryption,
-    data: { [hash: string]: RawOTPStorage }
+    data: { [hash: string]: RawOTPStorage },
   ) {
     let _data = await BrowserStorage.get();
     for (const hash of Object.keys(data)) {
@@ -412,7 +412,7 @@ export class EntryStorage {
       // not a valid / old hash
       if (
         !/^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}$/.test(
-          hash
+          hash,
         )
       ) {
         entryData.hash = crypto.randomUUID();
@@ -476,7 +476,7 @@ export class EntryStorage {
             keyId: entryData.keyId,
             hash,
             index: entryData.index,
-          })
+          }),
         );
         continue;
       }
@@ -487,7 +487,7 @@ export class EntryStorage {
 
       const { type, digits } = parseOTPType(
         entryData.type,
-        entryData.digits ? Number(entryData.digits) : undefined
+        entryData.digits ? Number(entryData.digits) : undefined,
       );
 
       let period: number | undefined;

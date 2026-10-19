@@ -36,7 +36,7 @@ describe("KeyUtilities", () => {
           counter,
           30,
           6,
-          OTPAlgorithm.SHA1
+          OTPAlgorithm.SHA1,
         ).should.equal(code);
       });
     });
@@ -65,7 +65,7 @@ describe("KeyUtilities", () => {
         name: "SHA512",
         algorithm: OTPAlgorithm.SHA512,
         secret: asciiToHex(
-          "1234567890123456789012345678901234567890123456789012345678901234"
+          "1234567890123456789012345678901234567890123456789012345678901234",
         ),
       },
     ];
@@ -90,7 +90,7 @@ describe("KeyUtilities", () => {
             0,
             30,
             8,
-            seed.algorithm
+            seed.algorithm,
           ).should.equal(codes[index]);
         });
       });
@@ -105,7 +105,7 @@ describe("KeyUtilities", () => {
         0,
         30,
         8,
-        OTPAlgorithm.SHA1
+        OTPAlgorithm.SHA1,
       ).should.equal("94287082");
     });
   });
@@ -132,7 +132,7 @@ describe("KeyUtilities", () => {
         0,
         30,
         6,
-        OTPAlgorithm.SHA1
+        OTPAlgorithm.SHA1,
       );
     }
 
@@ -143,7 +143,7 @@ describe("KeyUtilities", () => {
         0,
         30,
         6,
-        OTPAlgorithm.SHA1
+        OTPAlgorithm.SHA1,
       ).should.equal("363254");
       totp("J3WWIV3PTGJPQV5QAICM").should.equal("363254");
     });

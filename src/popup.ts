@@ -130,7 +130,7 @@ async function init() {
         searchInput.focus();
       }
     },
-    false
+    false,
   );
 
   // Show search box if more than 10 entries
@@ -165,7 +165,7 @@ async function init() {
       if (hasPermission) {
         syncTimeWithGoogle();
       }
-    }
+    },
   );
 }
 

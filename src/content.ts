@@ -19,7 +19,7 @@ if (!document.getElementById("__ga_grayLayout__")) {
           message.info.captureBoxLeft,
           message.info.captureBoxTop,
           message.info.captureBoxWidth,
-          message.info.captureBoxHeight
+          message.info.captureBoxHeight,
         );
         break;
       case "pastecode":
@@ -124,19 +124,19 @@ function grayLayoutMove(event: MouseEvent) {
 
   const captureBoxLeft = Math.min(
     Number(sessionStorage.getItem("captureBoxPositionLeft")),
-    event.clientX
+    event.clientX,
   );
   const captureBoxTop = Math.min(
     Number(sessionStorage.getItem("captureBoxPositionTop")),
-    event.clientY
+    event.clientY,
   );
   const captureBoxWidth =
     Math.abs(
-      Number(sessionStorage.getItem("captureBoxPositionLeft")) - event.clientX
+      Number(sessionStorage.getItem("captureBoxPositionLeft")) - event.clientX,
     ) - 1;
   const captureBoxHeight =
     Math.abs(
-      Number(sessionStorage.getItem("captureBoxPositionTop")) - event.clientY
+      Number(sessionStorage.getItem("captureBoxPositionTop")) - event.clientY,
     ) - 1;
   captureBox.style.left = captureBoxLeft + "px";
   captureBox.style.top = captureBoxTop + "px";
@@ -165,20 +165,20 @@ function grayLayoutUp(event: MouseEvent) {
   const captureBoxLeft =
     Math.min(
       Number(sessionStorage.getItem("captureBoxPositionLeft")),
-      event.clientX
+      event.clientX,
     ) + 1;
   const captureBoxTop =
     Math.min(
       Number(sessionStorage.getItem("captureBoxPositionTop")),
-      event.clientY
+      event.clientY,
     ) + 1;
   const captureBoxWidth =
     Math.abs(
-      Number(sessionStorage.getItem("captureBoxPositionLeft")) - event.clientX
+      Number(sessionStorage.getItem("captureBoxPositionLeft")) - event.clientX,
     ) - 1;
   const captureBoxHeight =
     Math.abs(
-      Number(sessionStorage.getItem("captureBoxPositionTop")) - event.clientY
+      Number(sessionStorage.getItem("captureBoxPositionTop")) - event.clientY,
     ) - 1;
 
   // make sure captureBox and grayLayout is hidden
@@ -201,10 +201,10 @@ async function qrDecode(
   left: number,
   top: number,
   width: number,
-  height: number
+  height: number,
 ) {
   const canvas = document.getElementById(
-    "__ga_qrCanvas__"
+    "__ga_qrCanvas__",
   ) as HTMLCanvasElement;
   const qr = new Image();
   qr.onload = () => {
@@ -218,7 +218,7 @@ async function qrDecode(
         left * devicePixelRatio,
         top * devicePixelRatio,
         width * devicePixelRatio,
-        height * devicePixelRatio
+        height * devicePixelRatio,
       );
     if (imageData) {
       canvas.width = imageData.width;
@@ -236,7 +236,7 @@ async function qrDecode(
             count: number;
             estimatedModuleSize: number;
           }>;
-        }
+        },
       ) => {
         let qrRes = "";
         if (error) {
@@ -244,7 +244,7 @@ async function qrDecode(
           const jsQrCode = jsQR(
             imageData.data,
             imageData.width,
-            imageData.height
+            imageData.height,
           );
 
           if (jsQrCode) {

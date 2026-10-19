@@ -42,7 +42,7 @@ export default Vue.extend({
         }
 
         const result = await getEntryDataFromOTPAuthPerLine(
-          otpUrlList.join("\n")
+          otpUrlList.join("\n"),
         );
 
         let importData: {
@@ -58,7 +58,7 @@ export default Vue.extend({
         if (Object.keys(decryptedFileData).length) {
           await EntryStorage.import(
             this.$encryption as Encryption,
-            decryptedFileData
+            decryptedFileData,
           );
 
           if (hasFailedResults) {
@@ -108,7 +108,7 @@ async function getOtpUrlFromQrFile(file: File): Promise<string | null> {
             count: number;
             estimatedModuleSize: number;
           }>;
-        }
+        },
       ) => {
         if (error) {
           console.error(error);
@@ -117,7 +117,7 @@ async function getOtpUrlFromQrFile(file: File): Promise<string | null> {
           image.onload = () => {
             const canvas: HTMLCanvasElement = document.createElement("canvas");
             const ctx: CanvasRenderingContext2D = canvas.getContext(
-              "2d"
+              "2d",
             ) as CanvasRenderingContext2D;
 
             canvas.width = image.width;
@@ -128,12 +128,12 @@ async function getOtpUrlFromQrFile(file: File): Promise<string | null> {
               0,
               0,
               canvas.width,
-              canvas.height
+              canvas.height,
             );
             const jsQrCode = jsQR(
               qrImageData.data,
               canvas.width,
-              canvas.height
+              canvas.height,
             );
 
             if (jsQrCode && jsQrCode.data) {

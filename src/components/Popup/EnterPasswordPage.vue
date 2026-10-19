@@ -32,7 +32,7 @@ export default Vue.extend({
     async applyPassphrase() {
       await this.$store.dispatch("accounts/applyPassphrase", this.password);
       const firstEntry = document.querySelector(
-        ".entry[tabindex='0']"
+        ".entry[tabindex='0']",
       ) as HTMLElement;
       firstEntry?.focus();
     },

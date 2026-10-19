@@ -47,7 +47,7 @@ describe("UserSettings", () => {
         const sync = (await storedSettings(StorageLocation.Sync)) || {};
         (location === StorageLocation.Sync ? sync : local).should.have.property(
           "theme",
-          "dark"
+          "dark",
         );
         for (const key of LEGACY_KEYS) {
           local.should.not.have.property(key);

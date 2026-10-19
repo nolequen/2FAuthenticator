@@ -71,9 +71,11 @@ describe("AddAccountPage", () => {
         algorithm: OTPAlgorithm.SHA1,
       },
     });
-    await ((wrapper.vm as unknown) as {
-      addNewAccount(): Promise<void>;
-    }).addNewAccount();
+    await (
+      wrapper.vm as unknown as {
+        addNewAccount(): Promise<void>;
+      }
+    ).addNewAccount();
 
     const stored = await chrome.storage.local.get();
     const entries = Object.keys(stored)
@@ -136,9 +138,11 @@ describe("AddAccountPage", () => {
         now: 1700000000 * 1000,
         toFake: ["Date"],
       });
-      await ((wrapper.vm as unknown) as {
-        addNewAccount(): Promise<void>;
-      }).addNewAccount();
+      await (
+        wrapper.vm as unknown as {
+          addNewAccount(): Promise<void>;
+        }
+      ).addNewAccount();
 
       addCode.should.have.been.calledOnce;
       const entry = addCode.lastCall.args[1];

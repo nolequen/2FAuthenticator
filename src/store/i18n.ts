@@ -2,7 +2,7 @@ export async function loadI18nMessages() {
   return new Promise(
     (
       resolve: (value: { [key: string]: string }) => void,
-      reject: (reason: Error) => void
+      reject: (reason: Error) => void,
     ) => {
       try {
         const xhr = new XMLHttpRequest();
@@ -29,6 +29,6 @@ export async function loadI18nMessages() {
           return reject(Error(String(error)));
         }
       }
-    }
+    },
   );
 }

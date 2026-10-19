@@ -24,7 +24,7 @@ export enum OTPAlgorithm {
 
 function parseEnumValue(
   values: Record<string, string | number>,
-  value: unknown
+  value: unknown,
 ): number | undefined {
   if (typeof value === "string" && /^\d+$/.test(value)) {
     return parseEnumValue(values, Number(value));
@@ -41,14 +41,14 @@ function parseEnumValue(
   const lowerCaseValue = value.toLowerCase();
   const name = Object.keys(values).find(
     (key) =>
-      typeof values[key] === "number" && key.toLowerCase() === lowerCaseValue
+      typeof values[key] === "number" && key.toLowerCase() === lowerCaseValue,
   );
   return name === undefined ? undefined : Number(values[name]);
 }
 
 export function parseOTPType(
   value: unknown,
-  digits?: number
+  digits?: number,
 ): { type: OTPType; digits?: number } {
   if (
     (typeof value === "string" || typeof value === "number") &&
@@ -136,7 +136,7 @@ export class OTPEntry implements OTPEntryInterface {
           hash: string;
           index: number;
         },
-    encryption?: EncryptionInterface
+    encryption?: EncryptionInterface,
   ) {
     this.encryption = encryption;
     this.index = entry.index;
@@ -247,13 +247,13 @@ export class OTPEntry implements OTPEntryInterface {
       console.warn(
         "Decrypt successful, but hash mismatch!",
         this.hash,
-        decryptedData.hash
+        decryptedData.hash,
       );
     }
 
     const { type, digits } = parseOTPType(
       decryptedData.type,
-      decryptedData.digits
+      decryptedData.digits,
     );
     this.account = decryptedData.account || "";
     this.algorithm =
@@ -320,7 +320,7 @@ export class OTPEntry implements OTPEntryInterface {
           this.period,
           this.digits,
           this.algorithm,
-          offset
+          offset,
         );
       } catch (error) {
         this.code = CodeState.Invalid;

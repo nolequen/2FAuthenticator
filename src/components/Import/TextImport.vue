@@ -63,13 +63,13 @@ export default Vue.extend({
             : null;
         const decryptedbackupData = await decryptBackupData(
           exportData,
-          passphrase
+          passphrase,
         );
 
         if (Object.keys(decryptedbackupData).length) {
           await EntryStorage.import(
             this.$encryption as Encryption,
-            decryptedbackupData
+            decryptedbackupData,
           );
           if (failedCount === 0) {
             alert(this.i18n.updateSuccess);

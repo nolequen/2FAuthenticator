@@ -50,7 +50,7 @@ export default Vue.extend({
 
 function getBackupFile(
   entryData: { [hash: string]: RawOTPStorage },
-  key?: Object
+  key?: Object,
 ) {
   if (key) {
     Object.assign(entryData, { key: key });

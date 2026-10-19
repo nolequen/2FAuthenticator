@@ -40,11 +40,13 @@ describe("EntryComponent", () => {
       encrypted: false,
       secret: "JBSWY3DPEHPK3PXP",
     });
-    const { methods } = ((EntryComponent as unknown) as {
-      options: {
-        methods: { showQr(this: unknown, entry: OTPEntry): void };
-      };
-    }).options;
+    const { methods } = (
+      EntryComponent as unknown as {
+        options: {
+          methods: { showQr(this: unknown, entry: OTPEntry): void };
+        };
+      }
+    ).options;
 
     methods.showQr.call({ $store: { commit } }, entry);
 

@@ -37,7 +37,10 @@ describe("content style", () => {
     getComputedStyle(grayLayout).pointerEvents.should.equal("auto");
     chai
       .expect(
-        document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2)
+        document.elementFromPoint(
+          window.innerWidth / 2,
+          window.innerHeight / 2,
+        ),
       )
       .to.equal(grayLayout);
   });

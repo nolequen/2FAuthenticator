@@ -6,7 +6,7 @@ import { parseOTPAuthURI } from "./models/otpauth";
 
 export async function handleCaptureMessage(
   message: { action: string; info?: unknown; data?: chrome.tabs.Tab },
-  sender: chrome.runtime.MessageSender
+  sender: chrome.runtime.MessageSender,
 ) {
   if (message.action === "getCapture") {
     if (!sender.tab || sender.tab.id === undefined) {
@@ -95,7 +95,7 @@ async function getTotp(text: string, id: number, silent = false) {
 
       const getTotpResults = await Promise.allSettled(getTotpPromises);
       const failedCount = getTotpResults.filter(
-        (res) => res.status === "rejected" || !res.value
+        (res) => res.status === "rejected" || !res.value,
       ).length;
       if (failedCount === otpUrls.length) {
         !silent && chrome.tabs.sendMessage(id, { action: "migrationfail" });
@@ -132,10 +132,8 @@ async function getTotp(text: string, id: number, silent = false) {
       return false;
     }
 
-    const {
-      cachedPassphrase,
-      cachedKeyId,
-    } = await chrome.storage.session.get();
+    const { cachedPassphrase, cachedKeyId } =
+      await chrome.storage.session.get();
     const encryption = new Encryption(cachedPassphrase, cachedKeyId);
     if (
       // If the entries are encrypted and we aren't unlocked, error.

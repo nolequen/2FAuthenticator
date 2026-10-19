@@ -20,7 +20,7 @@ async function init() {
   const cachedSecrets = await getCachedSecrets();
   const encryption = new Encryption(
     cachedSecrets.cachedPassphrase,
-    cachedSecrets.cachedKeyId
+    cachedSecrets.cachedKeyId,
   );
   const entries = await EntryStorage.get();
 
@@ -55,7 +55,7 @@ async function getCachedSecrets() {
 
 export async function decryptBackupData(
   backupData: { [hash: string]: OTPStorage | Key },
-  passphrase: string | null
+  passphrase: string | null,
 ) {
   const decryptedBackupData: { [hash: string]: RawOTPStorage } = {};
   const keys: Map<string, string | null> = new Map();
@@ -79,8 +79,8 @@ export async function decryptBackupData(
           await findAndUnlockKey(
             backupData,
             unknownStorageItem.keyId,
-            passphrase
-          )
+            passphrase,
+          ),
         );
       }
       const decryptKey = keys.get(unknownStorageItem.keyId);
@@ -93,8 +93,8 @@ export async function decryptBackupData(
         ...unknownStorageItem,
         ...JSON.parse(
           CryptoJS.AES.decrypt(unknownStorageItem.data, decryptKey).toString(
-            CryptoJS.enc.Utf8
-          )
+            CryptoJS.enc.Utf8,
+          ),
         ),
         encrypted: false,
       };
@@ -112,7 +112,7 @@ export async function decryptBackupData(
 async function findAndUnlockKey(
   importData: { [key: string]: OTPStorage | Key },
   keyId: string,
-  password: string
+  password: string,
 ): Promise<string | null> {
   if (!(keyId in importData)) {
     return null;
@@ -162,7 +162,7 @@ async function findAndUnlockKey(
         // @ts-expect-error bad typings
         iframe.contentWindow.postMessage(message, "*");
       }
-    }
+    },
   );
 
   if (!isCorrectPassword) {

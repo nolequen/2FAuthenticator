@@ -1,20 +1,11 @@
 export const SECRET_BYTES = [
-  0x48,
-  0x65,
-  0x6c,
-  0x6c,
-  0x6f,
-  0x21,
-  0xde,
-  0xad,
-  0xbe,
-  0xef,
+  0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0xde, 0xad, 0xbe, 0xef,
 ];
 
 function varint(value: number) {
   const bytes: number[] = [];
   while (value >= 0x80) {
-    bytes.push(value % 0x80 | 0x80);
+    bytes.push((value % 0x80) | 0x80);
     value = Math.floor(value / 0x80);
   }
   bytes.push(value);
@@ -41,7 +32,7 @@ export function account(
     digits?: number;
     type?: number;
     counter?: number;
-  } = {}
+  } = {},
 ) {
   const secret = options.secret ?? SECRET_BYTES;
   return [

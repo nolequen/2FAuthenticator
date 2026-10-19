@@ -31,7 +31,7 @@ async function getOnlyEntry() {
 
 async function importAndGet(
   fields: Partial<RawOTPStorage>,
-  encryption = new Encryption("", "")
+  encryption = new Encryption("", ""),
 ) {
   const entry = rawEntry(fields);
   await EntryStorage.import(encryption, { [entry.hash]: entry });
@@ -39,7 +39,7 @@ async function importAndGet(
 }
 
 function asStoredType(value: number) {
-  return (value as unknown) as string;
+  return value as unknown as string;
 }
 
 describe("EntryStorage", () => {

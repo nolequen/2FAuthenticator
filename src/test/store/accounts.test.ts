@@ -17,7 +17,8 @@ localVue.use(Vuex);
 
 const SECRET = "JBSWY3DPEHPK3PXP";
 const OLD_HASH = "0123456789abcdef0123456789abcdef";
-const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_V4 =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function key(id: string): Key {
   return {
@@ -71,7 +72,7 @@ function accountsState(store: Store<unknown>) {
 
 function decryptStoredAccounts(
   stored: { [hash: string]: OTPStorage },
-  encryption: EncryptionInterface
+  encryption: EncryptionInterface,
 ) {
   const accounts: { [hash: string]: string } = {};
   for (const hash of Object.keys(stored)) {
@@ -120,9 +121,7 @@ describe("Accounts", () => {
           toFake: ["Date"],
         });
 
-        module.mutations.updateCodes(
-          (module.state as unknown) as AccountsState
-        );
+        module.mutations.updateCodes(module.state as unknown as AccountsState);
 
         module.state.second.should.equal(expected);
       });
@@ -191,7 +190,7 @@ describe("Accounts", () => {
       sinon.replace(
         chrome.runtime,
         "sendMessage",
-        (sinon.fake() as unknown) as typeof chrome.runtime.sendMessage
+        sinon.fake() as unknown as typeof chrome.runtime.sendMessage,
       );
     });
 
@@ -221,7 +220,7 @@ describe("Accounts", () => {
       chai.expect(stored[hashB]).to.deep.equal(storedB);
       decryptStoredAccounts(
         { [hashB]: stored[hashB] },
-        new Encryption("passphrase-b", keyB)
+        new Encryption("passphrase-b", keyB),
       ).should.deep.equal({ [hashB]: "bob" });
     });
 
@@ -242,7 +241,7 @@ describe("Accounts", () => {
       chai.expect(stored[OLD_HASH]).to.equal(undefined);
       const accounts = decryptStoredAccounts(
         stored,
-        encryption as EncryptionInterface
+        encryption as EncryptionInterface,
       );
       const hashes = Object.keys(accounts);
       hashes.should.have.lengthOf(2);
@@ -257,10 +256,9 @@ describe("Accounts", () => {
       await chrome.storage.local.set({
         [hash]: { ...rawEntry(hash, "alice", 0), dataType: "OTPStorage" },
       });
-      await (await createStore()).dispatch(
-        "accounts/changePassphrase",
-        "right password"
-      );
+      await (
+        await createStore()
+      ).dispatch("accounts/changePassphrase", "right password");
 
       const store = await createStore();
       const state = accountsState(store);

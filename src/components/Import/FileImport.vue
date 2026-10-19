@@ -52,7 +52,7 @@ export default Vue.extend({
           } catch (e) {
             console.warn(e);
             const result = await getEntryDataFromOTPAuthPerLine(
-              reader.result as string
+              reader.result as string,
             );
             importData = result.exportData;
             failedCount = result.failedCount;
@@ -62,7 +62,7 @@ export default Vue.extend({
           let decryptedFileData: { [hash: string]: RawOTPStorage } = {};
           try {
             const passphrase = Object.values(importData).some(
-              (entry) => entry.dataType === "EncOTPStorage"
+              (entry) => entry.dataType === "EncOTPStorage",
             )
               ? await this.getOldPassphrase()
               : null;
@@ -73,7 +73,7 @@ export default Vue.extend({
           if (Object.keys(decryptedFileData).length) {
             await EntryStorage.import(
               this.$encryption as Encryption,
-              decryptedFileData
+              decryptedFileData,
             );
             if (failedCount === 0) {
               alert(this.i18n.updateSuccess);

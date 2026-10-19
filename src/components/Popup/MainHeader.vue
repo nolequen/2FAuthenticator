@@ -143,7 +143,7 @@ export default Vue.extend({
           if (
             await this.$store.dispatch(
               "notification/confirm",
-              this.i18n.capture_local_file_failed
+              this.i18n.capture_local_file_failed,
             )
           ) {
             window.open("import.html?QrImport", "_blank");

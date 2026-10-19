@@ -23,7 +23,7 @@ function parsedEntry(result: OTPAuthParseResult) {
 describe("parseOTPAuthURI", () => {
   it("should read the counter of a hotp entry", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI(`otpauth://hotp/Example:user?secret=${SECRET}&counter=7`)
+      parseOTPAuthURI(`otpauth://hotp/Example:user?secret=${SECRET}&counter=7`),
     );
 
     entry.type.should.equal("hotp");
@@ -32,7 +32,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should use zero for an invalid counter", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI(`otpauth://hotp/user?secret=${SECRET}&counter=-1`)
+      parseOTPAuthURI(`otpauth://hotp/user?secret=${SECRET}&counter=-1`),
     );
 
     (entry.counter as number).should.equal(0);
@@ -40,7 +40,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should read the type in lower case", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI(`otpauth://TOTP/user?secret=${SECRET}`)
+      parseOTPAuthURI(`otpauth://TOTP/user?secret=${SECRET}`),
     );
 
     entry.type.should.equal("totp");
@@ -48,7 +48,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should detect hex for a totp entry with a hex secret", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI(`otpauth://totp/user?secret=${HEX_SECRET}`)
+      parseOTPAuthURI(`otpauth://totp/user?secret=${HEX_SECRET}`),
     );
 
     entry.type.should.equal("hex");
@@ -56,7 +56,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should detect hhex for a hotp entry with a hex secret", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI(`otpauth://hotp/user?secret=${HEX_SECRET}`)
+      parseOTPAuthURI(`otpauth://hotp/user?secret=${HEX_SECRET}`),
     );
 
     entry.type.should.equal("hhex");
@@ -65,8 +65,8 @@ describe("parseOTPAuthURI", () => {
   it("should read issuer and account from the label and parameters", () => {
     const entry = parsedEntry(
       parseOTPAuthURI(
-        `otpauth://totp/Example%20Inc:user%40example.com?secret=${SECRET}&issuer=Example+Inc`
-      )
+        `otpauth://totp/Example%20Inc:user%40example.com?secret=${SECRET}&issuer=Example+Inc`,
+      ),
     );
 
     (entry.issuer as string).should.equal("Example Inc");
@@ -76,8 +76,8 @@ describe("parseOTPAuthURI", () => {
   it("should read algorithm, period and digits", () => {
     const entry = parsedEntry(
       parseOTPAuthURI(
-        `otpauth://totp/user?secret=${SECRET}&algorithm=SHA256&period=60&digits=8`
-      )
+        `otpauth://totp/user?secret=${SECRET}&algorithm=SHA256&period=60&digits=8`,
+      ),
     );
 
     (entry.algorithm as string).should.equal("SHA256");
@@ -87,7 +87,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should ignore a period that does not divide a minute", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI(`otpauth://totp/user?secret=${SECRET}&period=45`)
+      parseOTPAuthURI(`otpauth://totp/user?secret=${SECRET}&period=45`),
     );
 
     chai.expect(entry.period).to.equal(undefined);
@@ -96,7 +96,9 @@ describe("parseOTPAuthURI", () => {
   it("should use the default for zero or non-numeric digits", () => {
     for (const digits of ["0", "eight"]) {
       const entry = parsedEntry(
-        parseOTPAuthURI(`otpauth://totp/user?secret=${SECRET}&digits=${digits}`)
+        parseOTPAuthURI(
+          `otpauth://totp/user?secret=${SECRET}&digits=${digits}`,
+        ),
       );
 
       chai.expect(entry.digits).to.equal(undefined);
@@ -105,7 +107,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should accept an empty label", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI(`otpauth://totp/?secret=${SECRET}`)
+      parseOTPAuthURI(`otpauth://totp/?secret=${SECRET}`),
     );
 
     (entry.account as string).should.equal("");
@@ -132,7 +134,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should keep colons in the account part of the label", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI(`otpauth://totp/Example:alice:work?secret=${SECRET}`)
+      parseOTPAuthURI(`otpauth://totp/Example:alice:work?secret=${SECRET}`),
     );
 
     (entry.issuer as string).should.equal("Example");
@@ -141,7 +143,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should keep a plus sign encoded in the issuer", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI(`otpauth://totp/user?secret=${SECRET}&issuer=C%2B%2B`)
+      parseOTPAuthURI(`otpauth://totp/user?secret=${SECRET}&issuer=C%2B%2B`),
     );
 
     (entry.issuer as string).should.equal("C++");
@@ -149,7 +151,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should read a plus sign in the issuer as a space", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI(`otpauth://totp/user?secret=${SECRET}&issuer=Big+Co`)
+      parseOTPAuthURI(`otpauth://totp/user?secret=${SECRET}&issuer=Big+Co`),
     );
 
     (entry.issuer as string).should.equal("Big Co");
@@ -157,7 +159,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should remove spaces from the secret", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI("otpauth://totp/user?secret=JBSW%20Y3DP+EHPK3PXP")
+      parseOTPAuthURI("otpauth://totp/user?secret=JBSW%20Y3DP+EHPK3PXP"),
     );
 
     entry.secret.should.equal(SECRET);
@@ -165,7 +167,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should read a lower case secret in upper case", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI("otpauth://totp/user?secret=jbswy3dpehpk3pxp")
+      parseOTPAuthURI("otpauth://totp/user?secret=jbswy3dpehpk3pxp"),
     );
 
     entry.secret.should.equal(SECRET);
@@ -174,7 +176,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should remove the padding from the secret", () => {
     const entry = parsedEntry(
-      parseOTPAuthURI("otpauth://totp/user?secret=J3WWIV3PTGJPQV5QAICM====")
+      parseOTPAuthURI("otpauth://totp/user?secret=J3WWIV3PTGJPQV5QAICM===="),
     );
 
     entry.secret.should.equal("J3WWIV3PTGJPQV5QAICM");
@@ -182,7 +184,7 @@ describe("parseOTPAuthURI", () => {
 
   it("should report a secret that is neither base32 nor hex", () => {
     parseOTPAuthURI(
-      "otpauth://totp/user?secret=not-a-secret!"
+      "otpauth://totp/user?secret=not-a-secret!",
     ).should.deep.equal({ error: "secret", secret: "not-a-secret!" });
   });
 });
@@ -190,7 +192,7 @@ describe("parseOTPAuthURI", () => {
 describe("getEntryDataFromOTPAuthPerLine", () => {
   it("should keep the counter of a hotp entry", async () => {
     const result = await getEntryDataFromOTPAuthPerLine(
-      `otpauth://hotp/Example:user?secret=${SECRET}&counter=7`
+      `otpauth://hotp/Example:user?secret=${SECRET}&counter=7`,
     );
 
     result.succeededCount.should.equal(1);
@@ -204,7 +206,7 @@ describe("getEntryDataFromOTPAuthPerLine", () => {
       [
         `otpauth:totp/Broken?secret=${SECRET}`,
         `otpauth://totp/Example:user?secret=${SECRET}`,
-      ].join("\n")
+      ].join("\n"),
     );
 
     result.failedCount.should.equal(1);

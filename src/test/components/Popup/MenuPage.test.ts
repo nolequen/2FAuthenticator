@@ -51,7 +51,7 @@ describe("MenuPage", () => {
 
   const clickMenuPageButtonByTitle = async (
     wrapper: Wrapper<any>,
-    title: string
+    title: string,
   ) => wrapper.find(`*[title='${title}']`).trigger("click");
 
   describe("feedback button", () => {
@@ -81,20 +81,20 @@ describe("MenuPage", () => {
         chrome.tabs.create.withArgs({
           url: "https://github.com/nolequen/Authenticator/issues",
         }).calledOnce,
-        "Tab create should be called with the issues URL"
+        "Tab create should be called with the issues URL",
       );
     });
 
     it("should open the same issues page when the user agent is Firefox", async () => {
       mockUserAgent(
-        "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0"
+        "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0",
       );
       await clickMenuPageButtonByTitle(wrapper, "Feedback");
       assert.ok(
         chrome.tabs.create.withArgs({
           url: "https://github.com/nolequen/Authenticator/issues",
         }).calledOnce,
-        "Tab create should be called with the issues URL"
+        "Tab create should be called with the issues URL",
       );
     });
   });

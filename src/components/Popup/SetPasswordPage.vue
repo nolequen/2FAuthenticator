@@ -46,7 +46,7 @@ export default Vue.extend({
       if (this.defaultEncryption) {
         const isCorrectPassword = await verifyPasswordUsingKeyID(
           this.defaultEncryption,
-          this.currentPhrase
+          this.currentPhrase,
         );
         if (!isCorrectPassword) {
           this.$store.commit("notification/alert", this.i18n.phrase_not_match);
@@ -75,7 +75,7 @@ export default Vue.extend({
       if (this.defaultEncryption) {
         const isCorrectPassword = await verifyPasswordUsingKeyID(
           this.defaultEncryption,
-          this.currentPhrase
+          this.currentPhrase,
         );
         if (!isCorrectPassword) {
           this.$store.commit("notification/alert", this.i18n.phrase_wrong);

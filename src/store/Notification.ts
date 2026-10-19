@@ -30,7 +30,7 @@ export class Notification implements Module {
       actions: {
         confirm: async (
           state: ActionContext<NotificationState, object>,
-          message: string
+          message: string,
         ) => {
           return new Promise((resolve: (value: boolean) => void) => {
             state.commit("setConfirm", message);
@@ -47,7 +47,7 @@ export class Notification implements Module {
         },
         ephermalMessage: (
           state: ActionContext<NotificationState, object>,
-          message: string
+          message: string,
         ) => {
           state.commit("setNotification", message);
           state.commit("style/showNotification", null, { root: true });

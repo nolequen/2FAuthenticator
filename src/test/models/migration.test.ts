@@ -28,8 +28,8 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
   it("should keep a Cyrillic name and issuer", async () => {
     const entry = await importSingle(
       migrationUri(
-        payload(account({ name: "Иван Петров", issuer: "Сбербанк" }))
-      )
+        payload(account({ name: "Иван Петров", issuer: "Сбербанк" })),
+      ),
     );
 
     (entry.account as string).should.equal("Иван Петров");
@@ -39,7 +39,7 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
   it("should read an account longer than 127 bytes", async () => {
     const name = "Пользователь".repeat(6);
     const entry = await importSingle(
-      migrationUri(payload(account({ name, issuer: "Пример" })))
+      migrationUri(payload(account({ name, issuer: "Пример" }))),
     );
 
     (entry.account as string).should.equal(name);
@@ -49,7 +49,7 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
 
   it("should read an account without an issuer", () => {
     getOTPAuthPerLineFromOPTAuthMigration(
-      migrationUri(payload(account({ name: "alice" })))
+      migrationUri(payload(account({ name: "alice" }))),
     ).should.deep.equal([
       `otpauth://totp/alice?secret=${SECRET}&algorithm=SHA1&digits=6`,
     ]);
@@ -58,8 +58,8 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
   it("should read a hotp counter of 300", async () => {
     const uri = migrationUri(
       payload(
-        account({ name: "alice", issuer: "Example", type: 1, counter: 300 })
-      )
+        account({ name: "alice", issuer: "Example", type: 1, counter: 300 }),
+      ),
     );
 
     getOTPAuthPerLineFromOPTAuthMigration(uri).should.deep.equal([
@@ -83,7 +83,7 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
     ];
 
     getOTPAuthPerLineFromOPTAuthMigration(
-      migrationUri(payload(shuffled))
+      migrationUri(payload(shuffled)),
     ).should.deep.equal([
       `otpauth://totp/alice?secret=${SECRET}&issuer=Example&algorithm=SHA1&digits=6`,
     ]);
@@ -92,8 +92,8 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
   it("should keep special characters in the name and issuer", async () => {
     const entry = await importSingle(
       migrationUri(
-        payload(account({ name: "a&b=c?d%e+f #1", issuer: "x&y=z?%+w" }))
-      )
+        payload(account({ name: "a&b=c?d%e+f #1", issuer: "x&y=z?%+w" })),
+      ),
     );
 
     (entry.account as string).should.equal("a&b=c?d%e+f #1");
@@ -103,8 +103,8 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
   it("should keep colons in the account part of the name", async () => {
     const entry = await importSingle(
       migrationUri(
-        payload(account({ name: "GitHub:alice:work", issuer: "GitHub" }))
-      )
+        payload(account({ name: "GitHub:alice:work", issuer: "GitHub" })),
+      ),
     );
 
     (entry.issuer as string).should.equal("GitHub");
@@ -116,9 +116,9 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
       migrationUri(
         payload(
           account({ name: "alice:work", issuer: "GitHub" }),
-          account({ name: "github:bob", issuer: "GitHub" })
-        )
-      )
+          account({ name: "github:bob", issuer: "GitHub" }),
+        ),
+      ),
     );
 
     result.succeededCount.should.equal(2);
@@ -137,9 +137,9 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
         payload(
           account({ name: "a", algorithm: 2, digits: 2, type: 2 }),
           account({ name: "b", algorithm: 3, digits: 1, type: 1 }),
-          account({ name: "c", algorithm: 0, digits: 0, type: 0 })
-        )
-      )
+          account({ name: "c", algorithm: 0, digits: 0, type: 0 }),
+        ),
+      ),
     ).should.deep.equal([
       `otpauth://totp/a?secret=${SECRET}&algorithm=SHA256&digits=8`,
       `otpauth://hotp/b?secret=${SECRET}&algorithm=SHA512&digits=6&counter=1`,
@@ -151,7 +151,7 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
     const secret = Array.from(Array(16).keys());
 
     getOTPAuthPerLineFromOPTAuthMigration(
-      migrationUri(payload(account({ name: "alice", secret })))
+      migrationUri(payload(account({ name: "alice", secret }))),
     ).should.deep.equal([
       "otpauth://totp/alice?secret=AAAQEAYEAUDAOCAJBIFQYDIOB4======&algorithm=SHA1&digits=6",
     ]);
@@ -160,12 +160,12 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
   it("should return the accounts read before broken data", () => {
     const bytes = payload(
       account({ name: "alice", issuer: "Example" }),
-      account({ name: "bob", issuer: "Example" })
+      account({ name: "bob", issuer: "Example" }),
     );
     const first = field(1, account({ name: "alice", issuer: "Example" }));
 
     getOTPAuthPerLineFromOPTAuthMigration(
-      migrationUri(bytes.slice(0, first.length + 10))
+      migrationUri(bytes.slice(0, first.length + 10)),
     ).should.deep.equal([
       `otpauth://totp/alice?secret=${SECRET}&issuer=Example&algorithm=SHA1&digits=6`,
     ]);
@@ -173,7 +173,7 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
 
   it("should return nothing for a malformed percent sign in data", () => {
     getOTPAuthPerLineFromOPTAuthMigration(
-      "otpauth-migration://offline?data=CjEKCkhlbGxv%E0%A4%A"
+      "otpauth-migration://offline?data=CjEKCkhlbGxv%E0%A4%A",
     ).should.deep.equal([]);
   });
 
@@ -182,7 +182,7 @@ describe("getOTPAuthPerLineFromOPTAuthMigration", () => {
       [
         "otpauth-migration://offline?data=CjEKCkhlbGxv%E0%A4%A",
         `otpauth://totp/Example:user?secret=${SECRET}`,
-      ].join("\n")
+      ].join("\n"),
     );
 
     result.succeededCount.should.equal(1);

@@ -39,13 +39,13 @@ describe("capture", () => {
     sinon.replace(
       chrome.tabs,
       "sendMessage",
-      (sendMessage as unknown) as typeof chrome.tabs.sendMessage
+      sendMessage as unknown as typeof chrome.tabs.sendMessage,
     );
     captureVisibleTab = sinon.fake.resolves(CAPTURE_URL);
     sinon.replace(
       chrome.tabs,
       "captureVisibleTab",
-      captureVisibleTab as typeof chrome.tabs.captureVisibleTab
+      captureVisibleTab as typeof chrome.tabs.captureVisibleTab,
     );
   });
 
@@ -57,7 +57,7 @@ describe("capture", () => {
   it("should send the capture to the tab that asked for it", async () => {
     await handleCaptureMessage(
       { action: "getCapture", info: { captureBoxLeft: 1 } },
-      { tab: TAB }
+      { tab: TAB },
     );
 
     captureVisibleTab.should.have.been.calledOnceWith(3, { format: "png" });
@@ -73,7 +73,7 @@ describe("capture", () => {
         action: "getTotp",
         info: `otpauth://totp/Example:alice?secret=${SECRET}`,
       },
-      { tab: TAB }
+      { tab: TAB },
     );
 
     const entries = await EntryStorage.get();
@@ -88,7 +88,7 @@ describe("capture", () => {
   it("should ignore a capture request that does not come from a tab", async () => {
     await handleCaptureMessage(
       { action: "getCapture", info: { captureBoxLeft: 1 } },
-      {}
+      {},
     );
 
     captureVisibleTab.should.not.have.been.called;
@@ -101,7 +101,7 @@ describe("capture", () => {
         action: "getTotp",
         info: `otpauth://totp/Example:alice?secret=${SECRET}`,
       },
-      {}
+      {},
     );
 
     (await EntryStorage.get()).should.have.lengthOf(0);
@@ -121,7 +121,9 @@ describe("capture", () => {
 
   it("should stop the capture on autolock when the saved tab is gone", async () => {
     sendMessage.rejects(
-      new Error("Could not establish connection. Receiving end does not exist.")
+      new Error(
+        "Could not establish connection. Receiving end does not exist.",
+      ),
     );
     const rejections: unknown[] = [];
     const onRejection = (event: PromiseRejectionEvent) => {
@@ -146,7 +148,7 @@ describe("capture", () => {
   it("should save the tab of a capture started from the popup", async () => {
     await handleCaptureMessage(
       { action: "updateContentTab", data: { id: 9 } as chrome.tabs.Tab },
-      {}
+      {},
     );
 
     chai
@@ -159,7 +161,7 @@ describe("capture", () => {
       await handleCaptureMessage({ action: "updateContentTab", data: TAB }, {});
       await handleCaptureMessage(
         { action: "getTotp", info: uri },
-        { tab: TAB }
+        { tab: TAB },
       );
     }
 
@@ -168,9 +170,9 @@ describe("capture", () => {
         migrationUri(
           payload(
             account({ name: "alice", issuer: "Example" }),
-            account({ name: "bob", issuer: "Example", secret: [] })
-          )
-        )
+            account({ name: "bob", issuer: "Example", secret: [] }),
+          ),
+        ),
       );
 
       sendMessage.should.have.been.calledWith(7, {
@@ -182,8 +184,8 @@ describe("capture", () => {
     it("should report that no account could be added", async () => {
       await scan(
         migrationUri(
-          payload(account({ name: "bob", issuer: "Example", secret: [] }))
-        )
+          payload(account({ name: "bob", issuer: "Example", secret: [] })),
+        ),
       );
 
       sendMessage.should.have.been.calledWith(7, { action: "migrationfail" });
@@ -196,23 +198,23 @@ describe("capture", () => {
       sinon.replace(
         chrome.tabs,
         "query",
-        (sinon.fake.resolves([
+        sinon.fake.resolves([
           { id: 7, windowId: 3, url: "https://example.com/" },
-        ]) as unknown) as typeof chrome.tabs.query
+        ]) as unknown as typeof chrome.tabs.query,
       );
       sinon.replace(
         chrome.scripting,
         "executeScript",
-        (sinon.fake.resolves(
-          []
-        ) as unknown) as typeof chrome.scripting.executeScript
+        sinon.fake.resolves(
+          [],
+        ) as unknown as typeof chrome.scripting.executeScript,
       );
       sinon.replace(
         chrome.scripting,
         "insertCSS",
-        (sinon.fake.resolves(
-          undefined
-        ) as unknown) as typeof chrome.scripting.insertCSS
+        sinon.fake.resolves(
+          undefined,
+        ) as unknown as typeof chrome.scripting.insertCSS,
       );
     });
 
