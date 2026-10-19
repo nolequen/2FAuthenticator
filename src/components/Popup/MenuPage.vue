@@ -8,20 +8,6 @@
     </div>
     <div id="menuBody">
       <div class="menuList">
-        <p v-bind:title="i18n.advisor" v-on:click="showInfo('AdvisorPage')">
-          <span><IconAdvisor /></span>{{ i18n.advisor }}
-        </p>
-        <a
-          href="permissions.html"
-          target="_blank"
-          style="text-decoration: none"
-        >
-          <p v-bind:title="i18n.permissions">
-            <span><IconClipboardCheck /></span>{{ i18n.permissions }}
-          </p>
-        </a>
-      </div>
-      <div class="menuList">
         <p v-bind:title="i18n.backup" v-on:click="showInfo('BackupPage')">
           <span><IconExchange /></span>{{ i18n.backup }}
         </p>
@@ -31,11 +17,7 @@
         >
           <span><IconLock /></span>{{ i18n.security }}
         </p>
-        <p
-          v-bind:title="i18n.sync_clock"
-          v-on:click="syncClock()"
-          v-if="isSupported"
-        >
+        <p v-bind:title="i18n.sync_clock" v-on:click="syncClock()">
           <span><IconSync /></span>{{ i18n.sync_clock }}
         </p>
         <p
@@ -72,15 +54,11 @@ import { syncTimeWithGoogle } from "../../syncTime";
 import IconArrowLeft from "../../../svg/arrow-left.svg";
 import IconInfo from "../../../svg/info.svg";
 import IconExchange from "../../../svg/exchange.svg";
-import IconDatabase from "../../../svg/database.svg";
 import IconLock from "../../../svg/lock.svg";
 import IconSync from "../../../svg/sync.svg";
 import IconWrench from "../../../svg/wrench.svg";
-import IconAdvisor from "../../../svg/lightbulb.svg";
 import IconComments from "../../../svg/comments.svg";
 import IconCode from "../../../svg/code.svg";
-import IconClipboardCheck from "../../../svg/clipboard-check.svg";
-import { isFirefox, isSafari } from "../../browser";
 import { UserSettings } from "../../models/settings";
 
 export default Vue.extend({
@@ -88,23 +66,15 @@ export default Vue.extend({
     IconArrowLeft,
     IconInfo,
     IconExchange,
-    IconDatabase,
     IconLock,
     IconSync,
     IconWrench,
-    IconAdvisor,
     IconComments,
     IconCode,
-    IconClipboardCheck,
   },
   computed: {
     version: function () {
       return this.$store.state.menu.version;
-    },
-    isSupported: {
-      get(): boolean {
-        return !isSafari;
-      },
     },
   },
   methods: {
@@ -112,14 +82,9 @@ export default Vue.extend({
       this.$store.commit("style/hideMenu");
     },
     openHelp() {
-      let url = "https://github.com/nolequen/Authenticator/issues";
-
-      const feedbackURL = this.$store.state.menu.feedbackURL;
-      if (typeof feedbackURL === "string" && feedbackURL) {
-        url = feedbackURL;
-      }
-
-      chrome.tabs.create({ url });
+      chrome.tabs.create({
+        url: "https://github.com/nolequen/Authenticator/issues",
+      });
     },
     openLink(url: string) {
       window.open(url, "_blank");

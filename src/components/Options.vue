@@ -27,7 +27,6 @@ export default Vue.extend({
     async deleteEverything() {
       await chrome.storage.sync.clear();
       await chrome.storage.local.clear();
-      localStorage.clear();
       chrome.runtime.sendMessage({ action: "lock" });
       this.deleteConfirm = false;
       this.deleteComplete = true;

@@ -26,12 +26,9 @@ interface OTPEntryInterface {
 
 interface EncryptionInterface {
   getEncryptedString(data: string): string;
-  decryptSecretString(entry: string): string | null;
   decryptEncSecret(entry: OTPEntryInterface): RawOTPStorage | null;
   getEncryptionStatus(): boolean;
-  updateEncryptionPassword(password: string): void;
   getEncryptionKeyId(): string;
-  setEncryptionKeyId(id: string): void;
 }
 
 interface RawOTPStorage {
@@ -59,11 +56,6 @@ interface EncOTPStorage {
 }
 
 type OTPStorage = RawOTPStorage | EncOTPStorage;
-
-interface OldKey {
-  enc: string;
-  hash: string;
-}
 
 interface Key {
   dataType: "Key";

@@ -101,26 +101,7 @@ export async function decryptBackupData(
     } else {
       storageItem = unknownStorageItem;
     }
-    if (!storageItem.secret) {
-      continue;
-    }
-    if (storageItem.encrypted && !passphrase) {
-      continue;
-    }
-    if (storageItem.encrypted && passphrase) {
-      try {
-        storageItem.secret = CryptoJS.AES.decrypt(
-          storageItem.secret,
-          passphrase
-        ).toString(CryptoJS.enc.Utf8);
-        storageItem.encrypted = false;
-      } catch (error) {
-        continue;
-      }
-    }
-    // storageItem.secret may be empty after decrypt with wrong
-    // passphrase
-    if (!storageItem.secret) {
+    if (!storageItem.secret || storageItem.encrypted) {
       continue;
     }
     decryptedBackupData[hash] = storageItem;

@@ -8,13 +8,6 @@ import Vuex, { Store } from "vuex";
 import { loadI18nMessages } from "../../../store/i18n";
 import MenuPage from "../../../components/Popup/MenuPage.vue";
 
-import { Style } from "../../../store/Style";
-import { Accounts } from "../../../store/Accounts";
-import { CurrentView } from "../../../store/CurrentView";
-import { Menu } from "../../../store/Menu";
-import { Notification } from "../../../store/Notification";
-import { Qr } from "../../../store/Qr";
-
 import chrome from "sinon-chrome";
 
 chai.should();
@@ -44,7 +37,6 @@ describe("MenuPage", () => {
   before(() => {
     // mock the chrome global object
     global.chrome.tabs.create = chrome.tabs.create;
-    global.chrome.storage.managed.get = chrome.storage.managed.get;
   });
 
   beforeEach(async () => {
@@ -104,45 +96,6 @@ describe("MenuPage", () => {
         }).calledOnce,
         "Tab create should be called with the issues URL"
       );
-    });
-
-    describe("feedbackURL is set", () => {
-      beforeEach(async () => {
-        try {
-          chrome.storage.managed.get.yieldsAsync({
-            feedbackURL: "https://example.com/feedback",
-          });
-
-          store = new Vuex.Store({
-            modules: {
-              currentView: new CurrentView().getModule(),
-              notification: new Notification().getModule(),
-              qr: new Qr().getModule(),
-              style: new Style().getModule(),
-              menu: await new Menu().getModule(),
-              accounts: await new Accounts().getModule(),
-            },
-          });
-
-          wrapper = mount(MenuPage, {
-            store,
-            localVue,
-          });
-        } catch (e) {
-          console.error(e);
-          // Doesn't show up in mocha?
-          throw e;
-        }
-      });
-
-      it("should open a new tab to the page specified in ManagedStorage", async () => {
-        await clickMenuPageButtonByTitle(wrapper, "Feedback");
-        assert.ok(
-          chrome.tabs.create.withArgs({ url: "https://example.com/feedback" })
-            .called,
-          "Tab create should be called with the feedback URL"
-        );
-      });
     });
   });
 

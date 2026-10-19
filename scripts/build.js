@@ -135,16 +135,6 @@ function copyManifests(platform, dir, testing) {
     path.join(dir, "manifest.json"),
     JSON.stringify(manifest, null, 2) + "\n"
   );
-  if (platform === "chrome" || platform === "edge") {
-    fs.copyFileSync(
-      "manifests/schema-chrome.json",
-      path.join(dir, "schema.json")
-    );
-  }
-  fs.copyFileSync(
-    "manifests/manifest-pwa.json",
-    path.join(dir, "manifest-pwa.json")
-  );
 }
 
 function assemble(platform, dir, testing) {
@@ -171,9 +161,7 @@ function build(platform) {
       assemble(browser, path.join("release", browser), false);
     }
   } else if (platform === "test") {
-    for (const browser of ["chrome", "firefox"]) {
-      assemble(browser, path.join("test", browser), true);
-    }
+    assemble("chrome", path.join("test", "chrome"), true);
   } else {
     assemble(platform, platform, false);
   }

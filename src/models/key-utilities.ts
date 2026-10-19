@@ -62,20 +62,6 @@ export class KeyUtilities {
     return hex;
   }
 
-  private static base26(num: number) {
-    const chars = "23456789BCDFGHJKMNPQRTVWXY";
-    let output = "";
-    const len = 5;
-    for (let i = 0; i < len; i++) {
-      output += chars[num % chars.length];
-      num = Math.floor(num / chars.length);
-    }
-    if (output.length < len) {
-      output = new Array(len - output.length + 1).join(chars[0]) + output;
-    }
-    return output;
-  }
-
   private static cryptoJsWordArrayToUint8Array(
     wordArray: CryptoJS.lib.WordArray
   ) {
@@ -111,7 +97,6 @@ export class KeyUtilities {
     if (!len) {
       len = 6;
     }
-    let b26 = false;
     let key: string;
     switch (type) {
       case OTPType.totp:
@@ -121,15 +106,6 @@ export class KeyUtilities {
       case OTPType.hex:
       case OTPType.hhex:
         key = secret;
-        break;
-      case OTPType.battle:
-        key = this.base32tohex(secret);
-        len = 8;
-        break;
-      case OTPType.steam:
-        key = this.base32tohex(secret);
-        len = 10;
-        b26 = true;
         break;
       default:
         key = this.base32tohex(secret);
@@ -205,10 +181,6 @@ export class KeyUtilities {
     let otp =
       (this.hex2dec(hmac.substr(offset * 2, 8)) & this.hex2dec("7fffffff")) +
       "";
-
-    if (b26) {
-      return this.base26(Number(otp));
-    }
 
     if (otp.length < len) {
       otp = new Array(len - otp.length + 1).join("0") + otp;

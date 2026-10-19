@@ -26,7 +26,6 @@ otpauth://hotp/...
   </div>
 </template>
 <script lang="ts">
-import * as CryptoJS from "crypto-js";
 import Vue from "vue";
 import { decryptBackupData } from "../../import";
 import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
@@ -43,11 +42,7 @@ export default Vue.extend({
   },
   methods: {
     async importBackupCode() {
-      let exportData: {
-        // @ts-ignore
-        key?: { enc: string; hash: string };
-        [hash: string]: OTPStorage | Key;
-      } = {};
+      let exportData: { [hash: string]: OTPStorage | Key } = {};
       let failedCount = 0;
       let succeededCount = 0;
       try {
@@ -61,31 +56,15 @@ export default Vue.extend({
         succeededCount = result.succeededCount;
       }
 
-      let key: { enc: string; hash: string } | null = null;
-
-      if (exportData.hasOwnProperty("key")) {
-        if (exportData.key) {
-          key = exportData.key;
-        }
-        delete exportData.key;
-      }
-
       try {
         const passphrase: string | null =
           this.importEncrypted && this.importPassphrase
             ? this.importPassphrase
             : null;
-        let decryptedbackupData: {
-          [hash: string]: RawOTPStorage;
-        } = {};
-        if (key && passphrase) {
-          decryptedbackupData = await decryptBackupData(
-            exportData,
-            CryptoJS.AES.decrypt(key.enc, passphrase).toString()
-          );
-        } else {
-          decryptedbackupData = await decryptBackupData(exportData, passphrase);
-        }
+        const decryptedbackupData = await decryptBackupData(
+          exportData,
+          passphrase
+        );
 
         if (Object.keys(decryptedbackupData).length) {
           await EntryStorage.import(

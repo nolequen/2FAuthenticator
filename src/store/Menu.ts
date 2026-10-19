@@ -1,6 +1,4 @@
-import { isSafari } from "../browser";
 import { UserSettings } from "../models/settings";
-import { ManagedStorage } from "../models/storage";
 
 export class Menu implements Module {
   async getModule() {
@@ -12,18 +10,8 @@ export class Menu implements Module {
         zoom: Number(UserSettings.items.zoom) || 100,
         useAutofill: UserSettings.items.autofill === true,
         smartFilter: UserSettings.items.smartFilter === true,
-        enableContextMenu: UserSettings.items.enableContextMenu === true,
-        theme: UserSettings.items.theme || (isSafari ? "flat" : "normal"),
+        theme: UserSettings.items.theme || "normal",
         autolock: Number(UserSettings.items.autolock) || 30,
-        exportDisabled: await ManagedStorage.get("disableExport", false),
-        enforcePassword: await ManagedStorage.get("enforcePassword", false),
-        enforceAutolock: await ManagedStorage.get("enforceAutolock", false),
-        storageArea: await ManagedStorage.get<"sync" | "local">("storageArea"),
-        feedbackURL: await ManagedStorage.get<string>("feedbackURL"),
-        passwordPolicy: await ManagedStorage.get<string>("passwordPolicy"),
-        passwordPolicyHint: await ManagedStorage.get<string>(
-          "passwordPolicyHint"
-        ),
       },
       mutations: {
         setZoom: (state: MenuState, zoom: number) => {
@@ -40,11 +28,6 @@ export class Menu implements Module {
         setSmartFilter(state: MenuState, smartFilter: boolean) {
           state.smartFilter = smartFilter;
           UserSettings.items.smartFilter = smartFilter;
-          UserSettings.commitItems();
-        },
-        setEnableContextMenu(state: MenuState, enableContextMenu: boolean) {
-          state.enableContextMenu = enableContextMenu;
-          UserSettings.items.enableContextMenu = enableContextMenu;
           UserSettings.commitItems();
         },
         setTheme(state: MenuState, theme: string) {

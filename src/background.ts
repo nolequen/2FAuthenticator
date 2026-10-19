@@ -1,5 +1,5 @@
 import { Encryption } from "./models/encryption";
-import { EntryStorage, ManagedStorage } from "./models/storage";
+import { EntryStorage } from "./models/storage";
 import {
   getSiteName,
   getMatchedEntries,
@@ -9,7 +9,6 @@ import {
 import { CodeState } from "./models/otp";
 
 import { UserSettings } from "./models/settings";
-import { addContextMenuListener, updateContextMenu } from "./contextMenu";
 import {
   handleCaptureMessage,
   startCaptureFromCommand,
@@ -32,8 +31,6 @@ chrome.runtime.onMessage.addListener(async (message, sender) => {
   } else if (message.action === "resetAutolock") {
     chrome.alarms.clear("autolock");
     setAutolock();
-  } else if (message.action === "updateContextMenu") {
-    updateContextMenu();
   }
 
   // https://stackoverflow.com/a/56483156
@@ -104,15 +101,6 @@ chrome.commands.onCommand.addListener(async (command: string) => {
 });
 
 async function setAutolock() {
-  const enforcedAutolock = Number(
-    await ManagedStorage.get("enforceAutolock", false)
-  );
-
-  if (enforcedAutolock && enforcedAutolock > 0) {
-    chrome.alarms.create("autolock", { delayInMinutes: enforcedAutolock });
-    return;
-  }
-
   // Set default autolock value
   if (UserSettings.items.autolock === undefined) {
     UserSettings.items.autolock = 30;
@@ -124,6 +112,3 @@ async function setAutolock() {
     });
   }
 }
-
-addContextMenuListener();
-updateContextMenu();

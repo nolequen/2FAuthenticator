@@ -35,9 +35,7 @@ interface MenuState {
   autolock: number;
   useAutofill: boolean;
   smartFilter: boolean;
-  enableContextMenu: boolean;
   theme: string;
-  storageArea: "sync" | "local";
 }
 
 interface StyleState {
@@ -72,7 +70,7 @@ interface AccountsState {
   showSearch: boolean;
   exportData: { [k: string]: OTPEntryInterface };
   exportEncData: { [k: string]: OTPEntryInterface | Key };
-  keys: OldKey | Key[];
+  keys: Key[];
   wrongPassword: boolean;
   initComplete: boolean;
 }
@@ -82,13 +80,4 @@ interface NotificationState {
   confirmMessage: string;
   messageIdle: boolean;
   notification: string;
-}
-
-interface AdvisorState {
-  insights: AdvisorInsightInterface[];
-  ignoreList: string[];
-}
-
-interface PermissionsState {
-  permissions: PermissionInterface[];
 }

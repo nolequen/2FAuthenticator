@@ -1,4 +1,4 @@
-import { BrowserStorage, isOldKey } from "./storage";
+import { BrowserStorage } from "./storage";
 
 export async function argonHash(
   value: string,
@@ -59,12 +59,6 @@ export async function verifyPasswordUsingKeyID(
 ): Promise<boolean> {
   // Get key for current encryption
   const keys = await BrowserStorage.getKeys();
-  if (isOldKey(keys)) {
-    throw new Error(
-      "v3 encryption not being used with verifyPassword. This should never happen!"
-    );
-  }
-
   const key = keys.find((key) => key.id === keyId);
   if (!key) {
     throw new Error(`Key ${keyId} not in BrowserStorage`);

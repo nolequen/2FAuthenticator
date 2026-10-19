@@ -10,11 +10,8 @@ interface UserSettingsData {
   storageLocation?: StorageLocation;
 
   // syncable settings
-  advisorIgnoreList?: string[];
   autofill?: boolean;
   autolock?: number;
-  enableContextMenu?: boolean;
-  encodedPhrase?: string;
   smartFilter?: boolean;
   theme?: string;
   zoom?: number;
@@ -28,6 +25,7 @@ const LocalUserSettingsDataKeys = [
 ];
 
 const LegacyUserSettingsDataKeys = [
+  "advisorIgnoreList",
   "driveEncrypted",
   "driveFolder",
   "driveRefreshToken",
@@ -36,6 +34,8 @@ const LegacyUserSettingsDataKeys = [
   "dropboxEncrypted",
   "dropboxRevoked",
   "dropboxToken",
+  "enableContextMenu",
+  "encodedPhrase",
   "oneDriveBusiness",
   "oneDriveEncrypted",
   "oneDriveRevoked",
@@ -48,29 +48,6 @@ export class UserSettings {
 
   static async updateItems() {
     UserSettings.items = await UserSettings.getAllItems();
-  }
-
-  static async convertFromLocalStorage(
-    data: Storage,
-    location: StorageLocation
-  ) {
-    const settings: UserSettingsData = {};
-
-    for (const key in data) {
-      if (isBooleanOption(key)) {
-        settings[key] = data[key] === "true";
-      } else if (isNumberOption(key)) {
-        settings[key] = Number(data[key]);
-      } else if (isJSONOption(key)) {
-        settings[key] = JSON.parse(data[key]);
-      } else {
-        settings[key as keyof UserSettingsData] = data[key];
-      }
-    }
-
-    settings.storageLocation = location;
-    UserSettings.items = settings;
-    await UserSettings.commitItems();
   }
 
   static async commitItems() {
@@ -103,25 +80,6 @@ export class UserSettings {
     }
 
     await UserSettings.updateItems();
-  }
-
-  static async removeItem(key: keyof UserSettingsData) {
-    const localSettings = await UserSettings.getStorageData(
-      StorageLocation.Local
-    );
-    const storageLocation =
-      localSettings.storageLocation || StorageLocation.Local;
-
-    const location = LocalUserSettingsDataKeys.includes(key)
-      ? StorageLocation.Local
-      : storageLocation;
-    const storageData: UserSettingsData =
-      (await chrome.storage[location].get("UserSettings"))?.UserSettings || {};
-    delete storageData[key];
-
-    UserSettings.items = storageData;
-
-    await UserSettings.commitItems();
   }
 
   private static async getStorageData(location: StorageLocation) {
@@ -166,24 +124,4 @@ export class UserSettings {
     );
     return { ...syncableSettings, ...localSettings };
   }
-}
-
-type BooleanOption = "autofill" | "enableContextMenu" | "smartFilter";
-
-type NumberOption = "autolock" | "lastRemindingBackupTime" | "offset" | "zoom";
-
-type JSONOption = "advisorIgnoreList";
-
-function isBooleanOption(key: string): key is BooleanOption {
-  return ["autofill", "enableContextMenu", "smartFilter"].includes(key);
-}
-
-function isNumberOption(key: string): key is NumberOption {
-  return ["autolock", "lastRemindingBackupTime", "offset", "zoom"].includes(
-    key
-  );
-}
-
-function isJSONOption(key: string): key is JSONOption {
-  return ["advisorIgnoreList"].includes(key);
 }

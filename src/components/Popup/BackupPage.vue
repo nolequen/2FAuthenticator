@@ -1,65 +1,31 @@
 <template>
   <div>
     <!-- File Backup -->
-    <div v-show="!exportDisabled">
-      <div class="text warning" v-if="!defaultEncryption">
-        {{ i18n.export_info }}
-      </div>
-      <div class="text">
-        {{ i18n.backup_file_info }}
-      </div>
-      <div class="text warning" v-if="unsupportedAccounts">
-        {{ i18n.otp_unsupported_warn }}
-      </div>
-      <div class="text warning" v-if="currentlyEncrypted">
-        {{ i18n.phrase_incorrect_export }}
-      </div>
-      <a-button-link
-        download="authenticator.txt"
-        :href="exportOneLineOtpAuthFile"
-        v-if="!unsupportedAccounts && isDataLinkSupported"
-        >{{ i18n.download_backup }}</a-button-link
-      >
-      <button
-        v-on:click="downloadBackUpOneLineOtpAuthFile()"
-        v-if="!unsupportedAccounts && !isDataLinkSupported"
-        class="button"
-      >
-        {{ i18n.download_backup }}
-      </button>
-      <a-button-link
-        download="authenticator.json"
-        :href="exportFile"
-        v-if="unsupportedAccounts && isDataLinkSupported"
-        >{{ i18n.download_backup }}</a-button-link
-      >
-      <button
-        v-on:click="downloadBackUpExportFile()"
-        v-if="unsupportedAccounts && !isDataLinkSupported"
-        class="button"
-      >
-        {{ i18n.download_backup }}
-      </button>
-      <a-button-link
-        download="authenticator.json"
-        :href="exportEncryptedFile"
-        v-if="!!defaultEncryption && isDataLinkSupported"
-        >{{ i18n.download_enc_backup }}</a-button-link
-      >
-      <button
-        v-on:click="downloadBackUpExportEncryptedFile()"
-        v-if="!!defaultEncryption && !isDataLinkSupported"
-        class="button"
-      >
-        {{ i18n.download_enc_backup }}
-      </button>
+    <div class="text warning" v-if="!defaultEncryption">
+      {{ i18n.export_info }}
     </div>
+    <div class="text">
+      {{ i18n.backup_file_info }}
+    </div>
+    <div class="text warning" v-if="currentlyEncrypted">
+      {{ i18n.phrase_incorrect_export }}
+    </div>
+    <a-button-link
+      download="authenticator.txt"
+      :href="exportOneLineOtpAuthFile"
+      >{{ i18n.download_backup }}</a-button-link
+    >
+    <a-button-link
+      download="authenticator.json"
+      :href="exportEncryptedFile"
+      v-if="!!defaultEncryption"
+      >{{ i18n.download_enc_backup }}</a-button-link
+    >
     <a-button-link href="import.html">{{ i18n.import_backup }}</a-button-link>
   </div>
 </template>
 <script lang="ts">
 import Vue from "vue";
-import { isSafari } from "../../browser";
 
 export default Vue.extend({
   data: function () {
@@ -68,8 +34,6 @@ export default Vue.extend({
     const key = this.$store.state.accounts.key;
 
     return {
-      unsupportedAccounts: hasUnsupportedAccounts(exportData),
-      exportFile: getBackupFile(exportData),
       exportEncryptedFile: getBackupFile(exportEncData, key),
       exportOneLineOtpAuthFile: getOneLineOtpBackupFile(exportData),
     };
@@ -78,47 +42,11 @@ export default Vue.extend({
     defaultEncryption: function () {
       return this.$store.state.accounts.defaultEncryption;
     },
-    exportDisabled: function () {
-      return this.$store.state.menu.exportDisabled;
-    },
     currentlyEncrypted: function () {
       return this.$store.getters["accounts/currentlyEncrypted"];
     },
-    isDataLinkSupported: function () {
-      return !isSafari;
-    },
-  },
-  methods: {
-    downloadBackUpOneLineOtpAuthFile() {
-      const exportData = this.$store.state.accounts.exportData;
-      const t = getOneLineOtpBackupFile(exportData);
-      window.open(t);
-    },
-    downloadBackUpExportFile() {
-      const exportData = this.$store.state.accounts.exportData;
-      const t = getBackupFile(exportData);
-      window.open(t);
-    },
-    downloadBackUpExportEncryptedFile() {
-      const exportEncData = this.$store.state.accounts.exportEncData;
-      const key = this.$store.state.accounts.key;
-      const t = getBackupFile(exportEncData, key);
-      window.open(t);
-    },
   },
 });
-
-function hasUnsupportedAccounts(exportData: { [h: string]: RawOTPStorage }) {
-  for (const entry of Object.keys(exportData)) {
-    if (
-      exportData[entry].type === "battle" ||
-      exportData[entry].type === "steam"
-    ) {
-      return true;
-    }
-  }
-  return false;
-}
 
 function getBackupFile(
   entryData: { [hash: string]: RawOTPStorage },

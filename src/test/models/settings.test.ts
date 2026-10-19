@@ -7,7 +7,14 @@ import { resetStorage } from "../storage-helper";
 chai.should();
 mocha.setup("bdd");
 
-const LEGACY_KEYS = ["driveToken", "dropboxToken", "oneDriveRefreshToken"];
+const LEGACY_KEYS = [
+  "driveToken",
+  "dropboxToken",
+  "oneDriveRefreshToken",
+  "advisorIgnoreList",
+  "enableContextMenu",
+  "encodedPhrase",
+];
 
 async function storedSettings(location: StorageLocation) {
   return (await chrome.storage[location].get("UserSettings")).UserSettings;
@@ -16,7 +23,7 @@ async function storedSettings(location: StorageLocation) {
 describe("UserSettings", () => {
   afterEach(() => resetStorage());
 
-  describe("legacy cloud backup keys", () => {
+  describe("legacy keys", () => {
     for (const location of [StorageLocation.Local, StorageLocation.Sync]) {
       it(`should be dropped on commit with storage location ${location}`, async () => {
         await resetStorage();
@@ -27,6 +34,9 @@ describe("UserSettings", () => {
             driveToken: "drive-token",
             dropboxToken: "dropbox-token",
             oneDriveRefreshToken: "onedrive-token",
+            advisorIgnoreList: ["password_not_set"],
+            enableContextMenu: true,
+            encodedPhrase: "encoded-phrase",
           },
         });
 

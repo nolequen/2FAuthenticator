@@ -11,6 +11,7 @@ How it differs from the original:
 - its own name and extension ID in Chrome, Edge and Firefox;
 - no cloud backups (Google Drive, Dropbox, OneDrive): backups are exported to a file only;
 - the interface is in English and Russian only;
+- no Advisor, context menu, permissions page, enterprise policies or Steam and Battle.net account types;
 - bug fixes.
 
 ## Installation
@@ -45,7 +46,7 @@ Compare the hash with the line for that file in `SHA256SUMS.txt`. On Linux, run 
 
 ### Moving from Authenticator
 
-2FAuthenticator is a separate extension with its own storage: it does not see the accounts of Authenticator, and installing it changes nothing in Authenticator. To move your accounts, open **Backup** in Authenticator and download a backup file, then open **Backup** in 2FAuthenticator, click **Import Backup** and choose the file. If you set a password in Authenticator, use **Download Password-Protected Backup** and enter that password when importing. Otherwise **Download Backup File** saves all your secrets as plain text: delete the file right after the import.
+2FAuthenticator is a separate extension with its own storage: it does not see the accounts of Authenticator, and installing it changes nothing in Authenticator. To move your accounts, open **Backup** in Authenticator and download a backup file, then open **Backup** in 2FAuthenticator, click **Import Backup** and choose the file. If you set a password in Authenticator, use **Download Password-Protected Backup** and enter that password when importing. Otherwise **Download Backup File** saves all your secrets as plain text: delete the file right after the import. A password-protected backup made by Authenticator older than 8.0 does not import: import it into Authenticator and download the backup again.
 
 ## Building
 

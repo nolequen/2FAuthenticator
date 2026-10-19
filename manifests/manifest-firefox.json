@@ -47,8 +47,7 @@
     "activeTab",
     "storage",
     "alarms",
-    "scripting",
-    "contextMenus"
+    "scripting"
   ],
   "optional_permissions": ["clipboardWrite"],
   "host_permissions": ["https://www.google.com/"],

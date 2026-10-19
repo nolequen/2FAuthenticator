@@ -48,10 +48,28 @@ describe("EntryStorage", () => {
 
   describe("import", () => {
     describe("type", () => {
-      for (const name of ["totp", "hotp", "battle", "steam"]) {
+      for (const name of ["totp", "hotp"]) {
         it(`should keep the type ${name}`, async () => {
           const entry = await importAndGet({ type: name });
           entry.type.should.equal(OTPType[name as keyof typeof OTPType]);
+        });
+      }
+
+      it("should read the type battle as totp with 8 digits", async () => {
+        const entry = await importAndGet({ type: "battle", digits: 6 });
+        entry.type.should.equal(OTPType.totp);
+        entry.digits.should.equal(8);
+      });
+
+      for (const prefix of ["blz-", "bliz-"]) {
+        it(`should cut the secret prefix ${prefix} and use totp with 8 digits`, async () => {
+          const entry = await importAndGet({
+            type: "totp",
+            secret: prefix + BASE32_SECRET,
+          });
+          entry.type.should.equal(OTPType.totp);
+          entry.digits.should.equal(8);
+          (entry.secret as string).should.equal(BASE32_SECRET);
         });
       }
 
@@ -205,6 +223,28 @@ describe("EntryStorage", () => {
       entry.period.should.equal(60);
     });
 
+    it("should read an unencrypted battle entry as totp with 8 digits", async () => {
+      const raw = rawEntry({ type: "battle", digits: 6 });
+      await chrome.storage.local.set({ [raw.hash]: raw });
+
+      const entry = await getOnlyEntry();
+      entry.type.should.equal(OTPType.totp);
+      entry.digits.should.equal(8);
+    });
+
+    for (const [value, type] of [
+      [5, OTPType.hex],
+      [6, OTPType.hhex],
+    ]) {
+      it(`should read an unencrypted entry with type ${value} as ${OTPType[type]}`, async () => {
+        const raw = rawEntry({ type: asStoredType(value), secret: HEX_SECRET });
+        await chrome.storage.local.set({ [raw.hash]: raw });
+
+        const entry = await getOnlyEntry();
+        entry.type.should.equal(type);
+      });
+    }
+
     describe("an old encrypted entry", () => {
       const encryption = new Encryption("test-passphrase", "test-key-id");
 
@@ -248,6 +288,29 @@ describe("EntryStorage", () => {
         entry.type.should.equal(OTPType.hotp);
         entry.algorithm.should.equal(OTPAlgorithm.SHA256);
       });
+
+      it("should read type 3 as totp with 8 digits", async () => {
+        await storeEncrypted({ type: asStoredType(3), digits: 6 });
+
+        const entry = await getDecrypted();
+        entry.type.should.equal(OTPType.totp);
+        entry.digits.should.equal(8);
+      });
+
+      for (const [value, type] of [
+        [5, OTPType.hex],
+        [6, OTPType.hhex],
+      ]) {
+        it(`should read type ${value} as ${OTPType[type]}`, async () => {
+          await storeEncrypted({
+            type: asStoredType(value),
+            secret: HEX_SECRET,
+          });
+
+          const entry = await getDecrypted();
+          entry.type.should.equal(type);
+        });
+      }
     });
   });
 });

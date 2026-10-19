@@ -229,10 +229,6 @@
     "message": "Для импорта резервных копий необходимо указать правильный пароль.",
     "description": "Error password warning when import backups."
   },
-  "local_passphrase_warning": {
-    "message": "Ваши данные хоронятся в открытом виде, для защиты установите пароль в настройках безопасности.",
-    "description": "localStorage password warning."
-  },
   "remove": {
     "message": "Удалить",
     "description": "Remove password."
@@ -289,10 +285,6 @@
     "message": "Плоская",
     "description": "Flat theme"
   },
-  "otp_unsupported_warn": {
-    "message": "У вас есть один или несколько аккаунтов Steam или Blizzard. Не зашифрованные резервные копии не будут использовать стандартный формат резервного копирования.",
-    "description": "Warning if using account that is not supported by standard backup format."
-  },
   "otp_backup_inform": {
     "message": "Вы можете импортировать резервные копии из других приложений.",
     "description": "Info text on import page"
@@ -330,89 +322,8 @@
   "backup": {
     "message": "Резервная копия"
   },
-  "password_policy_default_hint": {
-    "message": "Ваш пароль не соответствует требованием безопасности вашей организации. Свяжитесь с вашим администратором для получения дополнительной информации."
-  },
-  "advisor": {
-    "message": "Советник"
-  },
-  "advisor_insight_password_not_set": {
-    "message": "Установите пароль для защиты своих данных."
-  },
-  "advisor_insight_auto_lock_not_set": {
-    "message": "Включите автоблокировку для защиты своих данных."
-  },
-  "advisor_insight_browser_sync_not_enabled": {
-    "message": "Синхронизация браузера отключена. Включение этой опции позволяет синхронизировать учетные записи между браузерами."
-  },
-  "advisor_insight_auto_fill_not_enabled": {
-    "message": "Автозаполнение может быть включено для автоматического заполнения кодов на веб-сайтах."
-  },
-  "advisor_insight_smart_filter_not_enabled": {
-    "message": "Включение смарт фильтра позволяет быстро получить доступ к аккаунтам."
-  },
-  "show_all_insights": {
-    "message": "Показать все действия."
-  },
-  "no_insight_available": {
-    "message": "Никаких действий не найдено, всё хорошо!"
-  },
-  "danger": {
-    "message": "Опасность"
-  },
-  "warning": {
-    "message": "Предупреждение"
-  },
-  "info": {
-    "message": "ℹ️ Информация"
-  },
-  "dismiss": {
-    "message": "Пропустить"
-  },
-  "learn_more": {
-    "message": "Узнать больше"
-  },
-  "enable_context_menu": {
-    "message": "Добавить в контекстное меню"
-  },
   "no_entires": {
     "message": "Нет аккаунтов для отображения. Добавьте свой первый аккаунт сейчас."
-  },
-  "permissions": {
-    "message": "Разрешения"
-  },
-  "permission_revoke": {
-    "message": "Отменить"
-  },
-  "permission_show_required_permissions": {
-    "message": "Показать неотменимые разрешения"
-  },
-  "permission_required": {
-    "message": "Это требуемое разрешение и не может быть отменено."
-  },
-  "permission_active_tab": {
-    "message": "Доступ к текущей вкладке для сканирования QR-кодов."
-  },
-  "permission_storage": {
-    "message": "Доступ к хранилищу браузера для хранения данных учетной записи."
-  },
-  "permission_alarms": {
-    "message": "Разрешить автоблокировку."
-  },
-  "permission_scripting": {
-    "message": "Вставляйте скрипты в текущую вкладку для сканирования QR-кодов и автоматического заполнения для работы."
-  },
-  "permission_clipboard_write": {
-    "message": "Даёт доступ только для записи в буфер обмена для копирования кодов в буфер обмена, когда вы нажмете на аккаунт."
-  },
-  "permission_context_menus": {
-    "message": "Добавляет аутентификатор в меню контекста."
-  },
-  "permission_sync_clock": {
-    "message": "Позволяет синхронизировать часы с Google."
-  },
-  "permission_unknown_permission": {
-    "message": "Неизвестное разрешение. Если вы видите это сообщение, отправьте сообщение об ошибке."
   },
   "phrase_wrong": {
     "message": "Неверный пароль"

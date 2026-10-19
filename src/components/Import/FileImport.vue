@@ -20,7 +20,6 @@
   </div>
 </template>
 <script lang="ts">
-import * as CryptoJS from "crypto-js";
 import Vue from "vue";
 import { decryptBackupData } from "../../import";
 import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
@@ -43,25 +42,13 @@ export default Vue.extend({
       }
       if (target.files[0]) {
         const reader = new FileReader();
-        let decryptedFileData: { [hash: string]: RawOTPStorage } = {};
         reader.onload = async () => {
-          let importData: {
-            // @ts-ignore
-            key?: { enc: string; hash: string };
-            [hash: string]: RawOTPStorage | Key;
-            // Bug #557, uploaded backups were missing `key`
-            // @ts-ignore
-            enc?: string;
-            // @ts-ignore
-            hash?: string;
-          } = {};
+          let importData: { [hash: string]: OTPStorage | Key } = {};
           let failedCount = 0;
           let succeededCount = 0;
           try {
             importData = JSON.parse(reader.result as string);
-            succeededCount = Object.keys(importData).filter(
-              (key) => ["key", "enc", "hash"].indexOf(key) === -1
-            ).length;
+            succeededCount = Object.keys(importData).length;
           } catch (e) {
             console.warn(e);
             const result = await getEntryDataFromOTPAuthPerLine(
@@ -72,53 +59,16 @@ export default Vue.extend({
             succeededCount = result.succeededCount;
           }
 
-          let key: { enc: string } | null = null;
-
-          if (importData.hasOwnProperty("key")) {
-            if (importData.key) {
-              key = importData.key;
-            }
-            delete importData.key;
-          } else if (importData.enc && importData.hash) {
-            key = { enc: importData.enc };
-            delete importData.hash;
-            delete importData.enc;
-          }
-
-          for (const hash in importData) {
-            const possibleEntry = importData[hash];
-            if (possibleEntry.dataType === "Key") {
-              // don't try to import keys as an OTPEntry
-              continue;
-            }
-
-            if (possibleEntry.keyId || possibleEntry.encrypted) {
-              try {
-                const oldPassphrase:
-                  | string
-                  | null = await this.getOldPassphrase();
-
-                if (key) {
-                  // v2 encryption
-                  decryptedFileData = await decryptBackupData(
-                    importData,
-                    CryptoJS.AES.decrypt(key.enc, oldPassphrase).toString()
-                  );
-                } else {
-                  // v3 and v1 encryption
-                  decryptedFileData = await decryptBackupData(
-                    importData,
-                    oldPassphrase
-                  );
-                }
-
-                break;
-              } catch {
-                break;
-              }
-            } else {
-              decryptedFileData[hash] = possibleEntry;
-            }
+          let decryptedFileData: { [hash: string]: RawOTPStorage } = {};
+          try {
+            const passphrase = Object.values(importData).some(
+              (entry) => entry.dataType === "EncOTPStorage"
+            )
+              ? await this.getOldPassphrase()
+              : null;
+            decryptedFileData = await decryptBackupData(importData, passphrase);
+          } catch (e) {
+            console.warn(e);
           }
           if (Object.keys(decryptedFileData).length) {
             await EntryStorage.import(

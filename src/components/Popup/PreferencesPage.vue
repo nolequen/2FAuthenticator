@@ -33,16 +33,9 @@
     <a-toggle-input
       :label="i18n.browser_sync"
       v-model="browserSync"
-      :disabled="storageArea"
       @change="migrateStorage()"
     />
     <a-toggle-input :label="i18n.smart_filter" v-model="smartFilter" />
-    <a-toggle-input
-      :label="i18n.enable_context_menu"
-      v-model="enableContextMenu"
-      @change="requireContextMenuPermission()"
-      v-if="isSupported"
-    />
     <div class="control-group" v-show="!!defaultEncryption">
       <label class="combo-label">{{ i18n.autolock }}</label>
       <input
@@ -51,7 +44,6 @@
         min="0"
         style="width: 70px; text-align: center"
         v-model="autolock"
-        :disabled="Boolean(enforceAutolock)"
       />
       <span class="combo-label" style="margin-left: 0; margin-right: 20px">{{
         i18n.minutes
@@ -62,7 +54,7 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
-import { isFirefox, isSafari } from "../../browser";
+import { isFirefox } from "../../browser";
 import { UserSettings } from "../../models/settings";
 
 export default Vue.extend({
@@ -95,14 +87,6 @@ export default Vue.extend({
         );
       },
     },
-    enableContextMenu: {
-      get(): boolean {
-        return this.$store.state.menu.enableContextMenu;
-      },
-      set(enableContextMenu: boolean) {
-        this.$store.commit("menu/setEnableContextMenu", enableContextMenu);
-      },
-    },
     theme: {
       get(): string {
         return this.$store.state.menu.theme;
@@ -114,24 +98,14 @@ export default Vue.extend({
     defaultEncryption(): string {
       return this.$store.state.accounts.defaultEncryption;
     },
-    enforceAutolock() {
-      return this.$store.state.menu.enforceAutolock;
-    },
     autolock: {
       get(): number {
-        if (this.$store.state.menu.enforceAutolock) {
-          return this.$store.state.menu.enforceAutolock;
-        } else {
-          return this.$store.state.menu.autolock;
-        }
+        return this.$store.state.menu.autolock;
       },
       set(autolock: number) {
         this.$store.commit("menu/setAutolock", autolock);
         chrome.runtime.sendMessage({ action: "resetAutolock" });
       },
-    },
-    storageArea() {
-      return this.$store.state.menu.storageArea;
     },
     browserSync: {
       get(): boolean {
@@ -139,11 +113,6 @@ export default Vue.extend({
       },
       set(value) {
         this.newStorageLocation = value ? "sync" : "local";
-      },
-    },
-    isSupported: {
-      get(): boolean {
-        return !isSafari;
       },
     },
   },
@@ -154,9 +123,7 @@ export default Vue.extend({
   },
   created() {
     UserSettings.updateItems().then(() => {
-      this.newStorageLocation =
-        this.$store.state.menu.storageArea ||
-        UserSettings.items.storageLocation;
+      this.newStorageLocation = UserSettings.items.storageLocation || "";
     });
   },
   methods: {
@@ -186,28 +153,6 @@ export default Vue.extend({
           this.$store.commit("notification/alert", this.i18n.updateFailure + r);
           this.$store.commit("currentView/changeView", "PreferencesPage");
         };
-    },
-    requireContextMenuPermission() {
-      if (isFirefox) {
-        chrome.runtime.sendMessage({
-          action: "updateContextMenu",
-        });
-        return;
-      }
-      chrome.permissions.request(
-        {
-          permissions: ["contextMenus"],
-        },
-        (granted) => {
-          if (!granted) {
-            this.enableContextMenu = false;
-            return;
-          }
-          chrome.runtime.sendMessage({
-            action: "updateContextMenu",
-          });
-        }
-      );
     },
   },
 });

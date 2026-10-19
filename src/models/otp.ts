@@ -5,10 +5,8 @@ import { EntryStorage } from "./storage";
 export enum OTPType {
   totp = 1,
   hotp,
-  battle,
-  steam,
-  hex,
-  hhex,
+  hex = 5,
+  hhex = 6,
 }
 
 export enum CodeState {
@@ -48,8 +46,17 @@ function parseEnumValue(
   return name === undefined ? undefined : Number(values[name]);
 }
 
-export function parseOTPType(value: unknown): OTPType | undefined {
-  return parseEnumValue(OTPType, value);
+export function parseOTPType(
+  value: unknown,
+  digits?: number
+): { type: OTPType; digits?: number } {
+  if (
+    (typeof value === "string" || typeof value === "number") &&
+    /^(battle|3)$/i.test(String(value))
+  ) {
+    return { type: OTPType.totp, digits: 8 };
+  }
+  return { type: parseEnumValue(OTPType, value) ?? OTPType.totp, digits };
 }
 
 export function parseOTPAlgorithm(value: unknown): OTPAlgorithm | undefined {
@@ -103,7 +110,6 @@ export class OTPEntry implements OTPEntryInterface {
   pinned: boolean;
   encryption?: EncryptionInterface;
   encData?: string;
-  encSecret?: string;
   keyId?: string;
   code = "&bull;&bull;&bull;&bull;&bull;&bull;";
 
@@ -151,14 +157,9 @@ export class OTPEntry implements OTPEntryInterface {
       this.algorithm = OTPAlgorithm.SHA1;
       this.pinned = false;
       return;
-    } else if (entry.encrypted) {
-      // v2 encryption backwards compat logic
-      this.secret = null;
-      this.encSecret = entry.secret;
-    } else {
-      this.secret = entry.secret;
     }
 
+    this.secret = entry.secret;
     this.type = entry.type;
     if (entry.issuer) {
       this.issuer = entry.issuer;
@@ -232,15 +233,6 @@ export class OTPEntry implements OTPEntryInterface {
       return;
     }
 
-    if (this.encSecret) {
-      // v2 encryption
-      this.secret = encryption.decryptSecretString(this.encSecret);
-      if (this.secret) {
-        this.encSecret = "";
-      }
-      return;
-    }
-
     // check if its a rawotpstorage
     const decryptedData = encryption.decryptEncSecret(this);
     if (decryptedData === null) {
@@ -259,16 +251,20 @@ export class OTPEntry implements OTPEntryInterface {
       );
     }
 
+    const { type, digits } = parseOTPType(
+      decryptedData.type,
+      decryptedData.digits
+    );
     this.account = decryptedData.account || "";
     this.algorithm =
       parseOTPAlgorithm(decryptedData.algorithm) ?? OTPAlgorithm.SHA1;
     this.counter = decryptedData.counter || 0;
-    this.digits = decryptedData.digits || 6;
+    this.digits = digits || 6;
     this.issuer = decryptedData.issuer || "";
     this.period = decryptedData.period || 30;
     this.pinned = decryptedData.pinned || false;
     this.secret = decryptedData.secret;
-    this.type = parseOTPType(decryptedData.type) ?? OTPType.totp;
+    this.type = type;
 
     if (this.type !== OTPType.hotp && this.type !== OTPType.hhex) {
       this.generate();

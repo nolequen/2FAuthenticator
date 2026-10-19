@@ -1,26 +1,11 @@
 export async function getSiteName() {
   const tab = await getCurrentTab();
-  const query =
-    typeof document === "undefined"
-      ? null
-      : new URLSearchParams(document.location.search.substring(1));
-
-  let title: string | null;
-  let url: string | null;
-  const titleFromQuery = query?.get("title");
-  const urlFromQuery = query?.get("url");
-
-  if (titleFromQuery && urlFromQuery) {
-    title = decodeURIComponent(titleFromQuery);
-    url = decodeURIComponent(urlFromQuery);
-  } else {
-    if (!tab) {
-      return [null, null];
-    }
-
-    title = tab.title?.replace(/[^a-z0-9]/gi, "").toLowerCase() ?? null;
-    url = tab.url ?? null;
+  if (!tab) {
+    return [null, null];
   }
+
+  const title = tab.title?.replace(/[^a-z0-9]/gi, "").toLowerCase() ?? null;
+  const url = tab.url ?? null;
 
   if (!url) {
     return [title, null];

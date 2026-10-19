@@ -15,21 +15,10 @@ import { CurrentView } from "./store/CurrentView";
 import { Menu } from "./store/Menu";
 import { Notification } from "./store/Notification";
 import { Qr } from "./store/Qr";
-import { Advisor } from "./store/Advisor";
 import { syncTimeWithGoogle } from "./syncTime";
-import { StorageLocation, UserSettings } from "./models/settings";
-
-async function migrateLocalStorageToBrowserStorage() {
-  if (localStorage.length > 0) {
-    const location =
-      (localStorage.storageLocation as StorageLocation) || StorageLocation.Sync;
-    await UserSettings.convertFromLocalStorage(localStorage, location);
-    localStorage.clear();
-  }
-}
+import { UserSettings } from "./models/settings";
 
 async function init() {
-  await migrateLocalStorageToBrowserStorage();
   await UserSettings.updateItems();
 
   // Add globals
@@ -48,7 +37,6 @@ async function init() {
   const store = new Vuex.Store({
     modules: {
       accounts: await new Accounts().getModule(),
-      advisor: await new Advisor().getModule(),
       currentView: new CurrentView().getModule(),
       menu: await new Menu().getModule(),
       notification: new Notification().getModule(),
@@ -93,14 +81,6 @@ async function init() {
     document.title = instance.i18n.extName;
   } catch (e) {
     console.error(e);
-  }
-
-  // Warn if legacy password is set
-  if (UserSettings.items.encodedPhrase) {
-    instance.$store.commit(
-      "notification/alert",
-      instance.i18n.local_passphrase_warning
-    );
   }
 
   // Backup reminder / run backup

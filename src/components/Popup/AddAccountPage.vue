@@ -39,8 +39,6 @@
       <a-select-input :label="i18n.type" v-model.number="newAccount.type">
         <option :value="OTPType.totp">{{ i18n.based_on_time }}</option>
         <option :value="OTPType.hotp">{{ i18n.based_on_counter }}</option>
-        <option :value="OTPType.battle">Battle.net</option>
-        <option :value="OTPType.steam">Steam</option>
       </a-select-input>
     </details>
     <a-button type="small" @click="addNewAccount()">{{ i18n.ok }}</a-button>

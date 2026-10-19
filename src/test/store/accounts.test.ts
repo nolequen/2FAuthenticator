@@ -1,7 +1,6 @@
 import "mocha";
 import * as chai from "chai";
 import * as sinon from "sinon";
-import * as CryptoJS from "crypto-js";
 import { createLocalVue } from "@vue/test-utils";
 import Vuex, { Store } from "vuex";
 
@@ -253,36 +252,33 @@ describe("Accounts", () => {
       accounts[newHash].should.equal("old");
     });
 
-    it("should give a new ID only to an account with an old ID when migrating old encryption", async () => {
-      const uuid = crypto.randomUUID();
-      const legacyEntry = (hash: string, account: string, index: number) => ({
-        ...rawEntry(hash, account, index),
-        encrypted: true,
-        secret: CryptoJS.AES.encrypt(SECRET, "old password").toString(),
-      });
+    it("should unlock the accounts only with the right password", async () => {
+      const hash = crypto.randomUUID();
       await chrome.storage.local.set({
-        [OLD_HASH]: legacyEntry(OLD_HASH, "old", 0),
-        [uuid]: legacyEntry(uuid, "new", 1),
+        [hash]: { ...rawEntry(hash, "alice", 0), dataType: "OTPStorage" },
       });
+      await (await createStore()).dispatch(
+        "accounts/changePassphrase",
+        "right password"
+      );
 
       const store = await createStore();
-      await store.dispatch("accounts/applyPassphrase", "old password");
-
       const state = accountsState(store);
-      const encryption = state.encryption.get(state.defaultEncryption);
-      chai.expect(encryption).to.not.equal(undefined);
-      const stored = await chrome.storage.local.get();
-      chai.expect(stored[OLD_HASH]).to.equal(undefined);
-      const accounts = decryptStoredAccounts(
-        stored,
-        encryption as EncryptionInterface
-      );
-      const hashes = Object.keys(accounts);
-      hashes.should.have.lengthOf(2);
-      accounts[uuid].should.equal("new");
-      const newHash = hashes.filter((hash) => hash !== uuid)[0];
-      newHash.should.match(UUID_V4);
-      accounts[newHash].should.equal("old");
+      state.shouldShowPassphrase.should.equal(true);
+
+      await store.dispatch("accounts/applyPassphrase", "wrong password");
+      state.wrongPassword.should.equal(true);
+      chai.expect(state.defaultEncryption).to.equal(undefined);
+      state.entries.should.have.lengthOf(1);
+      chai.expect(state.entries[0].secret).to.equal(null);
+
+      await store.dispatch("accounts/applyPassphrase", "right password");
+      chai
+        .expect(state.encryption.get(state.defaultEncryption))
+        .to.not.equal(undefined);
+      state.entries.should.have.lengthOf(1);
+      state.entries[0].account.should.equal("alice");
+      chai.expect(state.entries[0].secret).to.equal(SECRET);
     });
   });
 });

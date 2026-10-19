@@ -30,9 +30,6 @@
         "page": "view/options.html",
         "open_in_tab": false
     },
-    "storage": {
-        "managed_schema": "schema.json"
-    },
     "background": {
         "service_worker": "dist/background.js"
     },
@@ -48,8 +45,7 @@
         "scripting"
     ],
     "optional_permissions": [
-        "clipboardWrite",
-        "contextMenus"
+        "clipboardWrite"
     ],
     "optional_host_permissions": [
         "https://www.google.com/"

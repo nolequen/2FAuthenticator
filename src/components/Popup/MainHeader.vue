@@ -110,14 +110,6 @@ export default Vue.extend({
       this.$store.commit("style/showMenu");
     },
     showInfo(page: string) {
-      if (page === "AddMethodPage") {
-        if (
-          this.$store.state.menu.enforcePassword &&
-          !this.$store.state.accounts.defaultEncryption
-        ) {
-          page = "SetPasswordPage";
-        }
-      }
       this.$store.commit("style/showInfo");
       this.$store.commit("currentView/changeView", page);
     },
@@ -130,15 +122,6 @@ export default Vue.extend({
       return;
     },
     async beginCapture() {
-      if (
-        this.$store.state.menu.enforcePassword &&
-        !this.$store.state.accounts.defaultEncryption
-      ) {
-        this.$store.commit("style/showInfo");
-        this.$store.commit("currentView/changeView", "SetPasswordPage");
-        return;
-      }
-
       if (this.$store.getters["accounts/currentlyEncrypted"]) {
         this.$store.commit("notification/alert", this.i18n.phrase_incorrect);
         return;
