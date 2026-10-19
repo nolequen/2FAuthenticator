@@ -2,6 +2,15 @@ const path = require("path");
 const { VueLoaderPlugin } = require("vue-loader");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
+const failOnTypeCheckerError = {
+  apply(compiler) {
+    ForkTsCheckerWebpackPlugin.getCompilerHooks(compiler).error.tap(
+      "FailOnTypeCheckerError",
+      (error, compilation) => compilation.errors.push(error)
+    );
+  }
+};
+
 module.exports = {
   mode: "development",
   devtool: "source-map",
@@ -58,7 +67,8 @@ module.exports = {
           vue: true
         }
       }
-    })
+    }),
+    failOnTypeCheckerError
   ],
   resolve: {
     extensions: [

@@ -33,7 +33,7 @@ export class Encryption implements EncryptionInterface {
       }
 
       return JSON.parse(decryptedData);
-    } catch (error) {
+    } catch {
       return null;
     }
   }

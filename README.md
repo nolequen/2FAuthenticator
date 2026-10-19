@@ -61,7 +61,7 @@ npm run edge
 
 Each command builds the extension into the `chrome/`, `firefox/` or `edge/` folder. `npm run prod` builds all three into `release/`. The package submitted to addons.mozilla.org is the `release/firefox` folder built by `npm ci` and `npm run prod`.
 
-`npm test` rebuilds the test build and runs the tests in a Chrome window opened by Puppeteer.
+`npm test` rebuilds the test build and runs the tests in headless Chrome started by Puppeteer.
 
 `npm run lint` checks the code style, `npm run format` fixes it.
 

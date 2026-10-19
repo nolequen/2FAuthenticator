@@ -60,7 +60,7 @@ function lint() {
   if (result.status !== 0) {
     fail("Run `npm run format` to fix code style.", result.status ?? 1);
   }
-  runOrExit("eslint", [".", "--ext", ".js,.ts"]);
+  runOrExit("eslint", ["."]);
 }
 
 function copyCssExtras(dir) {
@@ -80,10 +80,8 @@ function compile(platform) {
       "--target",
       "ES2015",
       "--esModuleInterop",
-      "--moduleResolution",
-      "nodenext",
       "--module",
-      "commonjs",
+      "nodenext",
       "scripts/test-runner.ts",
     ]);
   } else {

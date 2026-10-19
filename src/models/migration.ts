@@ -4,7 +4,7 @@ function byteArray2Base32(bytes: number[]) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   const len = bytes.length;
   let result = "";
-  let high = 0,
+  let high: number,
     low = 0,
     sh = 0,
     hasDataInLow = false;

@@ -2,8 +2,6 @@
 
 import puppeteer from "puppeteer";
 import path from "path";
-import fs from "fs";
-import crypto from "crypto";
 import { execSync } from "child_process";
 import merge from "lodash/merge";
 
@@ -36,38 +34,24 @@ const colors = {
   red: "\x1b[31m",
 }
 
-function extensionId(manifestPath: string) {
-  const { key } = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-  return crypto
-    .createHash("sha256")
-    .update(Buffer.from(key, "base64"))
-    .digest("hex")
-    .slice(0, 32)
-    .replace(/[0-9a-f]/g, (c) => String.fromCharCode(97 + parseInt(c, 16)));
-}
-
 async function runTests() {
   const extensionDir = path.resolve(__dirname, "../test/chrome");
   const puppeteerArgs: string[] = [
-    `--load-extension=${extensionDir}`,
     // for CI
     "--no-sandbox",
     "--lang=en-US,en"
   ];
 
   const browser = await puppeteer.launch({
-    ignoreDefaultArgs: ["--disable-extensions"],
+    enableExtensions: true,
+    pipe: true,
     args: puppeteerArgs,
-    // chrome extensions don't work in headless
-    headless: false,
+    headless: true,
     executablePath: process.env.PUPPETEER_EXEC_PATH,
   });
+  const extensionId = await browser.installExtension(extensionDir);
   const mochaPage = await browser.newPage();
-  await mochaPage.goto(
-    `chrome-extension://${extensionId(
-      path.join(extensionDir, "manifest.json")
-    )}/view/test.html`
-  );
+  await mochaPage.goto(`chrome-extension://${extensionId}/view/test.html`);
 
   // by setting this env var, console logging works for both components and testing
   if (process.env.ENABLE_CONSOLE) {

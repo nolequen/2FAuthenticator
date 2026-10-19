@@ -84,7 +84,9 @@ async function getTotp(text: string, id: number, silent = false) {
     if (text.indexOf("otpauth-migration://") === 0) {
       const otpUrls = getOTPAuthPerLineFromOPTAuthMigration(text);
       if (otpUrls.length === 0) {
-        !silent && chrome.tabs.sendMessage(id, { action: "errorenc" });
+        if (!silent) {
+          chrome.tabs.sendMessage(id, { action: "errorenc" });
+        }
         return false;
       }
 
@@ -98,36 +100,48 @@ async function getTotp(text: string, id: number, silent = false) {
         (res) => res.status === "rejected" || !res.value,
       ).length;
       if (failedCount === otpUrls.length) {
-        !silent && chrome.tabs.sendMessage(id, { action: "migrationfail" });
+        if (!silent) {
+          chrome.tabs.sendMessage(id, { action: "migrationfail" });
+        }
         return false;
       }
 
       if (failedCount > 0) {
-        !silent &&
+        if (!silent) {
           chrome.tabs.sendMessage(id, { action: "migrationpartlyfail" });
+        }
         return true;
       }
 
-      !silent && chrome.tabs.sendMessage(id, { action: "migrationsuccess" });
+      if (!silent) {
+        chrome.tabs.sendMessage(id, { action: "migrationsuccess" });
+      }
       return true;
     } else if (text === "error decoding QR Code") {
-      !silent && chrome.tabs.sendMessage(id, { action: "errorqr" });
+      if (!silent) {
+        chrome.tabs.sendMessage(id, { action: "errorqr" });
+      }
       return false;
     } else {
-      !silent && chrome.tabs.sendMessage(id, { action: "text", text });
+      if (!silent) {
+        chrome.tabs.sendMessage(id, { action: "text", text });
+      }
       return true;
     }
   } else {
     const result = parseOTPAuthURI(text);
     if ("error" in result) {
       if (result.error === "secret") {
-        !silent &&
+        if (!silent) {
           chrome.tabs.sendMessage(id, {
             action: "secretqr",
             secret: result.secret,
           });
+        }
       } else {
-        !silent && chrome.tabs.sendMessage(id, { action: "errorqr" });
+        if (!silent) {
+          chrome.tabs.sendMessage(id, { action: "errorqr" });
+        }
       }
       return false;
     }
@@ -140,17 +154,20 @@ async function getTotp(text: string, id: number, silent = false) {
       (await EntryStorage.hasEncryptionKey()) !==
       encryption.getEncryptionStatus()
     ) {
-      !silent && chrome.tabs.sendMessage(id, { action: "errorenc" });
+      if (!silent) {
+        chrome.tabs.sendMessage(id, { action: "errorenc" });
+      }
       return false;
     }
     await EntryStorage.import(encryption, {
       [result.entry.hash]: result.entry,
     });
-    !silent &&
+    if (!silent) {
       chrome.tabs.sendMessage(id, {
         action: "added",
         account: result.entry.account,
       });
+    }
     return true;
   }
 }

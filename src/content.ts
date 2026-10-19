@@ -57,9 +57,8 @@ sessionStorage.setItem("captureBoxPositionTop", "0");
 
 function showGrayLayout() {
   let grayLayout = document.getElementById("__ga_grayLayout__");
-  let qrCanvas = document.getElementById("__ga_qrCanvas__");
   if (!grayLayout) {
-    qrCanvas = document.createElement("canvas");
+    const qrCanvas = document.createElement("canvas");
     qrCanvas.id = "__ga_qrCanvas__";
     qrCanvas.style.display = "none";
     document.body.appendChild(qrCanvas);
