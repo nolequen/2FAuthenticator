@@ -143,16 +143,21 @@ export default Vue.extend({
     },
     migrateStorage() {
       this.$store.commit("currentView/changeView", "LoadingPage");
-      (this.$store
+      this.$store
         .dispatch("accounts/migrateStorage", this.newStorageLocation)
-        .then((m) => {
-          this.$store.commit("notification/alert", this.i18n[m]);
-          this.$store.commit("currentView/changeView", "PreferencesPage");
-        }),
-        (r: string) => {
-          this.$store.commit("notification/alert", this.i18n.updateFailure + r);
-          this.$store.commit("currentView/changeView", "PreferencesPage");
-        });
+        .then(
+          (m) => {
+            this.$store.commit("notification/alert", this.i18n[m]);
+            this.$store.commit("currentView/changeView", "PreferencesPage");
+          },
+          (r: string) => {
+            this.$store.commit(
+              "notification/alert",
+              this.i18n.updateFailure + r,
+            );
+            this.$store.commit("currentView/changeView", "PreferencesPage");
+          },
+        );
     },
   },
 });

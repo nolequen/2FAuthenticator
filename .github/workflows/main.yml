@@ -66,4 +66,4 @@ jobs:
         run: npm ci
 
       - name: Test code
-        run: xvfb-run --auto-servernum npm test
+        run: npm test
