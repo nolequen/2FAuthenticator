@@ -472,27 +472,68 @@ export class EntryStorage {
     await BrowserStorage.set(_data);
   }
 
+  private static async ensureKeysStored(entries: OTPEntryInterface[]) {
+    const keyIds = new Set<string>();
+    for (const entry of entries) {
+      const keyId = entry.encryption?.getEncryptionKeyId();
+      if (entry.secret && entry.encryption?.getEncryptionStatus() && keyId) {
+        keyIds.add(keyId);
+      }
+    }
+    if (!keyIds.size) {
+      return;
+    }
+
+    const stored = (await BrowserStorage.getKeys()).map((key) => key.id);
+    for (const keyId of keyIds) {
+      if (!stored.includes(keyId)) {
+        throw new Error(`Key ${keyId} not in BrowserStorage`);
+      }
+    }
+  }
+
+  private static ensureStaysEncrypted(
+    stored: OTPStorage | undefined,
+    item: OTPStorage,
+  ) {
+    if (
+      stored?.dataType === "EncOTPStorage" &&
+      item.dataType !== "EncOTPStorage"
+    ) {
+      throw new Error("Encrypted entry would be stored unencrypted.");
+    }
+  }
+
   static async add(entry: OTPEntry) {
+    await this.ensureKeysStored([entry]);
     await BrowserStorage.set({
       [entry.hash]: await this.getOTPStorageFromEntry(entry),
     });
   }
 
   static async update(entry: OTPEntry) {
+    await this.ensureKeysStored([entry]);
     let _data = await BrowserStorage.get();
     if (!Object.prototype.hasOwnProperty.call(_data, entry.hash)) {
       throw new Error("Entry to change does not exist.");
     }
     const storageItem = await this.getOTPStorageFromEntry(entry);
+    if (entry.secret) {
+      this.ensureStaysEncrypted(_data[entry.hash], storageItem);
+    }
     _data[entry.hash] = storageItem;
     _data = this.ensureUniqueIndex(_data);
     await BrowserStorage.set(_data);
   }
 
-  static async set(entries: OTPEntryInterface[]) {
+  static async set(entries: OTPEntryInterface[], decrypt = false) {
+    await this.ensureKeysStored(entries);
     let _data = await BrowserStorage.get();
     for (const entry of entries) {
       const storageItem = await this.getOTPStorageFromEntry(entry);
+      if (entry.secret && !decrypt) {
+        this.ensureStaysEncrypted(_data[entry.hash], storageItem);
+      }
       _data[entry.hash] = storageItem;
     }
     _data = this.ensureUniqueIndex(_data);

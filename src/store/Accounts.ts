@@ -1,4 +1,8 @@
-import { EntryStorage, BrowserStorage } from "../models/storage";
+import {
+  EntryStorage,
+  BrowserStorage,
+  withStorageLock,
+} from "../models/storage";
 import { Encryption } from "../models/encryption";
 import { OTPType, OTPAlgorithm } from "../models/otp";
 import { ActionContext } from "vuex";
@@ -7,6 +11,7 @@ import { isChromium } from "../browser";
 import { StorageLocation, UserSettings } from "../models/settings";
 import {
   adoptEntries,
+  loadEntries,
   removePassword,
   setPassword,
   unlock,
@@ -289,14 +294,19 @@ export class Accounts implements Module {
             await state.dispatch("updateEntries");
             throw error;
           };
+          const currentKeyId = state.state.encryption
+            .get(state.state.defaultEncryption)
+            ?.getEncryptionKeyId();
 
           if (password) {
             const { encryption, passphrase } = await setPassword(
               password,
-              state.state.entries,
+              state.state.encryption,
+              currentKeyId,
             ).catch(restoreEntries);
             const keyId = encryption.getEncryptionKeyId();
 
+            state.state.encryption.clear();
             state.state.encryption.set(keyId, encryption);
             state.state.defaultEncryption = keyId;
 
@@ -313,12 +323,10 @@ export class Accounts implements Module {
               await BrowserStorage.clearLogs();
             }
           } else {
-            await removePassword(
-              state.state.entries,
-              state.state.encryption
-                .get(state.state.defaultEncryption)
-                ?.getEncryptionKeyId(),
-            ).catch(restoreEntries);
+            await removePassword(state.state.encryption, currentKeyId).catch(
+              restoreEntries,
+            );
+            state.state.encryption.clear();
             state.state.defaultEncryption = "";
 
             chrome.runtime.sendMessage({
@@ -329,16 +337,7 @@ export class Accounts implements Module {
           }
         },
         updateEntries: async (state: ActionContext<AccountsState, object>) => {
-          const entries = await this.getEntries();
-
-          for (const entry of entries) {
-            if (entry.keyId) {
-              const entryEncryption = state.state.encryption.get(entry.keyId);
-              if (entryEncryption) {
-                await entry.applyEncryption(entryEncryption);
-              }
-            }
-          }
+          const entries = await loadEntries(state.state.encryption);
 
           await upgradeLegacyEntries(entries);
 
@@ -356,6 +355,18 @@ export class Accounts implements Module {
           await state.dispatch("showSearchIfNeeded");
           return;
         },
+        showWriteFailure: async (
+          state: ActionContext<AccountsState, object>,
+          error: unknown,
+        ) => {
+          console.error(error);
+          state.commit(
+            "notification/alert",
+            chrome.i18n.getMessage("updateFailure"),
+            { root: true },
+          );
+          await state.dispatch("updateEntries");
+        },
         showSearchIfNeeded: (state: ActionContext<AccountsState, object>) => {
           if (
             state.state.entries.length >= 10 &&
@@ -370,64 +381,67 @@ export class Accounts implements Module {
             state.commit("showSearch");
           }
         },
-        migrateStorage: async (
+        migrateStorage: (
           state: ActionContext<AccountsState, object>,
           newStorageLocation: string,
-        ) => {
-          // sync => local
-          if (
-            UserSettings.items.storageLocation === StorageLocation.Sync &&
-            newStorageLocation === StorageLocation.Local
-          ) {
-            const syncData = await chrome.storage.sync.get();
-            await chrome.storage.local.set(syncData); // userSettings will be handled later
-            const localData = await chrome.storage.local.get();
+        ) =>
+          withStorageLock(async () => {
+            await UserSettings.updateItems();
 
-            // Double check if data was set
+            // sync => local
             if (
-              Object.keys(syncData).every(
-                (value) => Object.keys(localData).indexOf(value) >= 0,
-              )
+              UserSettings.items.storageLocation === StorageLocation.Sync &&
+              newStorageLocation === StorageLocation.Local
             ) {
-              UserSettings.items.storageLocation = StorageLocation.Local;
-              await chrome.storage.sync.clear();
-              await chrome.storage.local.set({
-                UserSettings: UserSettings.items,
-              });
-              return "updateSuccess";
-            } else {
-              throw " All data not transferred successfully.";
-            }
-            // local => sync
-          } else if (
-            UserSettings.items.storageLocation === StorageLocation.Local &&
-            newStorageLocation === StorageLocation.Sync
-          ) {
-            const localData = await chrome.storage.local.get();
-            if (localData?.UserSettings) {
-              delete localData.UserSettings;
-              await chrome.storage.sync.set(localData);
-            }
-            const syncData = await chrome.storage.sync.get();
+              const syncData = await chrome.storage.sync.get();
+              await chrome.storage.local.set(syncData); // userSettings will be handled later
+              const localData = await chrome.storage.local.get();
 
-            // Double check if data was set
-            if (
-              Object.keys(localData).every(
-                (value) => Object.keys(syncData).indexOf(value) >= 0,
-              )
+              // Double check if data was set
+              if (
+                Object.keys(syncData).every(
+                  (value) => Object.keys(localData).indexOf(value) >= 0,
+                )
+              ) {
+                UserSettings.items.storageLocation = StorageLocation.Local;
+                await chrome.storage.sync.clear();
+                await chrome.storage.local.set({
+                  UserSettings: UserSettings.items,
+                });
+                return "updateSuccess";
+              } else {
+                throw " All data not transferred successfully.";
+              }
+              // local => sync
+            } else if (
+              UserSettings.items.storageLocation === StorageLocation.Local &&
+              newStorageLocation === StorageLocation.Sync
             ) {
-              UserSettings.items.storageLocation = StorageLocation.Sync;
-              await chrome.storage.local.clear();
-              await UserSettings.commitItems();
-              return "updateSuccess";
-            } else {
-              throw " All data not transferred successfully.";
-            }
-          }
+              const localData = await chrome.storage.local.get();
+              if (localData?.UserSettings) {
+                delete localData.UserSettings;
+                await chrome.storage.sync.set(localData);
+              }
+              const syncData = await chrome.storage.sync.get();
 
-          // No change
-          return "updateSuccess";
-        },
+              // Double check if data was set
+              if (
+                Object.keys(localData).every(
+                  (value) => Object.keys(syncData).indexOf(value) >= 0,
+                )
+              ) {
+                UserSettings.items.storageLocation = StorageLocation.Sync;
+                await chrome.storage.local.clear();
+                await UserSettings.commitItems();
+                return "updateSuccess";
+              } else {
+                throw " All data not transferred successfully.";
+              }
+            }
+
+            // No change
+            return "updateSuccess";
+          }),
       },
       namespaced: true,
     };

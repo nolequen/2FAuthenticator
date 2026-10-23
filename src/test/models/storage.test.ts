@@ -239,6 +239,60 @@ describe("EntryStorage", () => {
     });
   });
 
+  describe("writing", () => {
+    async function expectRejected(write: () => Promise<void>) {
+      const before = await chrome.storage.local.get();
+
+      let error: unknown;
+      try {
+        await write();
+      } catch (e) {
+        error = e;
+      }
+
+      chai.expect(error).to.be.instanceOf(Error);
+      (await chrome.storage.local.get()).should.deep.equal(before);
+    }
+
+    async function entryUnderMissingKey() {
+      const raw = rawEntry();
+      await chrome.storage.local.set({ [raw.hash]: raw });
+      const entry = await getOnlyEntry();
+      entry.changeEncryption(new Encryption(randomPassphrase(), "missing-key"));
+      return entry;
+    }
+
+    it("should not set an account encrypted with a key that is not stored", async () => {
+      const entry = await entryUnderMissingKey();
+      await expectRejected(() => EntryStorage.set([entry]));
+    });
+
+    it("should not add an account encrypted with a key that is not stored", async () => {
+      const entry = await entryUnderMissingKey();
+      await expectRejected(() => EntryStorage.add(entry));
+    });
+
+    it("should not update an account encrypted with a key that is not stored", async () => {
+      const entry = await entryUnderMissingKey();
+      await expectRejected(() => EntryStorage.update(entry));
+    });
+
+    it("should not store an encrypted account in the open", async () => {
+      const raw = rawEntry();
+      await chrome.storage.local.set({ [raw.hash]: raw });
+      const entry = await getOnlyEntry();
+      await storeKey("test-key");
+      await EntryStorage.import(
+        new Encryption(randomPassphrase(), "test-key"),
+        {
+          [raw.hash]: raw,
+        },
+      );
+
+      await expectRejected(() => EntryStorage.set([entry]));
+    });
+  });
+
   describe("get", () => {
     it("should read a stored hex entry with its period", async () => {
       const raw = rawEntry({ type: "hex", secret: HEX_SECRET, period: 60 });

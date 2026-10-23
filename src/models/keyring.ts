@@ -56,7 +56,7 @@ export async function adoptEntries(
   }
 
   if (needUpdateStorage) {
-    await EntryStorage.set(entries);
+    await withStorageLock(() => EntryStorage.set(entries));
   }
   return needUpdateStorage;
 }
@@ -94,30 +94,32 @@ export async function upgradeLegacyEntries(entries: OTPEntryInterface[]) {
       upgraded[entry.hash] = item;
     }
 
-    const stored = await BrowserStorage.get();
-    const changes: { [hash: string]: EncOTPStorage } = {};
-    const changed: OTPEntryInterface[] = [];
-    for (const entry of candidates) {
-      const storedItem = stored[entry.hash];
-      if (
-        storedItem?.dataType === "EncOTPStorage" &&
-        storedItem.keyId === entry.keyId &&
-        storedItem.data === entry.legacyData
-      ) {
-        changes[entry.hash] = {
-          ...upgraded[entry.hash],
-          index: storedItem.index,
-        };
-        changed.push(entry);
+    const written = await withStorageLock(async () => {
+      const stored = await BrowserStorage.get();
+      const changes: { [hash: string]: EncOTPStorage } = {};
+      const changed: OTPEntryInterface[] = [];
+      for (const entry of candidates) {
+        const storedItem = stored[entry.hash];
+        if (
+          storedItem?.dataType === "EncOTPStorage" &&
+          storedItem.keyId === entry.keyId &&
+          storedItem.data === entry.legacyData
+        ) {
+          changes[entry.hash] = {
+            ...upgraded[entry.hash],
+            index: storedItem.index,
+          };
+          changed.push(entry);
+        }
       }
-    }
 
-    if (!changed.length) {
-      return;
-    }
+      if (changed.length) {
+        await BrowserStorage.set(changes);
+      }
+      return changed;
+    });
 
-    await BrowserStorage.set(changes);
-    for (const entry of changed) {
+    for (const entry of written) {
       entry.legacyData = undefined;
     }
   } catch (error) {
@@ -141,12 +143,45 @@ async function linkedKeyIds(ignoredHashes: string[] = []) {
   return linkedKeys;
 }
 
+export async function loadEntries(
+  encryptions: Map<string, EncryptionInterface>,
+) {
+  const entries = await EntryStorage.get();
+  for (const entry of entries) {
+    if (entry.keyId) {
+      const encryption = encryptions.get(entry.keyId);
+      if (encryption) {
+        await entry.applyEncryption(encryption);
+      }
+    }
+  }
+  return entries;
+}
+
+async function ensureCurrentKey(keyId: string | undefined) {
+  if (
+    keyId &&
+    !(await BrowserStorage.getKeys()).some((key) => key.id === keyId)
+  ) {
+    throw new Error("The password was changed in another window.");
+  }
+}
+
 export async function setPassword(
   password: string,
-  entries: OTPEntryInterface[],
+  encryptions: Map<string, EncryptionInterface>,
+  keyId: string | undefined,
 ) {
   const { key, encryption, passphrase } = await createKey(password);
-  await withStorageLock(() => replaceKey(key, encryption, passphrase, entries));
+  await withStorageLock(async () => {
+    await ensureCurrentKey(keyId);
+    await replaceKey(
+      key,
+      encryption,
+      passphrase,
+      await loadEntries(encryptions),
+    );
+  });
   return { encryption, passphrase };
 }
 
@@ -208,14 +243,16 @@ async function replaceKey(
 }
 
 export function removePassword(
-  entries: OTPEntryInterface[],
+  encryptions: Map<string, EncryptionInterface>,
   keyId: string | undefined,
 ) {
   return withStorageLock(async () => {
+    await ensureCurrentKey(keyId);
+    const entries = await loadEntries(encryptions);
     for (const entry of entries) {
       entry.changeEncryption(new Encryption("", ""));
     }
-    await EntryStorage.set(entries);
+    await EntryStorage.set(entries, true);
     await cacheSession(null, null);
 
     if (keyId && !(await linkedKeyIds()).has(keyId)) {

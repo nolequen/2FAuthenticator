@@ -136,7 +136,12 @@ export default Vue.extend({
         encryption,
       );
 
-      await entry.create();
+      try {
+        await entry.create();
+      } catch (error) {
+        await this.$store.dispatch("accounts/showWriteFailure", error);
+        return;
+      }
       await this.$store.dispatch("accounts/addCode", entry);
       this.$store.commit("style/hideInfo");
       this.$store.commit("style/toggleEdit");

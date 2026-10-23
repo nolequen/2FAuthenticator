@@ -7,8 +7,13 @@ import Vuex, { Store } from "vuex";
 import { Accounts } from "../../store/Accounts";
 import { Encryption } from "../../models/encryption";
 import { EntryStorage } from "../../models/storage";
-import { UserSettings } from "../../models/settings";
-import { randomPassphrase, resetStorage } from "../storage-helper";
+import { StorageLocation, UserSettings } from "../../models/settings";
+import {
+  holdStorageLock,
+  randomPassphrase,
+  resetStorage,
+  waitForStorageLockRequests,
+} from "../storage-helper";
 
 chai.should();
 mocha.setup("bdd");
@@ -264,6 +269,60 @@ describe("Accounts", () => {
       state.entries.should.have.lengthOf(1);
       state.entries[0].account.should.equal("alice");
       chai.expect(state.entries[0].secret).to.equal(SECRET);
+    });
+  });
+
+  describe("migrateStorage", () => {
+    it("should move the accounts to sync only after the storage lock is released", async () => {
+      const hash = crypto.randomUUID();
+      await chrome.storage.local.set({
+        [hash]: { ...rawEntry(hash, "alice", 0), dataType: "OTPStorage" },
+      });
+      const store = await createStore();
+      const release = await holdStorageLock();
+      const migrating = store
+        .dispatch("accounts/migrateStorage", StorageLocation.Sync)
+        .then(
+          (result: string) => result,
+          (error: unknown) => error,
+        );
+      try {
+        await waitForStorageLockRequests();
+        (await chrome.storage.sync.get()).should.deep.equal({});
+        chai
+          .expect((await chrome.storage.local.get())[hash])
+          .to.not.equal(undefined);
+        chai
+          .expect(UserSettings.items.storageLocation)
+          .to.equal(StorageLocation.Local);
+      } finally {
+        await release();
+      }
+
+      chai.expect(await migrating).to.equal("updateSuccess");
+      chai
+        .expect((await chrome.storage.sync.get())[hash])
+        .to.not.equal(undefined);
+      chai.expect((await chrome.storage.local.get())[hash]).to.equal(undefined);
+    });
+
+    it("should migrate by the settings in the storage, not by an older copy in memory", async () => {
+      const hash = crypto.randomUUID();
+      await chrome.storage.local.set({
+        [hash]: { ...rawEntry(hash, "alice", 0), dataType: "OTPStorage" },
+      });
+      const store = await createStore();
+      UserSettings.items.storageLocation = StorageLocation.Sync;
+
+      chai
+        .expect(
+          await store.dispatch("accounts/migrateStorage", StorageLocation.Sync),
+        )
+        .to.equal("updateSuccess");
+
+      chai
+        .expect((await chrome.storage.sync.get())[hash])
+        .to.not.equal(undefined);
     });
   });
 });

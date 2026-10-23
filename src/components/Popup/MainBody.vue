@@ -52,7 +52,7 @@
 import Vue from "vue";
 import { mapState, mapGetters } from "vuex";
 import { OTPEntry } from "../../models/otp";
-import { EntryStorage } from "../../models/storage";
+import { EntryStorage, withStorageLock } from "../../models/storage";
 
 import EntryComponent from "./EntryComponent.vue";
 
@@ -185,7 +185,13 @@ export default Vue.extend({
           from: dragIndex,
           to: dropIndex,
         });
-        await EntryStorage.set(this.$store.state.accounts.entries);
+        try {
+          await withStorageLock(() =>
+            EntryStorage.set(this.$store.state.accounts.entries),
+          );
+        } catch (error) {
+          await this.$store.dispatch("accounts/showWriteFailure", error);
+        }
       },
     );
   },

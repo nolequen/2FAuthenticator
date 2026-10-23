@@ -11,7 +11,7 @@ import AddAccountPage from "../../../components/Popup/AddAccountPage.vue";
 import { loadI18nMessages } from "../../../store/i18n";
 import { Encryption } from "../../../models/encryption";
 import { OTPAlgorithm, OTPType } from "../../../models/otp";
-import { randomPassphrase, resetStorage } from "../../storage-helper";
+import { randomPassphrase, resetStorage, storeKey } from "../../storage-helper";
 
 chai.should();
 chai.use(sinonChai);
@@ -34,6 +34,7 @@ describe("AddAccountPage", () => {
   afterEach(() => resetStorage());
 
   it("should save a new account encrypted when a password is set", async () => {
+    await storeKey("test-key-id");
     const store = new Vuex.Store({
       modules: {
         accounts: {

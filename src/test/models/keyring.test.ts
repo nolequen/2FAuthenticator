@@ -10,6 +10,7 @@ import { Accounts } from "../../store/Accounts";
 import { Encryption } from "../../models/encryption";
 import { createKey } from "../../models/password";
 import {
+  loadEntries,
   setPassword,
   unlock,
   upgradeLegacyEntries,
@@ -157,6 +158,24 @@ describe("keyring", function () {
   });
 
   describe("unlock", () => {
+    it("should unlock with a malformed encrypted account in the storage", async () => {
+      await storeV3Fixture();
+      await chrome.storage.local.set({
+        [crypto.randomUUID()]: {
+          dataType: "EncOTPStorage",
+          keyId: V3_KEY_ID,
+          data: "",
+          index: 9,
+        },
+      });
+      const store = await createStore();
+
+      await store.dispatch("accounts/applyPassphrase", V3_FIXTURE.password);
+
+      alert.called.should.equal(false);
+      accountsState(store).defaultEncryption.should.equal(V3_KEY_ID);
+    });
+
     it("should unlock the v3 fixture with its password", async () => {
       await storeV3Fixture();
 
@@ -235,6 +254,42 @@ describe("keyring", function () {
     afterEach(() => {
       clock?.restore();
       clock = undefined;
+    });
+
+    it("should write the upgrade only after the storage lock is released", async () => {
+      await storeV3Fixture();
+      const before = await storedItems();
+      const entries = await loadEntries(
+        new Map([
+          [V3_KEY_ID, new Encryption(V3_FIXTURE.passphrase, V3_KEY_ID)],
+        ]),
+      );
+      const changed = await encryptedAccount(
+        new Encryption(V3_FIXTURE.passphrase, V3_KEY_ID),
+        0,
+      );
+      const release = await holdStorageLock();
+      const upgrading = upgradeLegacyEntries(entries);
+      try {
+        await waitForStorageLockRequests();
+        (await storedItems()).should.deep.equal(before);
+        await chrome.storage.local.set({ [HOTP_HASH]: changed });
+      } finally {
+        await release();
+      }
+
+      await upgrading;
+      const stored = await storedItems();
+      chai.expect(stored[HOTP_HASH]).to.deep.equal(changed);
+      chai
+        .expect(entries.find((entry) => entry.hash === HOTP_HASH)?.legacyData)
+        .to.not.equal(undefined);
+      const accounts = await storedAccounts(stored);
+      for (const hash of Object.keys(V3_FIXTURE_ENTRIES)) {
+        if (hash !== HOTP_HASH) {
+          accounts[hash].data.should.match(/^v4:/);
+        }
+      }
     });
 
     it("should upgrade the accounts to v4 when the popup opens from the cached key", async () => {
@@ -456,7 +511,7 @@ describe("keyring", function () {
 
     it("should store the new key only after the storage lock is released", async () => {
       const release = await holdStorageLock();
-      const changing = setPassword("new password", []);
+      const changing = setPassword("new password", new Map(), undefined);
       try {
         await waitForStorageLockRequests();
         (await BrowserStorage.getKeys()).should.have.lengthOf(0);
@@ -475,7 +530,7 @@ describe("keyring", function () {
       await cacheSessionKey("old-key");
       const hash = crypto.randomUUID();
       const release = await holdStorageLock();
-      const changing = setPassword("new password", []);
+      const changing = setPassword("new password", new Map(), "old-key");
       let importing: Promise<boolean> = Promise.resolve(false);
       try {
         await waitForStorageLockRequests();
@@ -564,39 +619,248 @@ describe("keyring", function () {
       }
     });
 
-    it("should keep the old key for an account that only the storage has", async () => {
+    it("should move an account that only the storage has to the new key", async () => {
       const store = await unlockedFixtureStore();
-      const synced = await encryptedAccount(
-        new Encryption(V3_FIXTURE.passphrase, V3_KEY_ID),
-        4,
-      );
       const syncedHash = crypto.randomUUID();
-      await chrome.storage.local.set({ [syncedHash]: synced });
+      await chrome.storage.local.set({
+        [syncedHash]: await encryptedAccount(
+          new Encryption(V3_FIXTURE.passphrase, V3_KEY_ID),
+          4,
+        ),
+      });
 
       await store.dispatch("accounts/changePassphrase", "new password");
 
+      const newKeyId = accountsState(store).defaultEncryption;
       const stored = await storedItems();
-      chai.expect(stored[V3_KEY_ID]).to.deep.equal(V3_KEY);
-      chai.expect(stored[syncedHash]).to.deep.equal(synced);
+      chai.expect(stored[V3_KEY_ID]).to.equal(undefined);
+      (stored[syncedHash] as EncOTPStorage).keyId.should.equal(newKeyId);
+      const unlocked = await unlock("new password");
+      const entries = await decryptedEntries(
+        unlocked?.passphrase ?? "",
+        newKeyId,
+      );
+      entries
+        .find((entry) => entry.hash === syncedHash)
+        ?.account.should.equal("synced");
     });
 
-    it("should keep the key on removal for an account that only the storage has", async () => {
+    it("should store an account that only the storage has open when the password is removed", async () => {
       const store = await unlockedFixtureStore();
-      const synced = await encryptedAccount(
-        new Encryption(V3_FIXTURE.passphrase, V3_KEY_ID),
-        4,
-      );
       const syncedHash = crypto.randomUUID();
-      await chrome.storage.local.set({ [syncedHash]: synced });
+      await chrome.storage.local.set({
+        [syncedHash]: await encryptedAccount(
+          new Encryption(V3_FIXTURE.passphrase, V3_KEY_ID),
+          4,
+        ),
+      });
 
       await store.dispatch("accounts/changePassphrase", "");
 
       const stored = await storedItems();
-      chai.expect(stored[V3_KEY_ID]).to.deep.equal(V3_KEY);
-      chai.expect(stored[syncedHash]).to.deep.equal(synced);
+      chai.expect(stored[V3_KEY_ID]).to.equal(undefined);
+      const synced = stored[syncedHash] as RawOTPStorage;
+      synced.encrypted.should.equal(false);
+      chai.expect(synced.account).to.equal("synced");
       for (const hash of Object.keys(V3_FIXTURE_ENTRIES)) {
         (stored[hash] as RawOTPStorage).encrypted.should.equal(false);
       }
+    });
+
+    it("should move an account added while the password change waits for the lock to the new key", async () => {
+      const store = await unlockedFixtureStore();
+      const addedHash = crypto.randomUUID();
+      const release = await holdStorageLock();
+      const changing = store
+        .dispatch("accounts/changePassphrase", "new password")
+        .then(
+          () => undefined,
+          (error: unknown) => error,
+        );
+      try {
+        await waitForStorageLockRequests();
+        await chrome.storage.local.set({
+          [addedHash]: await encryptedAccount(
+            new Encryption(V3_FIXTURE.passphrase, V3_KEY_ID),
+            4,
+          ),
+        });
+      } finally {
+        await release();
+      }
+
+      chai.expect(await changing).to.equal(undefined);
+      const newKeyId = accountsState(store).defaultEncryption;
+      const stored = await storedItems();
+      chai.expect(stored[V3_KEY_ID]).to.equal(undefined);
+      (stored[addedHash] as EncOTPStorage).keyId.should.equal(newKeyId);
+    });
+
+    it("should not bring back an account deleted while the password change waits for the lock", async () => {
+      const store = await unlockedFixtureStore();
+      const release = await holdStorageLock();
+      const changing = store
+        .dispatch("accounts/changePassphrase", "new password")
+        .then(
+          () => undefined,
+          (error: unknown) => error,
+        );
+      try {
+        await waitForStorageLockRequests();
+        await chrome.storage.local.remove(HOTP_HASH);
+      } finally {
+        await release();
+      }
+
+      chai.expect(await changing).to.equal(undefined);
+      chai.expect((await storedItems())[HOTP_HASH]).to.equal(undefined);
+      accountsState(store)
+        .entries.map((entry) => entry.hash)
+        .should.not.include(HOTP_HASH);
+    });
+
+    it("should store an account added while the password removal waits for the lock open", async () => {
+      const store = await unlockedFixtureStore();
+      const addedHash = crypto.randomUUID();
+      const release = await holdStorageLock();
+      const removing = store.dispatch("accounts/changePassphrase", "").then(
+        () => undefined,
+        (error: unknown) => error,
+      );
+      try {
+        await waitForStorageLockRequests();
+        await chrome.storage.local.set({
+          [addedHash]: await encryptedAccount(
+            new Encryption(V3_FIXTURE.passphrase, V3_KEY_ID),
+            4,
+          ),
+        });
+      } finally {
+        await release();
+      }
+
+      chai.expect(await removing).to.equal(undefined);
+      const stored = await storedItems();
+      chai.expect(stored[V3_KEY_ID]).to.equal(undefined);
+      (stored[addedHash] as RawOTPStorage).encrypted.should.equal(false);
+    });
+
+    it("should change the password with an account under a key that is not stored", async () => {
+      const store = await unlockedFixtureStore();
+      const foreignHash = crypto.randomUUID();
+      const foreign = await encryptedAccount(
+        new Encryption(randomPassphrase(), "foreign-key"),
+        4,
+      );
+      await chrome.storage.local.set({ [foreignHash]: foreign });
+
+      await store.dispatch("accounts/changePassphrase", "new password");
+
+      const newKeyId = accountsState(store).defaultEncryption;
+      newKeyId.should.not.equal(V3_KEY_ID);
+      const stored = await storedItems();
+      (stored[foreignHash] as EncOTPStorage).data.should.equal(foreign.data);
+      (stored[foreignHash] as EncOTPStorage).keyId.should.equal("foreign-key");
+      (await BrowserStorage.getKeys())
+        .map((key) => key.id)
+        .should.deep.equal([newKeyId]);
+    });
+
+    it("should set a new password after removing one while an old key is still stored", async () => {
+      const store = await createStore();
+      await store.dispatch("accounts/changePassphrase", "first password");
+      const firstKeyId = accountsState(store).defaultEncryption;
+      await store.dispatch("accounts/changePassphrase", "second password");
+      await store.dispatch("accounts/changePassphrase", "");
+      (await BrowserStorage.getKeys())
+        .map((key) => key.id)
+        .should.deep.equal([firstKeyId]);
+
+      await store.dispatch("accounts/changePassphrase", "third password");
+
+      const newKeyId = accountsState(store).defaultEncryption;
+      (await BrowserStorage.getKeys())
+        .map((key) => key.id)
+        .should.have.members([firstKeyId, newKeyId]);
+    });
+
+    it("should not change the password when another window changed it first", async () => {
+      const stale = await unlockedFixtureStore();
+      const store = await createStore();
+      await store.dispatch("accounts/applyPassphrase", V3_FIXTURE.password);
+      await store.dispatch("accounts/changePassphrase", "new password");
+      const newKeyId = accountsState(store).defaultEncryption;
+
+      let error: unknown;
+      try {
+        await stale.dispatch("accounts/changePassphrase", "other password");
+      } catch (e) {
+        error = e;
+      }
+
+      chai.expect(error).to.be.instanceOf(Error);
+      (await BrowserStorage.getKeys())
+        .map((key) => key.id)
+        .should.deep.equal([newKeyId]);
+      const unlocked = await unlock("new password");
+      expectFixtureAccounts(
+        await decryptedEntries(unlocked?.passphrase ?? "", newKeyId),
+      );
+    });
+
+    it("should not let a window without a password store the accounts in the open after another window set one", async () => {
+      const hash = crypto.randomUUID();
+      await chrome.storage.local.set({
+        [hash]: {
+          dataType: "OTPStorage",
+          encrypted: false,
+          hash,
+          index: 0,
+          type: "totp",
+          secret: "JBSWY3DPEHPK3PXP",
+          account: "alice",
+        },
+      });
+      const stale = await createStore();
+      const store = await createStore();
+      await store.dispatch("accounts/changePassphrase", "new password");
+
+      const entries = accountsState(stale).entries;
+      entries[0].pinned = true;
+      let error: unknown;
+      try {
+        await EntryStorage.set(entries);
+      } catch (e) {
+        error = e;
+      }
+
+      chai.expect(error).to.be.instanceOf(Error);
+      chai
+        .expect((await storedItems())[hash].dataType)
+        .to.equal("EncOTPStorage");
+    });
+
+    it("should not let a window with the old key write after another window changed the password", async () => {
+      const stale = await unlockedFixtureStore();
+      const store = await createStore();
+      await store.dispatch("accounts/applyPassphrase", V3_FIXTURE.password);
+      await store.dispatch("accounts/changePassphrase", "new password");
+      const newKeyId = accountsState(store).defaultEncryption;
+
+      const entries = accountsState(stale).entries;
+      entries[0].pinned = true;
+      let error: unknown;
+      try {
+        await EntryStorage.set(entries);
+      } catch (e) {
+        error = e;
+      }
+
+      chai.expect(error).to.be.instanceOf(Error);
+      const unlocked = await unlock("new password");
+      expectFixtureAccounts(
+        await decryptedEntries(unlocked?.passphrase ?? "", newKeyId),
+      );
     });
 
     it("should store the accounts open and remove the key when the password is removed", async () => {

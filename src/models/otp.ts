@@ -1,6 +1,6 @@
 import { KeyUtilities } from "./key-utilities";
 import { UserSettings } from "./settings";
-import { EntryStorage } from "./storage";
+import { EntryStorage, withStorageLock } from "./storage";
 
 export enum OTPType {
   totp = 1,
@@ -211,12 +211,12 @@ export class OTPEntry implements OTPEntryInterface {
   }
 
   async create() {
-    await EntryStorage.add(this);
+    await withStorageLock(() => EntryStorage.add(this));
     return;
   }
 
   async update() {
-    await EntryStorage.update(this);
+    await withStorageLock(() => EntryStorage.update(this));
     return;
   }
 
@@ -285,7 +285,7 @@ export class OTPEntry implements OTPEntryInterface {
   }
 
   async delete() {
-    await EntryStorage.delete(this);
+    await withStorageLock(() => EntryStorage.delete(this));
     return;
   }
 
