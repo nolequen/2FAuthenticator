@@ -8,7 +8,7 @@ import { Accounts } from "../../store/Accounts";
 import { Encryption } from "../../models/encryption";
 import { EntryStorage } from "../../models/storage";
 import { UserSettings } from "../../models/settings";
-import { resetStorage } from "../storage-helper";
+import { randomPassphrase, resetStorage } from "../storage-helper";
 
 chai.should();
 mocha.setup("bdd");
@@ -70,7 +70,7 @@ function accountsState(store: Store<unknown>) {
   return (store.state as { accounts: AccountsState }).accounts;
 }
 
-function decryptStoredAccounts(
+async function decryptStoredAccounts(
   stored: { [hash: string]: OTPStorage },
   encryption: EncryptionInterface,
 ) {
@@ -78,10 +78,8 @@ function decryptStoredAccounts(
   for (const hash of Object.keys(stored)) {
     const item = stored[hash];
     if (item.dataType === "EncOTPStorage") {
-      const data = encryption.decryptEncSecret({
-        encData: item.data,
-      } as OTPEntryInterface);
-      accounts[hash] = data?.account ?? "";
+      const decrypted = await encryption.decrypt(item.data);
+      accounts[hash] = decrypted?.data.account ?? "";
     }
   }
   return accounts;
@@ -130,7 +128,7 @@ describe("Accounts", () => {
 
   describe("search", () => {
     const KEY_ID = "search-key";
-    const PASSPHRASE = "search-passphrase";
+    const PASSPHRASE = randomPassphrase();
 
     async function storeEncryptedEntries(count: number) {
       const data: { [hash: string]: RawOTPStorage } = {};
@@ -168,23 +166,7 @@ describe("Accounts", () => {
   });
 
   describe("password", function () {
-    this.timeout(10000);
-    let argonSandbox: HTMLIFrameElement;
-
-    before(async () => {
-      argonSandbox = document.createElement("iframe");
-      argonSandbox.id = "argon-sandbox";
-      argonSandbox.src = chrome.runtime.getURL("view/argon.html");
-      argonSandbox.style.display = "none";
-      await new Promise((resolve) => {
-        argonSandbox.addEventListener("load", resolve);
-        document.body.appendChild(argonSandbox);
-      });
-    });
-
-    after(() => {
-      argonSandbox.remove();
-    });
+    this.timeout(20000);
 
     beforeEach(() => {
       sinon.replace(
@@ -199,18 +181,20 @@ describe("Accounts", () => {
       const keyB = crypto.randomUUID();
       const hashA = crypto.randomUUID();
       const hashB = crypto.randomUUID();
+      const passphraseA = randomPassphrase();
+      const passphraseB = randomPassphrase();
       await chrome.storage.local.set({ [keyA]: key(keyA), [keyB]: key(keyB) });
-      await EntryStorage.import(new Encryption("passphrase-a", keyA), {
+      await EntryStorage.import(new Encryption(passphraseA, keyA), {
         [hashA]: rawEntry(hashA, "alice", 0),
       });
-      await EntryStorage.import(new Encryption("passphrase-b", keyB), {
+      await EntryStorage.import(new Encryption(passphraseB, keyB), {
         [hashB]: rawEntry(hashB, "bob", 1),
       });
       const storedB = (await chrome.storage.local.get())[hashB];
 
       const store = await createStore();
       const state = accountsState(store);
-      state.encryption.set(keyA, new Encryption("passphrase-a", keyA));
+      state.encryption.set(keyA, new Encryption(passphraseA, keyA));
       state.defaultEncryption = keyA;
       await store.dispatch("accounts/updateEntries");
       await store.dispatch("accounts/changePassphrase", "new password");
@@ -218,9 +202,11 @@ describe("Accounts", () => {
       const stored = await chrome.storage.local.get();
       chai.expect(stored[keyB]).to.deep.equal(key(keyB));
       chai.expect(stored[hashB]).to.deep.equal(storedB);
-      decryptStoredAccounts(
-        { [hashB]: stored[hashB] },
-        new Encryption("passphrase-b", keyB),
+      (
+        await decryptStoredAccounts(
+          { [hashB]: stored[hashB] },
+          new Encryption(passphraseB, keyB),
+        )
       ).should.deep.equal({ [hashB]: "bob" });
     });
 
@@ -239,7 +225,7 @@ describe("Accounts", () => {
       chai.expect(encryption).to.not.equal(undefined);
       const stored = await chrome.storage.local.get();
       chai.expect(stored[OLD_HASH]).to.equal(undefined);
-      const accounts = decryptStoredAccounts(
+      const accounts = await decryptStoredAccounts(
         stored,
         encryption as EncryptionInterface,
       );

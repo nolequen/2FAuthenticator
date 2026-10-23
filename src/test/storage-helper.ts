@@ -10,3 +10,8 @@ export async function resetStorage(settings: typeof UserSettings.items = {}) {
   });
   await UserSettings.updateItems();
 }
+
+export function randomPassphrase() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return btoa(String.fromCharCode(...bytes)).replace(/=+$/, "");
+}

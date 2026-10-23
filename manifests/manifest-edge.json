@@ -33,11 +33,6 @@
     "background": {
         "service_worker": "dist/background.js"
     },
-    "sandbox": {
-        "pages": [
-            "view/argon.html"
-        ]
-    },
     "permissions": [
         "activeTab",
         "storage",
@@ -51,8 +46,7 @@
         "https://www.google.com/"
     ],
     "content_security_policy": {
-        "extension_pages": "script-src 'self'; font-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src https://www.google.com/; default-src 'none'",
-        "sandbox": "sandbox allow-scripts; script-src 'self' 'unsafe-eval';"
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; font-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src https://www.google.com/; default-src 'none'"
     },
     "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA9vro3+s4dLZk10pvS7kY/XXz/O6862u1GHlWVWvhOzI7EPFRd7FUkcKdDgbkLGVN4NtbkpebOvrJav4ntOtgHDwbHRK3ZW65h1ftlX9ObpUw9rpgloexNwZ8+53p/neTMH05LY6zPLA6XSuDw/b66QcJP8CtaD+MLiNmlf0J5dERgfjhHtkW4xFJ6xCc59ilBbFmx2JucIdhScYIkY3DnrOl25Ey89TaqphwihHj0hErcz4HmNH6LZmBBKSB4Kr4lulqIFzFYm1OG7/l+rM/BGd9d4mOnEcNUIGV+HxawOLLln166TANtmdSR2ZM10hOkDGojcJ91DWwLWBlWVOa/wIDAQAB"
 }

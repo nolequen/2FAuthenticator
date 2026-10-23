@@ -12,12 +12,13 @@ interface OTPEntryInterface {
   algorithm: number; // OTPAlgorithm
   pinned: boolean;
   encData?: string;
+  legacyData?: string;
   keyId?: string;
   encryption?: EncryptionInterface;
   create(): Promise<void>;
   update(): Promise<void>;
   next(): Promise<void>;
-  applyEncryption(encryption: EncryptionInterface): void;
+  applyEncryption(encryption: EncryptionInterface): Promise<void>;
   changeEncryption(encryption: EncryptionInterface): void;
   delete(): Promise<void>;
   generate(): void;
@@ -25,8 +26,10 @@ interface OTPEntryInterface {
 }
 
 interface EncryptionInterface {
-  getEncryptedString(data: string): string;
-  decryptEncSecret(entry: OTPEntryInterface): RawOTPStorage | null;
+  encrypt(data: string): Promise<string>;
+  decrypt(
+    data: string,
+  ): Promise<{ data: RawOTPStorage; legacy: boolean } | null>;
   getEncryptionStatus(): boolean;
   getEncryptionKeyId(): string;
 }

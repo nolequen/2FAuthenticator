@@ -5,7 +5,13 @@ import { ActionContext } from "vuex";
 import { getSiteName, getMatchedEntriesHash } from "../utils";
 import { isChromium } from "../browser";
 import { StorageLocation, UserSettings } from "../models/settings";
-import { DataType } from "../models/otp";
+import {
+  adoptEntries,
+  removePassword,
+  setPassword,
+  unlock,
+  upgradeLegacyEntries,
+} from "../models/keyring";
 
 export class Accounts implements Module {
   async getModule() {
@@ -221,190 +227,84 @@ export class Accounts implements Module {
 
           state.commit("currentView/changeView", "LoadingPage", { root: true });
 
-          // Decrypt entries
-          let saltedHash = "";
-          const encKeys = await BrowserStorage.getKeys();
-          // TODO: let user reconcile multiple keys from sync conflicts
-          for (const key of encKeys) {
-            const rawHash = await new Promise(
-              (resolve: (value: string) => void) => {
-                const iframe = document.getElementById("argon-sandbox");
-                const message = {
-                  action: "hash",
-                  value: password,
-                  salt: key.salt,
-                };
-                if (iframe) {
-                  window.addEventListener("message", (response) => {
-                    resolve(response.data.response);
-                  });
-                  // @ts-expect-error bad typings
-                  iframe.contentWindow.postMessage(message, "*");
-                }
-              },
-            );
-
-            // https://passlib.readthedocs.io/en/stable/lib/passlib.hash.argon2.html#format-algorithm
-            const possibleHash = rawHash.split("$")[5];
-            if (!possibleHash) {
-              throw new Error("argon2 did not return a hash!");
+          try {
+            // Decrypt entries
+            const unlocked = await unlock(password);
+            if (unlocked) {
+              for (const [keyId, encryption] of unlocked.encryptions) {
+                state.state.encryption.set(keyId, encryption);
+              }
+              state.state.defaultEncryption = unlocked.defaultKeyId;
             }
 
-            // verify user password by comparing their password hash with the
-            // hash of their password's hash
-            const isCorrectPassword = await new Promise(
-              (resolve: (value: string) => void) => {
-                const iframe = document.getElementById("argon-sandbox");
-                const message = {
-                  action: "verify",
-                  value: possibleHash,
-                  hash: key.hash,
-                };
-                if (iframe) {
-                  window.addEventListener("message", (response) => {
-                    resolve(response.data.response);
-                  });
-                  // @ts-expect-error bad typings
-                  iframe.contentWindow.postMessage(message, "*");
-                }
-              },
-            );
+            await state.dispatch("updateEntries");
 
-            // TODO: there is a serious bug here. If two keys have the same password,
-            // then only one of them will be used for decryption.
-            if (isCorrectPassword) {
-              state.state.encryption.set(
-                key.id,
-                new Encryption(possibleHash, key.id),
+            if (!unlocked) {
+              state.commit("wrongPassword");
+              state.commit("currentView/changeView", "EnterPasswordPage", {
+                root: true,
+              });
+              return;
+            }
+
+            const defaultEncryption = unlocked.encryptions.get(
+              unlocked.defaultKeyId,
+            );
+            if (!defaultEncryption) {
+              throw new Error(
+                "defaultEncryption is empty, this should never happen!",
               );
-              state.state.defaultEncryption = key.id;
-
-              saltedHash = possibleHash;
             }
-          }
+            if (await adoptEntries(state.state.entries, defaultEncryption)) {
+              await state.dispatch("updateEntries");
+            }
 
-          await state.dispatch("updateEntries");
+            if (!state.getters.currentlyEncrypted) {
+              chrome.runtime.sendMessage({
+                action: "cachePassphrase",
+                value: unlocked.passphrase,
+                keyId: unlocked.defaultKeyId,
+              });
+            }
 
-          if (!saltedHash) {
-            state.commit("wrongPassword");
+            state.commit("style/hideInfo", true, { root: true });
+          } catch (error) {
+            console.error(error);
+            state.commit(
+              "notification/alert",
+              chrome.i18n.getMessage("updateFailure"),
+              { root: true },
+            );
             state.commit("currentView/changeView", "EnterPasswordPage", {
               root: true,
             });
-            return;
           }
-
-          // Encrypt any unencrypted entries.
-          // Browser sync can cause unencrypted entries to show up.
-          let needUpdateStorage = false;
-          const defaultEncryption = state.state.encryption.get(
-            state.state.defaultEncryption,
-          );
-          if (!defaultEncryption) {
-            throw new Error(
-              "defaultEncryption is empty, this should never happen!",
-            );
-          }
-          for (const entry of state.state.entries) {
-            if (
-              entry.encryption?.getEncryptionKeyId() !==
-              state.state.defaultEncryption
-            ) {
-              await entry.changeEncryption(defaultEncryption);
-              needUpdateStorage = true;
-            }
-          }
-
-          if (needUpdateStorage) {
-            await EntryStorage.set(state.state.entries);
-            await state.dispatch("updateEntries");
-          }
-
-          if (!state.getters.currentlyEncrypted) {
-            chrome.runtime.sendMessage({
-              action: "cachePassphrase",
-              value: saltedHash,
-              keyId: defaultEncryption.getEncryptionKeyId(),
-            });
-          }
-
-          state.commit("style/hideInfo", true, { root: true });
           return;
         },
         changePassphrase: async (
           state: ActionContext<AccountsState, object>,
           password: string,
         ) => {
+          const restoreEntries = async (error: unknown) => {
+            await state.dispatch("updateEntries");
+            throw error;
+          };
+
           if (password) {
-            // The hash of the user's password is used as the encryption key for user data.
-            const rawSaltedHash = await genHash(password);
-            // https://passlib.readthedocs.io/en/stable/lib/passlib.hash.argon2.html#format-algorithm
-            const salt = window.atob(rawSaltedHash.split("$")[4]);
-            const saltedHash = rawSaltedHash.split("$")[5];
+            const { encryption, passphrase } = await setPassword(
+              password,
+              state.state.entries,
+            ).catch(restoreEntries);
+            const keyId = encryption.getEncryptionKeyId();
 
-            // This hash is used to verify that a user decrypted `saltedHash` correctly
-            const hashOfHash = await genHash(saltedHash);
+            state.state.encryption.set(keyId, encryption);
+            state.state.defaultEncryption = keyId;
 
-            if (!saltedHash || !hashOfHash) {
-              throw new Error("argon2 did not return a hash!");
-            }
-
-            // change entry encryption and regen hash
-            const removeKeys: string[] = [];
-            const keys = await BrowserStorage.getKeys();
-            const key: Key = {
-              dataType: DataType.Key,
-              id: crypto.randomUUID(),
-              salt: salt,
-              hash: hashOfHash,
-              version: 3,
-            };
-
-            const linkedKeys = new Map<string, undefined>();
-            for (const entry of state.state.entries) {
-              if (!entry.secret) {
-                if (entry.keyId) {
-                  linkedKeys.set(entry.keyId, undefined);
-                }
-                continue;
-              }
-
-              await entry.changeEncryption(new Encryption(saltedHash, key.id));
-              // if not uuidv4 regen
-              if (!isUUIDv4(entry.hash)) {
-                removeKeys.push(entry.hash);
-                entry.genUUID();
-              }
-
-              if (entry.encryption?.getEncryptionKeyId()) {
-                linkedKeys.set(
-                  entry.encryption.getEncryptionKeyId(),
-                  undefined,
-                );
-              }
-            }
-
-            // store key
-            await BrowserStorage.set({
-              [key.id]: key,
+            chrome.runtime.sendMessage({
+              action: "cachePassphrase",
+              value: passphrase,
+              keyId,
             });
-            await EntryStorage.set(state.state.entries);
-            // remove unlinked keys when there is at least one entry
-            if (state.state.entries.length !== 0) {
-              for (const storedKey of keys) {
-                if (!linkedKeys.has(storedKey.id)) {
-                  removeKeys.push(storedKey.id);
-                }
-              }
-            }
-            if (removeKeys.length) {
-              await BrowserStorage.remove(removeKeys);
-            }
-
-            state.state.encryption.set(
-              key.id,
-              new Encryption(saltedHash, key.id),
-            );
-            state.state.defaultEncryption = key.id;
 
             await state.dispatch("updateEntries");
 
@@ -412,31 +312,20 @@ export class Accounts implements Module {
             if (isChromium) {
               await BrowserStorage.clearLogs();
             }
-
-            chrome.runtime.sendMessage({
-              action: "cachePassphrase",
-              value: saltedHash,
-              keyId: key.id,
-            });
           } else {
-            for (const entry of state.state.entries) {
-              await entry.changeEncryption(new Encryption("", ""));
-            }
-            await EntryStorage.set(state.state.entries);
-
-            const keyId = state.state.encryption
-              .get(state.state.defaultEncryption)
-              ?.getEncryptionKeyId();
-            if (keyId) {
-              await BrowserStorage.remove(keyId);
-            }
+            await removePassword(
+              state.state.entries,
+              state.state.encryption
+                .get(state.state.defaultEncryption)
+                ?.getEncryptionKeyId(),
+            ).catch(restoreEntries);
             state.state.defaultEncryption = "";
-
-            await state.dispatch("updateEntries");
 
             chrome.runtime.sendMessage({
               action: "lock",
             });
+
+            await state.dispatch("updateEntries");
           }
         },
         updateEntries: async (state: ActionContext<AccountsState, object>) => {
@@ -450,6 +339,8 @@ export class Accounts implements Module {
               }
             }
           }
+
+          await upgradeLegacyEntries(entries);
 
           state.commit("loadCodes", entries);
           state.commit("updateCodes");
@@ -553,34 +444,4 @@ export class Accounts implements Module {
     const otpEntries = await EntryStorage.get();
     return otpEntries;
   }
-}
-
-async function genHash(value: string) {
-  const randomValues = window.crypto.getRandomValues(new Uint16Array(8));
-  let salt = "";
-  for (const byte of randomValues) {
-    salt += byte.toString(16);
-  }
-
-  return new Promise((resolve: (value: string) => void) => {
-    const iframe = document.getElementById("argon-sandbox");
-    const message = {
-      action: "hash",
-      value: value,
-      salt,
-    };
-    if (iframe) {
-      window.addEventListener("message", (response) => {
-        resolve(response.data.response);
-      });
-      // @ts-expect-error bad typings
-      iframe.contentWindow.postMessage(message, "*");
-    }
-  });
-}
-
-function isUUIDv4(hash: string) {
-  return /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i.test(
-    hash,
-  );
 }

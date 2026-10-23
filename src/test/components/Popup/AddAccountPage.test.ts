@@ -11,7 +11,7 @@ import AddAccountPage from "../../../components/Popup/AddAccountPage.vue";
 import { loadI18nMessages } from "../../../store/i18n";
 import { Encryption } from "../../../models/encryption";
 import { OTPAlgorithm, OTPType } from "../../../models/otp";
-import { resetStorage } from "../../storage-helper";
+import { randomPassphrase, resetStorage } from "../../storage-helper";
 
 chai.should();
 chai.use(sinonChai);
@@ -41,7 +41,10 @@ describe("AddAccountPage", () => {
           state: {
             defaultEncryption: "test-key-id",
             encryption: new Map([
-              ["test-key-id", new Encryption("test-passphrase", "test-key-id")],
+              [
+                "test-key-id",
+                new Encryption(randomPassphrase(), "test-key-id"),
+              ],
             ]),
             OTPType,
             OTPAlgorithm,
@@ -83,6 +86,7 @@ describe("AddAccountPage", () => {
       .filter((item) => item.dataType !== undefined && item.dataType !== "Key");
     entries.should.have.lengthOf(1);
     entries[0].dataType.should.equal("EncOTPStorage");
+    entries[0].data.should.match(/^v4:/);
     JSON.stringify(stored).should.not.contain(SECRET);
   });
 

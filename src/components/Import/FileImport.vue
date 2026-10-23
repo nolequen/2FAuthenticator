@@ -21,7 +21,7 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
-import { decryptBackupData } from "../../import";
+import { decryptBackupData } from "../../models/backup";
 import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
 import { EntryStorage } from "../../models/storage";
 import { Encryption } from "../../models/encryption";

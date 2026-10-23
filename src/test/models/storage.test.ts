@@ -1,10 +1,11 @@
 import "mocha";
 import * as chai from "chai";
+import * as CryptoJS from "crypto-js";
 
 import { Encryption } from "../../models/encryption";
 import { OTPAlgorithm, OTPEntry, OTPType } from "../../models/otp";
 import { EntryStorage } from "../../models/storage";
-import { resetStorage } from "../storage-helper";
+import { randomPassphrase, resetStorage } from "../storage-helper";
 
 chai.should();
 mocha.setup("bdd");
@@ -156,7 +157,8 @@ describe("EntryStorage", () => {
     });
 
     describe("with encryption", () => {
-      const encryption = new Encryption("test-passphrase", "test-key-id");
+      const encryptionPassphrase = randomPassphrase();
+      const encryption = new Encryption(encryptionPassphrase, "test-key-id");
 
       async function importEncrypted(fields: Partial<RawOTPStorage>) {
         const raw = rawEntry(fields);
@@ -164,10 +166,12 @@ describe("EntryStorage", () => {
 
         const stored = await chrome.storage.local.get();
         stored[raw.hash].dataType.should.equal("EncOTPStorage");
+        stored[raw.hash].data.should.match(/^v4:/);
         JSON.stringify(stored).should.not.contain(raw.secret);
 
         const entry = await getOnlyEntry();
-        entry.applyEncryption(encryption);
+        await entry.applyEncryption(encryption);
+        chai.expect(entry.legacyData).to.equal(undefined);
         return entry;
       }
 
@@ -188,6 +192,20 @@ describe("EntryStorage", () => {
         entry.issuer.should.equal("Example");
         entry.account.should.equal("user");
         (entry.secret as string).should.equal(BASE32_SECRET);
+      });
+
+      it("should not decrypt an entry with the key of another ID", async () => {
+        const raw = rawEntry({ type: "totp" });
+        await EntryStorage.import(encryption, { [raw.hash]: raw });
+        const entry = await getOnlyEntry();
+        const encData = entry.encData;
+
+        await entry.applyEncryption(
+          new Encryption(encryptionPassphrase, "other-key-id"),
+        );
+
+        chai.expect(entry.secret).to.equal(null);
+        chai.expect(entry.encData).to.equal(encData);
       });
 
       it("should restore a totp entry with its period", async () => {
@@ -246,7 +264,8 @@ describe("EntryStorage", () => {
     }
 
     describe("an old encrypted entry", () => {
-      const encryption = new Encryption("test-passphrase", "test-key-id");
+      const passphrase = randomPassphrase();
+      const encryption = new Encryption(passphrase, "test-key-id");
 
       async function storeEncrypted(fields: Partial<RawOTPStorage>) {
         const raw = rawEntry({
@@ -258,7 +277,10 @@ describe("EntryStorage", () => {
         const stored: EncOTPStorage = {
           dataType: "EncOTPStorage",
           keyId: "test-key-id",
-          data: encryption.getEncryptedString(JSON.stringify(raw)),
+          data: CryptoJS.AES.encrypt(
+            JSON.stringify(raw),
+            passphrase,
+          ).toString(),
           index: 0,
         };
         await chrome.storage.local.set({ [raw.hash]: stored });
@@ -266,7 +288,9 @@ describe("EntryStorage", () => {
 
       async function getDecrypted(): Promise<OTPEntry> {
         const entry = await getOnlyEntry();
-        entry.applyEncryption(encryption);
+        const data = entry.encData;
+        await entry.applyEncryption(encryption);
+        chai.expect(entry.legacyData).to.equal(data);
         return entry;
       }
 

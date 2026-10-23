@@ -110,6 +110,7 @@ export class OTPEntry implements OTPEntryInterface {
   pinned: boolean;
   encryption?: EncryptionInterface;
   encData?: string;
+  legacyData?: string;
   keyId?: string;
   code = "&bull;&bull;&bull;&bull;&bull;&bull;";
 
@@ -228,16 +229,24 @@ export class OTPEntry implements OTPEntryInterface {
     return;
   }
 
-  applyEncryption(encryption: EncryptionInterface) {
-    if (!encryption || !encryption.getEncryptionStatus()) {
+  async applyEncryption(encryption: EncryptionInterface) {
+    if (
+      !encryption ||
+      !encryption.getEncryptionStatus() ||
+      !this.keyId ||
+      this.keyId !== encryption.getEncryptionKeyId() ||
+      !this.encData
+    ) {
       return;
     }
 
+    const encData = this.encData;
     // check if its a rawotpstorage
-    const decryptedData = encryption.decryptEncSecret(this);
-    if (decryptedData === null) {
+    const decrypted = await encryption.decrypt(encData);
+    if (decrypted === null) {
       return;
     }
+    const decryptedData = decrypted.data;
 
     if (decryptedData?.dataType !== "OTPStorage") {
       console.warn("Decrypt successful, but malformed encData!", this.hash);
@@ -271,6 +280,7 @@ export class OTPEntry implements OTPEntryInterface {
     }
 
     this.encryption = encryption;
+    this.legacyData = decrypted.legacy ? encData : undefined;
     this.encData = "";
   }
 

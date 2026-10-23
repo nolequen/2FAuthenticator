@@ -72,7 +72,7 @@ chrome.commands.onCommand.addListener(async (command: string) => {
         const entries = await EntryStorage.get();
         const encryption = new Encryption(cachedPassphrase, cachedKeyId);
         for (const entry of entries) {
-          entry.applyEncryption(encryption);
+          await entry.applyEncryption(encryption);
         }
         const matchedEntries = getMatchedEntries(siteName, entries);
 

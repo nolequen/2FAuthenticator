@@ -24,7 +24,7 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
-import { verifyPasswordUsingKeyID } from "../../models/password";
+import { verifyPassword } from "../../models/keyring";
 
 export default Vue.extend({
   data: function () {
@@ -43,19 +43,27 @@ export default Vue.extend({
     async removePassphrase() {
       this.$store.commit("currentView/changeView", "LoadingPage");
 
-      if (this.defaultEncryption) {
-        const isCorrectPassword = await verifyPasswordUsingKeyID(
-          this.defaultEncryption,
-          this.currentPhrase,
-        );
-        if (!isCorrectPassword) {
-          this.$store.commit("notification/alert", this.i18n.phrase_not_match);
-          this.$store.commit("currentView/changeView", "SetPasswordPage");
-          return;
+      try {
+        if (this.defaultEncryption) {
+          const isCorrectPassword = await verifyPassword(
+            this.defaultEncryption,
+            this.currentPhrase,
+          );
+          if (!isCorrectPassword) {
+            this.$store.commit(
+              "notification/alert",
+              this.i18n.phrase_not_match,
+            );
+            this.$store.commit("currentView/changeView", "SetPasswordPage");
+            return;
+          }
         }
-      }
 
-      await this.$store.dispatch("accounts/changePassphrase", "");
+        await this.$store.dispatch("accounts/changePassphrase", "");
+      } catch (error) {
+        this.showFailure(error);
+        return;
+      }
       this.$store.commit("notification/alert", this.i18n.updateSuccess);
       this.$store.commit("style/hideInfo");
       return;
@@ -72,22 +80,32 @@ export default Vue.extend({
 
       this.$store.commit("currentView/changeView", "LoadingPage");
 
-      if (this.defaultEncryption) {
-        const isCorrectPassword = await verifyPasswordUsingKeyID(
-          this.defaultEncryption,
-          this.currentPhrase,
-        );
-        if (!isCorrectPassword) {
-          this.$store.commit("notification/alert", this.i18n.phrase_wrong);
-          this.$store.commit("currentView/changeView", "SetPasswordPage");
-          return;
+      try {
+        if (this.defaultEncryption) {
+          const isCorrectPassword = await verifyPassword(
+            this.defaultEncryption,
+            this.currentPhrase,
+          );
+          if (!isCorrectPassword) {
+            this.$store.commit("notification/alert", this.i18n.phrase_wrong);
+            this.$store.commit("currentView/changeView", "SetPasswordPage");
+            return;
+          }
         }
-      }
 
-      await this.$store.dispatch("accounts/changePassphrase", this.phrase);
+        await this.$store.dispatch("accounts/changePassphrase", this.phrase);
+      } catch (error) {
+        this.showFailure(error);
+        return;
+      }
       this.$store.commit("notification/alert", this.i18n.updateSuccess);
       this.$store.commit("style/hideInfo");
       return;
+    },
+    showFailure(error: unknown) {
+      console.error(error);
+      this.$store.commit("notification/alert", this.i18n.updateFailure);
+      this.$store.commit("currentView/changeView", "SetPasswordPage");
     },
   },
 });
