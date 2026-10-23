@@ -23,8 +23,7 @@
 import Vue from "vue";
 import { decryptBackupData } from "../../models/backup";
 import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
-import { EntryStorage } from "../../models/storage";
-import { Encryption } from "../../models/encryption";
+import { importUnderSession } from "../../models/session";
 
 export default Vue.extend({
   data: function () {
@@ -71,10 +70,13 @@ export default Vue.extend({
             console.warn(e);
           }
           if (Object.keys(decryptedFileData).length) {
-            await EntryStorage.import(
-              this.$encryption as Encryption,
-              decryptedFileData,
-            );
+            if (!(await importUnderSession(decryptedFileData))) {
+              alert(this.i18n.phrase_incorrect);
+              target.value = "";
+              this.getFilePassphrase = false;
+              this.importFilePassphrase = "";
+              return;
+            }
             if (failedCount === 0) {
               alert(this.i18n.updateSuccess);
             } else if (succeededCount) {

@@ -10,6 +10,14 @@ import {
 } from "./otp";
 import { StorageLocation, UserSettings } from "./settings";
 import { DataType } from "./otp";
+
+export const STORAGE_LOCK = "storage";
+const CLEAR_LOGS_RETRY_DELAYS = [100, 500, 1000];
+
+export async function withStorageLock<T>(callback: () => Promise<T>) {
+  return await navigator.locks.request(STORAGE_LOCK, callback);
+}
+
 export class BrowserStorage {
   private static async getStorageLocation(): Promise<StorageLocation> {
     await UserSettings.updateItems();
@@ -127,16 +135,48 @@ export class BrowserStorage {
 
   // Use for Chrome only.
   // https://github.com/Authenticator-Extension/Authenticator/issues/412
-  static async clearLogs() {
-    const storageLocation = await this.getStorageLocation();
-    if (storageLocation === "local") {
-      const data = await chrome.storage.local.get();
-      await chrome.storage.local.clear();
-      await chrome.storage.local.set(data);
-    } else if (storageLocation === "sync") {
-      const data = await chrome.storage.sync.get();
-      await chrome.storage.sync.clear();
-      await chrome.storage.sync.set(data);
+  static clearLogs() {
+    return withStorageLock(async () => {
+      const storage = chrome.storage[await this.getStorageLocation()];
+      const data = await storage.get();
+      const [cleared, written] = await Promise.allSettled([
+        storage.clear(),
+        storage.set(data),
+      ]);
+
+      let error: unknown =
+        written.status === "rejected" ? written.reason : undefined;
+      let restored = await this.hasItems(storage, data);
+      for (const delay of CLEAR_LOGS_RETRY_DELAYS) {
+        if (restored) {
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        error = await storage.set(data).then(
+          () => undefined,
+          (setError) => setError,
+        );
+        restored = await this.hasItems(storage, data);
+      }
+
+      if (!restored) {
+        throw error ?? new Error("Could not restore the storage.");
+      }
+      if (cleared.status === "rejected") {
+        console.warn("Could not clear the storage logs.", cleared.reason);
+      }
+    });
+  }
+
+  private static async hasItems(
+    storage: chrome.storage.StorageArea,
+    data: { [key: string]: unknown },
+  ) {
+    try {
+      const stored = await storage.get();
+      return Object.keys(data).every((key) => key in stored);
+    } catch {
+      return false;
     }
   }
 }
@@ -340,7 +380,7 @@ export class EntryStorage {
     encryption: Encryption,
     data: { [hash: string]: RawOTPStorage },
   ) {
-    let _data = await BrowserStorage.get();
+    const imported: { [hash: string]: OTPStorage } = {};
     for (const hash of Object.keys(data)) {
       // never trust data import from user
       // data must be decrypted before calling this method
@@ -423,9 +463,12 @@ export class EntryStorage {
       }
 
       const entry = new OTPEntry(entryData, encryption);
-      _data[entryData.hash] = await this.getOTPStorageFromEntry(entry);
+      imported[entryData.hash] = await this.getOTPStorageFromEntry(entry);
     }
-    _data = this.ensureUniqueIndex(_data);
+    const _data = this.ensureUniqueIndex({
+      ...(await BrowserStorage.get()),
+      ...imported,
+    });
     await BrowserStorage.set(_data);
   }
 

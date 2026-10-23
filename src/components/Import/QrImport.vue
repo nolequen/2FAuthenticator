@@ -18,8 +18,7 @@ import Vue from "vue";
 import QRCode from "qrcode-reader";
 import jsQR from "jsqr";
 import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
-import { EntryStorage } from "../../models/storage";
-import { Encryption } from "../../models/encryption";
+import { importUnderSession } from "../../models/session";
 
 export default Vue.extend({
   methods: {
@@ -56,10 +55,11 @@ export default Vue.extend({
         let decryptedFileData: { [hash: string]: RawOTPStorage } = importData;
 
         if (Object.keys(decryptedFileData).length) {
-          await EntryStorage.import(
-            this.$encryption as Encryption,
-            decryptedFileData,
-          );
+          if (!(await importUnderSession(decryptedFileData))) {
+            alert(this.i18n.phrase_incorrect);
+            target.value = "";
+            return;
+          }
 
           if (hasFailedResults) {
             alert(this.i18n.import_backup_qr_partly_failed);

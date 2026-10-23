@@ -9,7 +9,12 @@ import Vuex, { Store } from "vuex";
 import { Accounts } from "../../store/Accounts";
 import { Encryption } from "../../models/encryption";
 import { createKey } from "../../models/password";
-import { unlock, upgradeLegacyEntries } from "../../models/keyring";
+import {
+  setPassword,
+  unlock,
+  upgradeLegacyEntries,
+} from "../../models/keyring";
+import { importUnderSession } from "../../models/session";
 import { BrowserStorage, EntryStorage } from "../../models/storage";
 import { V3_FIXTURE, V3_FIXTURE_ENTRIES } from "../fixtures/v3-storage";
 import {
@@ -21,7 +26,15 @@ import {
   fixtureCodes,
   storeV3Fixture,
 } from "../fixture-helper";
-import { randomPassphrase, resetStorage } from "../storage-helper";
+import {
+  cacheSessionKey,
+  clearSession,
+  holdStorageLock,
+  randomPassphrase,
+  resetStorage,
+  storeKey,
+  waitForStorageLockRequests,
+} from "../storage-helper";
 
 chai.should();
 mocha.setup("bdd");
@@ -31,14 +44,6 @@ localVue.use(Vuex);
 const HOTP_HASH = "0d9b7e14-3c2a-4f58-8e61-7a4b2c9d3e02";
 let changeView: sinon.SinonSpy;
 let alert: sinon.SinonSpy;
-
-async function clearSession() {
-  await chrome.storage.session.remove([
-    "cachedPassphrase",
-    "cachedKeyId",
-    "contentTabId",
-  ]);
-}
 
 async function createStore() {
   changeView = sinon.fake();
@@ -447,6 +452,51 @@ describe("keyring", function () {
       expectFixtureAccounts(
         await decryptedEntries(unlocked?.passphrase ?? "", newKeyId),
       );
+    });
+
+    it("should store the new key only after the storage lock is released", async () => {
+      const release = await holdStorageLock();
+      const changing = setPassword("new password", []);
+      try {
+        await waitForStorageLockRequests();
+        (await BrowserStorage.getKeys()).should.have.lengthOf(0);
+      } finally {
+        await release();
+      }
+
+      const { encryption } = await changing;
+      (await BrowserStorage.getKeys())
+        .map((key) => key.id)
+        .should.deep.equal([encryption.getEncryptionKeyId()]);
+    });
+
+    it("should let an import that waits for the password change use the new key", async () => {
+      await storeKey("old-key");
+      await cacheSessionKey("old-key");
+      const hash = crypto.randomUUID();
+      const release = await holdStorageLock();
+      const changing = setPassword("new password", []);
+      let importing: Promise<boolean> = Promise.resolve(false);
+      try {
+        await waitForStorageLockRequests();
+        importing = importUnderSession({
+          [hash]: {
+            hash,
+            index: 0,
+            encrypted: false,
+            secret: "JBSWY3DPEHPK3PXP",
+            type: "totp",
+          },
+        });
+        await waitForStorageLockRequests(2);
+      } finally {
+        await release();
+      }
+
+      const { encryption } = await changing;
+      (await importing).should.equal(true);
+      const [entry] = await EntryStorage.get();
+      chai.expect(entry.keyId).to.equal(encryption.getEncryptionKeyId());
     });
 
     it("should keep the accounts under the old key when the new password cannot be saved", async () => {

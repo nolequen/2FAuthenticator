@@ -10,7 +10,12 @@ import {
 } from "../capture";
 import { EntryStorage } from "../models/storage";
 import { account, migrationUri, payload } from "./migration-helper";
-import { resetStorage } from "./storage-helper";
+import {
+  cacheSessionKey,
+  clearSession,
+  resetStorage,
+  storeKey,
+} from "./storage-helper";
 
 chai.should();
 chai.use(sinonChai);
@@ -19,14 +24,6 @@ mocha.setup("bdd");
 const CAPTURE_URL = "data:image/png;base64,AAAA";
 const SECRET = "JBSWY3DPEHPK3PXP";
 const TAB = { id: 7, windowId: 3 } as chrome.tabs.Tab;
-
-async function clearSession() {
-  await chrome.storage.session.remove([
-    "cachedPassphrase",
-    "cachedKeyId",
-    "contentTabId",
-  ]);
-}
 
 describe("capture", () => {
   let sendMessage: sinon.SinonStub;
@@ -83,6 +80,45 @@ describe("capture", () => {
       action: "added",
       account: "alice",
     });
+  });
+
+  it("should add a scanned account under the key of the session", async () => {
+    await storeKey("capture-key");
+    const encryption = await cacheSessionKey("capture-key");
+
+    await handleCaptureMessage(
+      {
+        action: "getTotp",
+        info: `otpauth://totp/Example:alice?secret=${SECRET}`,
+      },
+      { tab: TAB },
+    );
+
+    const entries = await EntryStorage.get();
+    entries.should.have.lengthOf(1);
+    chai.expect(entries[0].keyId).to.equal("capture-key");
+    await entries[0].applyEncryption(encryption);
+    entries[0].account.should.equal("alice");
+    sendMessage.should.have.been.calledOnceWith(7, {
+      action: "added",
+      account: "alice",
+    });
+  });
+
+  it("should not add a scanned account when the key of the session is no longer stored", async () => {
+    await storeKey("new-key");
+    await cacheSessionKey("old-key");
+
+    await handleCaptureMessage(
+      {
+        action: "getTotp",
+        info: `otpauth://totp/Example:alice?secret=${SECRET}`,
+      },
+      { tab: TAB },
+    );
+
+    (await EntryStorage.get()).should.have.lengthOf(0);
+    sendMessage.should.have.been.calledOnceWith(7, { action: "errorenc" });
   });
 
   it("should ignore a capture request that does not come from a tab", async () => {
@@ -164,6 +200,27 @@ describe("capture", () => {
         { tab: TAB },
       );
     }
+
+    it("should add every account of the export at its own position", async () => {
+      await scan(
+        migrationUri(
+          payload(
+            account({ name: "alice", issuer: "Example" }),
+            account({ name: "bob", issuer: "Example" }),
+            account({ name: "carol", issuer: "Example" }),
+          ),
+        ),
+      );
+
+      sendMessage.should.have.been.calledWith(7, {
+        action: "migrationsuccess",
+      });
+      const entries = await EntryStorage.get();
+      entries
+        .map((entry) => entry.account)
+        .should.have.members(["alice", "bob", "carol"]);
+      new Set(entries.map((entry) => entry.index)).size.should.equal(3);
+    });
 
     it("should report that some accounts could not be added", async () => {
       await scan(

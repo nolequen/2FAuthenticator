@@ -29,8 +29,7 @@ otpauth://hotp/...
 import Vue from "vue";
 import { decryptBackupData } from "../../models/backup";
 import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
-import { EntryStorage } from "../../models/storage";
-import { Encryption } from "../../models/encryption";
+import { importUnderSession } from "../../models/session";
 
 export default Vue.extend({
   data: function () {
@@ -67,10 +66,10 @@ export default Vue.extend({
         );
 
         if (Object.keys(decryptedbackupData).length) {
-          await EntryStorage.import(
-            this.$encryption as Encryption,
-            decryptedbackupData,
-          );
+          if (!(await importUnderSession(decryptedbackupData))) {
+            alert(this.i18n.phrase_incorrect);
+            return;
+          }
           if (failedCount === 0) {
             alert(this.i18n.updateSuccess);
           } else if (succeededCount) {

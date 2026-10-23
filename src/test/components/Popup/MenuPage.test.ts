@@ -55,6 +55,16 @@ describe("MenuPage", () => {
   ) => wrapper.find(`*[title='${title}']`).trigger("click");
 
   describe("feedback button", () => {
+    const realNavigator = Object.getOwnPropertyDescriptor(global, "navigator");
+
+    after(() => {
+      Object.defineProperty(
+        global,
+        "navigator",
+        realNavigator as PropertyDescriptor,
+      );
+    });
+
     // mocks the user agent for testing purposes
     const mockUserAgent = (userAgent: string) => {
       Object.defineProperty(global, "navigator", {

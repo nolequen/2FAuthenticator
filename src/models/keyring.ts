@@ -1,6 +1,6 @@
 import { Encryption } from "./encryption";
 import { createKey, unlockKey } from "./password";
-import { BrowserStorage, EntryStorage } from "./storage";
+import { BrowserStorage, EntryStorage, withStorageLock } from "./storage";
 
 export function isUUIDv4(hash: string) {
   return /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i.test(
@@ -146,7 +146,16 @@ export async function setPassword(
   entries: OTPEntryInterface[],
 ) {
   const { key, encryption, passphrase } = await createKey(password);
+  await withStorageLock(() => replaceKey(key, encryption, passphrase, entries));
+  return { encryption, passphrase };
+}
 
+async function replaceKey(
+  key: Key,
+  encryption: Encryption,
+  passphrase: string,
+  entries: OTPEntryInterface[],
+) {
   // change entry encryption and regen hash
   const removeKeys: string[] = [];
   const keys = await BrowserStorage.getKeys();
@@ -175,6 +184,7 @@ export async function setPassword(
     );
     throw error;
   }
+  await cacheSession(passphrase, key.id);
 
   try {
     // remove unlinked keys when there is at least one entry
@@ -195,22 +205,29 @@ export async function setPassword(
       error,
     );
   }
-
-  return { encryption, passphrase };
 }
 
-export async function removePassword(
+export function removePassword(
   entries: OTPEntryInterface[],
   keyId: string | undefined,
 ) {
-  for (const entry of entries) {
-    entry.changeEncryption(new Encryption("", ""));
-  }
-  await EntryStorage.set(entries);
+  return withStorageLock(async () => {
+    for (const entry of entries) {
+      entry.changeEncryption(new Encryption("", ""));
+    }
+    await EntryStorage.set(entries);
+    await cacheSession(null, null);
 
-  if (keyId && !(await linkedKeyIds()).has(keyId)) {
-    await BrowserStorage.remove(keyId);
-  }
+    if (keyId && !(await linkedKeyIds()).has(keyId)) {
+      await BrowserStorage.remove(keyId);
+    }
+  });
+}
+
+async function cacheSession(passphrase: string | null, keyId: string | null) {
+  await chrome.storage.session
+    .set({ cachedPassphrase: passphrase, cachedKeyId: keyId })
+    .catch((error) => console.warn("Could not update the session.", error));
 }
 
 export async function verifyPassword(keyId: string, password: string) {

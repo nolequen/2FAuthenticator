@@ -1,4 +1,4 @@
-import { Encryption } from "./models/encryption";
+import { importUnderSession } from "./models/session";
 import { EntryStorage } from "./models/storage";
 import { getCurrentTab, okToInjectContentScript } from "./utils";
 import { getOTPAuthPerLineFromOPTAuthMigration } from "./models/migration";
@@ -90,15 +90,12 @@ async function getTotp(text: string, id: number, silent = false) {
         return false;
       }
 
-      const getTotpPromises: Array<Promise<boolean>> = [];
+      let failedCount = 0;
       for (const otpUrl of otpUrls) {
-        getTotpPromises.push(getTotp(otpUrl, id, true));
+        if (!(await getTotp(otpUrl, id, true).catch(() => false))) {
+          failedCount++;
+        }
       }
-
-      const getTotpResults = await Promise.allSettled(getTotpPromises);
-      const failedCount = getTotpResults.filter(
-        (res) => res.status === "rejected" || !res.value,
-      ).length;
       if (failedCount === otpUrls.length) {
         if (!silent) {
           chrome.tabs.sendMessage(id, { action: "migrationfail" });
@@ -146,22 +143,13 @@ async function getTotp(text: string, id: number, silent = false) {
       return false;
     }
 
-    const { cachedPassphrase, cachedKeyId } =
-      await chrome.storage.session.get();
-    const encryption = new Encryption(cachedPassphrase, cachedKeyId);
-    if (
-      // If the entries are encrypted and we aren't unlocked, error.
-      (await EntryStorage.hasEncryptionKey()) !==
-      encryption.getEncryptionStatus()
-    ) {
+    // If the entries are encrypted and we aren't unlocked, error.
+    if (!(await importUnderSession({ [result.entry.hash]: result.entry }))) {
       if (!silent) {
         chrome.tabs.sendMessage(id, { action: "errorenc" });
       }
       return false;
     }
-    await EntryStorage.import(encryption, {
-      [result.entry.hash]: result.entry,
-    });
     if (!silent) {
       chrome.tabs.sendMessage(id, {
         action: "added",

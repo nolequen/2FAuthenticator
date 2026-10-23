@@ -8,7 +8,6 @@ declare module "vue/types/vue" {
     $dragula: any;
     // Only in Import
     $entries: OTPEntryInterface[];
-    $encryption: EncryptionInterface;
     // In all
     i18n: { [key: string]: string };
   }

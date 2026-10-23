@@ -3,7 +3,7 @@ import ImportView from "./components/Import.vue";
 import CommonComponents from "./components/common/index";
 import { loadI18nMessages } from "./store/i18n";
 
-import { Encryption } from "./models/encryption";
+import { getSessionEncryption } from "./models/session";
 import { EntryStorage } from "./models/storage";
 
 async function init() {
@@ -16,19 +16,12 @@ async function init() {
   }
 
   // Load entries to global
-  const cachedSecrets = await getCachedSecrets();
-  if (
-    !cachedSecrets.cachedPassphrase &&
-    (await EntryStorage.hasEncryptionKey())
-  ) {
+  const encryption = await getSessionEncryption();
+  if (!encryption) {
     alert(Vue.prototype.i18n.phrase_incorrect);
     window.close();
     return;
   }
-  const encryption = new Encryption(
-    cachedSecrets.cachedPassphrase,
-    cachedSecrets.cachedKeyId,
-  );
   const entries = await EntryStorage.get();
 
   if (encryption.getEncryptionStatus()) {
@@ -38,7 +31,6 @@ async function init() {
   }
 
   Vue.prototype.$entries = entries;
-  Vue.prototype.$encryption = encryption;
 
   const instance = new Vue({
     render: (h) => h(ImportView),
@@ -53,9 +45,3 @@ async function init() {
 }
 
 init();
-
-async function getCachedSecrets() {
-  const { cachedPassphrase, cachedKeyId } = await chrome.storage.session.get();
-
-  return { cachedPassphrase, cachedKeyId };
-}

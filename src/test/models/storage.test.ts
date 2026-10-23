@@ -1,13 +1,17 @@
 import "mocha";
 import * as chai from "chai";
+import * as sinon from "sinon";
+import * as sinonChai from "sinon-chai";
 import * as CryptoJS from "crypto-js";
 
 import { Encryption } from "../../models/encryption";
 import { OTPAlgorithm, OTPEntry, OTPType } from "../../models/otp";
-import { EntryStorage } from "../../models/storage";
-import { randomPassphrase, resetStorage } from "../storage-helper";
+import { StorageLocation, UserSettings } from "../../models/settings";
+import { BrowserStorage, EntryStorage } from "../../models/storage";
+import { randomPassphrase, resetStorage, storeKey } from "../storage-helper";
 
 chai.should();
+chai.use(sinonChai);
 mocha.setup("bdd");
 
 const BASE32_SECRET = "JBSWY3DPEHPK3PXP";
@@ -41,6 +45,19 @@ async function importAndGet(
 
 function asStoredType(value: number) {
   return value as unknown as string;
+}
+
+async function storeAccount(storage: chrome.storage.StorageArea) {
+  const raw = rawEntry();
+  await storage.set({ [raw.hash]: raw });
+  await storeKey("test-key", storage);
+  return storage.get();
+}
+
+async function waitFor(condition: () => boolean) {
+  for (let attempt = 0; attempt < 100 && !condition(); attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
 }
 
 describe("EntryStorage", () => {
@@ -335,6 +352,129 @@ describe("EntryStorage", () => {
           entry.type.should.equal(type);
         });
       }
+    });
+  });
+});
+
+describe("BrowserStorage", () => {
+  beforeEach(() => resetStorage());
+  afterEach(() => resetStorage());
+
+  describe("clearLogs", () => {
+    it("should keep all the data", async () => {
+      const before = await storeAccount(chrome.storage.local);
+
+      await BrowserStorage.clearLogs();
+
+      (await chrome.storage.local.get()).should.deep.equal(before);
+    });
+
+    it("should keep all the data in sync storage", async () => {
+      await chrome.storage.local.set({
+        UserSettings: { storageLocation: StorageLocation.Sync },
+      });
+      await UserSettings.updateItems();
+      const local = await chrome.storage.local.get();
+      const before = await storeAccount(chrome.storage.sync);
+
+      await BrowserStorage.clearLogs();
+
+      (await chrome.storage.sync.get()).should.deep.equal(before);
+      (await chrome.storage.local.get()).should.deep.equal(local);
+    });
+
+    it("should send the data back before the storage is cleared", async () => {
+      const before = await storeAccount(chrome.storage.local);
+      const clearStorage = chrome.storage.local.clear.bind(
+        chrome.storage.local,
+      ) as () => Promise<void>;
+      let finishClear: () => void = () => undefined;
+      const clear = sinon.fake(() => {
+        const cleared = clearStorage();
+        return new Promise<void>((resolve) => {
+          finishClear = () => resolve(cleared);
+        });
+      });
+      sinon.replace(
+        chrome.storage.local,
+        "clear",
+        clear as unknown as typeof chrome.storage.local.clear,
+      );
+      const set = sinon.spy(chrome.storage.local, "set");
+      let clearing: Promise<void> = Promise.resolve();
+      try {
+        clearing = BrowserStorage.clearLogs();
+        await waitFor(() => clear.called);
+        set.should.have.been.calledOnceWith(before);
+      } finally {
+        finishClear();
+        await clearing.catch(() => undefined);
+        sinon.restore();
+      }
+
+      set.should.have.been.calledOnce;
+      (await chrome.storage.local.get()).should.deep.equal(before);
+    });
+
+    it("should write the data again when the first write fails", async () => {
+      const before = await storeAccount(chrome.storage.local);
+      const set = sinon.stub(chrome.storage.local, "set").callThrough();
+      set.onFirstCall().rejects(new Error("IO error"));
+      try {
+        await BrowserStorage.clearLogs();
+      } finally {
+        sinon.restore();
+      }
+
+      set.should.have.been.calledTwice;
+      (await chrome.storage.local.get()).should.deep.equal(before);
+    });
+
+    it("should fail when the data cannot be written back", async function () {
+      this.timeout(5000);
+      await storeAccount(chrome.storage.local);
+      sinon.replace(
+        chrome.storage.local,
+        "set",
+        sinon.fake.rejects(
+          new Error("IO error"),
+        ) as unknown as typeof chrome.storage.local.set,
+      );
+
+      let error: unknown;
+      try {
+        await BrowserStorage.clearLogs();
+      } catch (e) {
+        error = e;
+      } finally {
+        sinon.restore();
+      }
+
+      chai
+        .expect(error)
+        .to.be.instanceOf(Error)
+        .with.property("message", "IO error");
+    });
+
+    it("should keep the data and only warn when the storage cannot be cleared", async () => {
+      const before = await storeAccount(chrome.storage.local);
+      sinon.replace(
+        chrome.storage.local,
+        "clear",
+        sinon.fake.rejects(
+          new Error("IO error"),
+        ) as unknown as typeof chrome.storage.local.clear,
+      );
+      const warn = sinon.fake();
+      sinon.replace(console, "warn", warn);
+      try {
+        await BrowserStorage.clearLogs();
+      } finally {
+        sinon.restore();
+      }
+
+      warn.should.have.been.calledOnce;
+      (await chrome.storage.local.get()).should.deep.equal(before);
     });
   });
 });

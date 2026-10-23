@@ -245,6 +245,7 @@ describe("Accounts", () => {
       await (
         await createStore()
       ).dispatch("accounts/changePassphrase", "right password");
+      await clearSession();
 
       const store = await createStore();
       const state = accountsState(store);
