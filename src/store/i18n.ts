@@ -1,3 +1,5 @@
+export const i18n: { [key: string]: string } = {};
+
 export async function loadI18nMessages() {
   return new Promise(
     (
@@ -10,11 +12,10 @@ export async function loadI18nMessages() {
         xhr.onreadystatechange = () => {
           if (xhr.readyState === 4) {
             const i18nMessage: I18nMessage = JSON.parse(xhr.responseText);
-            const i18nData: { [key: string]: string } = {};
             for (const key of Object.keys(i18nMessage)) {
-              i18nData[key] = chrome.i18n.getMessage(key);
+              i18n[key] = chrome.i18n.getMessage(key);
             }
-            return resolve(i18nData);
+            return resolve(i18n);
           }
           return;
         };

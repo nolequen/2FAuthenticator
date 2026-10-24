@@ -1,59 +1,79 @@
+import { defineStore } from "pinia";
+import { ref } from "vue";
 import { UserSettings } from "../models/settings";
 
-export class Menu implements Module {
-  async getModule() {
+export const useMenuStore = defineStore("menu", () => {
+  const version = ref(chrome.runtime.getManifest()?.version || "0.0.0");
+  const zoom = ref<number | string>(100);
+  const useAutofill = ref(false);
+  const smartFilter = ref(false);
+  const theme = ref("normal");
+  const autolock = ref(30);
+
+  async function init() {
     await UserSettings.updateItems();
 
-    const menuState = {
-      state: {
-        version: chrome.runtime.getManifest()?.version || "0.0.0",
-        zoom: Number(UserSettings.items.zoom) || 100,
-        useAutofill: UserSettings.items.autofill === true,
-        smartFilter: UserSettings.items.smartFilter === true,
-        theme: UserSettings.items.theme || "normal",
-        autolock: Number(UserSettings.items.autolock) || 30,
-      },
-      mutations: {
-        setZoom: (state: MenuState, zoom: number) => {
-          state.zoom = zoom;
-          UserSettings.items.zoom = zoom;
-          UserSettings.commitItems();
-          this.resize(zoom);
-        },
-        setAutofill(state: MenuState, useAutofill: boolean) {
-          state.useAutofill = useAutofill;
-          UserSettings.items.autofill = useAutofill;
-          UserSettings.commitItems();
-        },
-        setSmartFilter(state: MenuState, smartFilter: boolean) {
-          state.smartFilter = smartFilter;
-          UserSettings.items.smartFilter = smartFilter;
-          UserSettings.commitItems();
-        },
-        setTheme(state: MenuState, theme: string) {
-          state.theme = theme;
-          UserSettings.items.theme = theme;
-          UserSettings.commitItems();
-        },
-        setAutolock(state: MenuState, autolock: number) {
-          state.autolock = autolock;
-          UserSettings.items.autolock = autolock;
-          UserSettings.commitItems();
-        },
-      },
-      namespaced: true,
-    };
+    zoom.value = Number(UserSettings.items.zoom) || 100;
+    useAutofill.value = UserSettings.items.autofill === true;
+    smartFilter.value = UserSettings.items.smartFilter === true;
+    theme.value = UserSettings.items.theme || "normal";
+    autolock.value = Number(UserSettings.items.autolock) || 30;
 
-    this.resize(menuState.state.zoom);
-
-    return menuState;
+    resize(zoom.value);
   }
 
-  private resize(zoom: number) {
-    if (zoom !== 100) {
-      document.body.style.marginBottom = 480 * (zoom / 100 - 1) + "px";
-      document.body.style.marginRight = 320 * (zoom / 100 - 1) + "px";
-      document.body.style.transform = "scale(" + zoom / 100 + ")";
+  function setZoom(value: number | string) {
+    zoom.value = value;
+    UserSettings.items.zoom = Number(value);
+    UserSettings.commitItems();
+    resize(value);
+  }
+
+  function setAutofill(value: boolean) {
+    useAutofill.value = value;
+    UserSettings.items.autofill = value;
+    UserSettings.commitItems();
+  }
+
+  function setSmartFilter(value: boolean) {
+    smartFilter.value = value;
+    UserSettings.items.smartFilter = value;
+    UserSettings.commitItems();
+  }
+
+  function setTheme(value: string) {
+    theme.value = value;
+    UserSettings.items.theme = value;
+    UserSettings.commitItems();
+  }
+
+  function setAutolock(value: number) {
+    autolock.value = value;
+    UserSettings.items.autolock = value;
+    UserSettings.commitItems();
+  }
+
+  function resize(value: number | string) {
+    if (value !== 100) {
+      const scale = Number(value) / 100;
+      document.body.style.marginBottom = 480 * (scale - 1) + "px";
+      document.body.style.marginRight = 320 * (scale - 1) + "px";
+      document.body.style.transform = "scale(" + scale + ")";
     }
   }
-}
+
+  return {
+    version,
+    zoom,
+    useAutofill,
+    smartFilter,
+    theme,
+    autolock,
+    init,
+    setZoom,
+    setAutofill,
+    setSmartFilter,
+    setTheme,
+    setAutolock,
+  };
+});

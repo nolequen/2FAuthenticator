@@ -29,48 +29,47 @@
           {{ i18n.otp_backup_inform }}
         </p>
       </div>
-      <component v-bind:is="importType" />
+      <component v-bind:is="pages[importType]" />
     </div>
     <div v-if="shouldShowPassphrase" class="error_password">
       {{ i18n.import_error_password }}
     </div>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
+<script setup lang="ts">
+import { type Component, onMounted, ref } from "vue";
 import FileImport from "./Import/FileImport.vue";
 import QrImport from "./Import/QrImport.vue";
 import TextImport from "./Import/TextImport.vue";
 
-export default Vue.extend({
-  data: function () {
-    const query = location.search ? location.search.substr(1) : "";
-    const importType = ["FileImport", "QrImport", "TextImport"].includes(query)
-      ? query
-      : "FileImport";
-    return {
-      importType,
-      shouldShowPassphrase: shouldShowPassphrase(this.$entries),
-    };
-  },
-  components: {
-    FileImport,
-    QrImport,
-    TextImport,
-  },
-  mounted() {
-    chrome.runtime.onMessage.addListener((event) => {
-      if (event.action === "stopImport") {
-        this.shouldShowPassphrase = true;
-      }
+const props = defineProps<{ entries: OTPEntryInterface[] }>();
 
-      // https://stackoverflow.com/a/56483156
-      return true;
-    });
-  },
+const pages: { [name: string]: Component } = {
+  FileImport,
+  QrImport,
+  TextImport,
+};
+
+const query = location.search ? location.search.substr(1) : "";
+const importType = ref(
+  ["FileImport", "QrImport", "TextImport"].includes(query)
+    ? query
+    : "FileImport",
+);
+const shouldShowPassphrase = ref(getShouldShowPassphrase(props.entries));
+
+onMounted(() => {
+  chrome.runtime.onMessage.addListener((event) => {
+    if (event.action === "stopImport") {
+      shouldShowPassphrase.value = true;
+    }
+
+    // https://stackoverflow.com/a/56483156
+    return true;
+  });
 });
 
-function shouldShowPassphrase(entries: OTPEntryInterface[]) {
+function getShouldShowPassphrase(entries: OTPEntryInterface[]) {
   for (const entry of entries) {
     if (!entry.secret) {
       return true;

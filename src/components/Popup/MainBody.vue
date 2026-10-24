@@ -24,8 +24,7 @@
     </div>
     <!-- Entries -->
     <div
-      v-dragula
-      drake="entryDrake"
+      ref="entryList"
       v-on:keydown.down="focusNextEntry()"
       v-on:keydown.right="focusNextEntry()"
       v-on:keydown.up="focusLastEntry()"
@@ -34,8 +33,8 @@
       <EntryComponent
         v-for="entry in entries"
         :key="entry.hash"
-        v-bind:filtered="!entry.pinned && !isMatchedEntry(entry)"
-        v-bind:notSearched="!isSearchedEntry(entry)"
+        v-bind:filtered="(!entry.pinned && !isMatchedEntry(entry)) || null"
+        v-bind:notSearched="!isSearchedEntry(entry) || null"
         v-bind:entry="entry"
         v-bind:tabindex="getTabindex(entry)"
       />
@@ -48,157 +47,137 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
-import { mapState, mapGetters } from "vuex";
-import { OTPEntry } from "../../models/otp";
-import { EntryStorage, withStorageLock } from "../../models/storage";
+<script setup lang="ts">
+import { computed, ref, useTemplateRef } from "vue";
+import { storeToRefs } from "pinia";
+import { useDraggable } from "vue-draggable-plus";
+import { useAccountsStore } from "../../store/Accounts";
+import { useStyleStore } from "../../store/Style";
 
 import EntryComponent from "./EntryComponent.vue";
 
 // import IconPlus from "../../../svg/plus.svg";
 import IconKey from "../../../svg/key-solid.svg";
 
-const computed: {
-  filter: () => boolean;
-  showSearch: () => boolean;
-  shouldFilter: () => boolean;
-  entries: () => OTPEntry[];
-} = {
-  ...mapState("accounts", ["filter", "showSearch", "initComplete"]),
-  ...mapGetters("accounts", ["shouldFilter", "entries"]),
-};
+const accounts = useAccountsStore();
+const { style } = storeToRefs(useStyleStore());
+const { filter, showSearch, initComplete, shouldFilter } =
+  storeToRefs(accounts);
 
-export default Vue.extend({
-  data: function () {
-    return {
-      searchText: "",
-    };
-  },
-  computed,
-  methods: {
-    isMatchedEntry(entry: OTPEntry) {
-      for (const hash of this.$store.getters["accounts/matchedEntries"]) {
-        if (entry.hash === hash) {
-          return true;
-        }
-      }
-      return false;
-    },
-    isSearchedEntry(entry: OTPEntry) {
-      if (this.searchText === "") {
-        return true;
-      }
-      if (
-        entry.issuer.toLowerCase().includes(this.searchText.toLowerCase()) ||
-        entry.account.toLowerCase().includes(this.searchText.toLowerCase())
-      ) {
-        return true;
-      } else {
-        return false;
-      }
-    },
-    clearFilter() {
-      this.$store.dispatch("accounts/clearFilter");
-    },
-    isEntryVisible(entry: OTPEntry) {
-      return (
-        this.isSearchedEntry(entry) &&
-        (entry.pinned ||
-          !this.shouldFilter ||
-          !this.filter ||
-          this.isMatchedEntry(entry))
-      );
-    },
-    getTabindex(entry: OTPEntry) {
-      const firstEntry = this.entries.find((entry) =>
-        this.isEntryVisible(entry),
-      );
+const searchText = ref("");
 
-      return entry === firstEntry ? 0 : -1;
-    },
-    findNextEntryIndex(reverse: boolean) {
-      if (document.activeElement?.getAttribute("data-x-role") !== "entry") {
-        return -1;
-      }
-
-      const activeIndex = Array.prototype.indexOf.call(
-        document.querySelectorAll(".entry"),
-        document.activeElement,
-      );
-      if (activeIndex === -1) {
-        return -1;
-      }
-
-      // reverse modify origin array, and use slice() to make a clone first
-      const _entries = reverse ? this.entries.slice().reverse() : this.entries;
-
-      let nextIndex = _entries.findIndex(
-        (entry, index) =>
-          index >
-            (reverse ? this.entries.length - 1 - activeIndex : activeIndex) &&
-          this.isEntryVisible(entry),
-      );
-
-      if (nextIndex === -1) {
-        nextIndex = _entries.findIndex((entry) => this.isEntryVisible(entry));
-      }
-
-      return nextIndex;
-    },
-    focusNextEntry() {
-      const nextIndex = this.findNextEntryIndex(false);
-      document
-        .querySelector<HTMLLinkElement>(`.entry:nth-child(${nextIndex + 1})`)
-        ?.focus();
-    },
-    focusLastEntry() {
-      const lastIndex = this.entries.length - 1 - this.findNextEntryIndex(true);
-      document
-        .querySelector<HTMLLinkElement>(`.entry:nth-child(${lastIndex + 1})`)
-        ?.focus();
-    },
-  },
-  created() {
-    // Don't drag if !isEditing
-    this.$dragula.$service.options("entryDrake", {
-      invalid: () => {
-        if (!this.$store.state.style.style.isEditing) {
-          return true;
-        } else {
-          return false;
-        }
-      },
-    });
-
-    // Update entry index if dragged
-    this.$dragula.$service.eventBus.$on(
-      "dropModel",
-      async ({
-        dragIndex,
-        dropIndex,
-      }: {
-        dragIndex: number;
-        dropIndex: number;
-      }) => {
-        this.$store.commit("accounts/moveCode", {
-          from: dragIndex,
-          to: dropIndex,
-        });
-        try {
-          await withStorageLock(() =>
-            EntryStorage.set(this.$store.state.accounts.entries),
-          );
-        } catch (error) {
-          await this.$store.dispatch("accounts/showWriteFailure", error);
-        }
-      },
-    );
-  },
-  components: {
-    EntryComponent,
-    // IconPlus,
-    IconKey,
+const entries = computed({
+  get: () => accounts.orderedEntries,
+  set: (list) => {
+    accounts.reorderEntries(list);
   },
 });
+
+const entryList = useTemplateRef<HTMLDivElement>("entryList");
+
+// Don't drag if !isEditing
+useDraggable(
+  entryList,
+  entries,
+  computed(() => ({
+    disabled: !style.value.isEditing,
+    forceFallback: true,
+    fallbackTolerance: 5,
+    animation: 150,
+    filter: "input",
+    preventOnFilter: false,
+    clone: (entry: OTPEntryInterface) => entry,
+  })),
+);
+
+function isMatchedEntry(entry: OTPEntryInterface) {
+  const matchedEntries = accounts.matchedEntries;
+  if (!matchedEntries) {
+    return false;
+  }
+  for (const hash of matchedEntries) {
+    if (entry.hash === hash) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isSearchedEntry(entry: OTPEntryInterface) {
+  if (searchText.value === "") {
+    return true;
+  }
+  if (
+    entry.issuer.toLowerCase().includes(searchText.value.toLowerCase()) ||
+    entry.account.toLowerCase().includes(searchText.value.toLowerCase())
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function clearFilter() {
+  accounts.clearFilter();
+}
+
+function isEntryVisible(entry: OTPEntryInterface) {
+  return (
+    isSearchedEntry(entry) &&
+    (entry.pinned ||
+      !shouldFilter.value ||
+      !filter.value ||
+      isMatchedEntry(entry))
+  );
+}
+
+function getTabindex(entry: OTPEntryInterface) {
+  const firstEntry = entries.value.find((entry) => isEntryVisible(entry));
+
+  return entry === firstEntry ? 0 : -1;
+}
+
+function findNextEntryIndex(reverse: boolean) {
+  if (document.activeElement?.getAttribute("data-x-role") !== "entry") {
+    return -1;
+  }
+
+  const activeIndex = Array.prototype.indexOf.call(
+    document.querySelectorAll(".entry"),
+    document.activeElement,
+  );
+  if (activeIndex === -1) {
+    return -1;
+  }
+
+  // reverse modify origin array, and use slice() to make a clone first
+  const _entries = reverse ? entries.value.slice().reverse() : entries.value;
+
+  let nextIndex = _entries.findIndex(
+    (entry, index) =>
+      index >
+        (reverse ? entries.value.length - 1 - activeIndex : activeIndex) &&
+      isEntryVisible(entry),
+  );
+
+  if (nextIndex === -1) {
+    nextIndex = _entries.findIndex((entry) => isEntryVisible(entry));
+  }
+
+  return nextIndex;
+}
+
+function focusNextEntry() {
+  const nextIndex = findNextEntryIndex(false);
+  document
+    .querySelector<HTMLLinkElement>(`.entry:nth-child(${nextIndex + 1})`)
+    ?.focus();
+}
+
+function focusLastEntry() {
+  const lastIndex = entries.value.length - 1 - findNextEntryIndex(true);
+  document
+    .querySelector<HTMLLinkElement>(`.entry:nth-child(${lastIndex + 1})`)
+    ?.focus();
+}
 </script>

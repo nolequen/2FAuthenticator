@@ -1,15 +1,6 @@
 const path = require("path");
+const { DefinePlugin } = require("webpack");
 const { VueLoaderPlugin } = require("vue-loader");
-const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
-
-const failOnTypeCheckerError = {
-  apply(compiler) {
-    ForkTsCheckerWebpackPlugin.getCompilerHooks(compiler).error.tap(
-      "FailOnTypeCheckerError",
-      (error, compilation) => compilation.errors.push(error)
-    );
-  }
-};
 
 module.exports = {
   mode: "development",
@@ -41,11 +32,16 @@ module.exports = {
       },
       {
         test: /\.vue$/,
-        loader: "vue-loader"
+        loader: "vue-loader",
+        options: {
+          compilerOptions: {
+            whitespace: "preserve"
+          }
+        }
       },
       {
         test: /\.svg$/,
-        loader: 'vue-svg-loader'
+        loader: path.resolve(__dirname, "scripts/svg-loader.js")
       },
       {
         test: /\.(png|jpe?g|gif)$/,
@@ -60,14 +56,11 @@ module.exports = {
   },
   plugins: [
     new VueLoaderPlugin(),
-    new ForkTsCheckerWebpackPlugin({
-      typescript: {
-        extensions: {
-          vue: true
-        }
-      }
-    }),
-    failOnTypeCheckerError
+    new DefinePlugin({
+      __VUE_OPTIONS_API__: true,
+      __VUE_PROD_DEVTOOLS__: false,
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false
+    })
   ],
   resolve: {
     extensions: [

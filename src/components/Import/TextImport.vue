@@ -25,67 +25,58 @@ otpauth://hotp/...
     </a-button>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
+<script setup lang="ts">
+import { ref } from "vue";
 import { decryptBackupData } from "../../models/backup";
 import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
 import { importUnderSession } from "../../models/session";
+import { i18n } from "../../store/i18n";
 
-export default Vue.extend({
-  data: function () {
-    return {
-      importCode: "",
-      importEncrypted: false,
-      importPassphrase: "",
-    };
-  },
-  methods: {
-    async importBackupCode() {
-      let exportData: { [hash: string]: OTPStorage | Key } = {};
-      let failedCount = 0;
-      let succeededCount = 0;
-      try {
-        exportData = JSON.parse(this.importCode);
-      } catch (error) {
-        console.warn(error);
-        // Maybe one-otpauth-per line text
-        const result = await getEntryDataFromOTPAuthPerLine(this.importCode);
-        exportData = result.exportData;
-        failedCount = result.failedCount;
-        succeededCount = result.succeededCount;
-      }
+const importCode = ref("");
+const importEncrypted = ref(false);
+const importPassphrase = ref("");
 
-      try {
-        const passphrase: string | null =
-          this.importEncrypted && this.importPassphrase
-            ? this.importPassphrase
-            : null;
-        const decryptedbackupData = await decryptBackupData(
-          exportData,
-          passphrase,
-        );
+async function importBackupCode() {
+  let exportData: { [hash: string]: OTPStorage | Key } = {};
+  let failedCount = 0;
+  let succeededCount = 0;
+  try {
+    exportData = JSON.parse(importCode.value);
+  } catch (error) {
+    console.warn(error);
+    // Maybe one-otpauth-per line text
+    const result = await getEntryDataFromOTPAuthPerLine(importCode.value);
+    exportData = result.exportData;
+    failedCount = result.failedCount;
+    succeededCount = result.succeededCount;
+  }
 
-        if (Object.keys(decryptedbackupData).length) {
-          if (!(await importUnderSession(decryptedbackupData))) {
-            alert(this.i18n.phrase_incorrect);
-            return;
-          }
-          if (failedCount === 0) {
-            alert(this.i18n.updateSuccess);
-          } else if (succeededCount) {
-            alert(this.i18n.import_backup_qr_partly_failed);
-          } else {
-            alert(this.i18n.updateFailure);
-          }
-          window.close();
-        } else {
-          alert(this.i18n.updateFailure);
-        }
+  try {
+    const passphrase: string | null =
+      importEncrypted.value && importPassphrase.value
+        ? importPassphrase.value
+        : null;
+    const decryptedbackupData = await decryptBackupData(exportData, passphrase);
+
+    if (Object.keys(decryptedbackupData).length) {
+      if (!(await importUnderSession(decryptedbackupData))) {
+        alert(i18n.phrase_incorrect);
         return;
-      } catch (error) {
-        throw error;
       }
-    },
-  },
-});
+      if (failedCount === 0) {
+        alert(i18n.updateSuccess);
+      } else if (succeededCount) {
+        alert(i18n.import_backup_qr_partly_failed);
+      } else {
+        alert(i18n.updateFailure);
+      }
+      window.close();
+    } else {
+      alert(i18n.updateFailure);
+    }
+    return;
+  } catch (error) {
+    throw error;
+  }
+}
 </script>

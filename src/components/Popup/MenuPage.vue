@@ -47,9 +47,15 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
+<script setup lang="ts">
+import { storeToRefs } from "pinia";
 import { syncTimeWithGoogle } from "../../syncTime";
+import { i18n } from "../../store/i18n";
+import { useAccountsStore } from "../../store/Accounts";
+import { useCurrentViewStore } from "../../store/CurrentView";
+import { useMenuStore } from "../../store/Menu";
+import { useNotificationStore } from "../../store/Notification";
+import { useStyleStore } from "../../store/Style";
 
 import IconArrowLeft from "../../../svg/arrow-left.svg";
 import IconInfo from "../../../svg/info.svg";
@@ -61,60 +67,51 @@ import IconComments from "../../../svg/comments.svg";
 import IconCode from "../../../svg/code.svg";
 import { UserSettings } from "../../models/settings";
 
-export default Vue.extend({
-  components: {
-    IconArrowLeft,
-    IconInfo,
-    IconExchange,
-    IconLock,
-    IconSync,
-    IconWrench,
-    IconComments,
-    IconCode,
-  },
-  computed: {
-    version: function () {
-      return this.$store.state.menu.version;
-    },
-  },
-  methods: {
-    hideMenu() {
-      this.$store.commit("style/hideMenu");
-    },
-    openHelp() {
-      chrome.tabs.create({
-        url: "https://github.com/nolequen/Authenticator/issues",
-      });
-    },
-    openLink(url: string) {
-      window.open(url, "_blank");
+const accounts = useAccountsStore();
+const currentView = useCurrentViewStore();
+const notification = useNotificationStore();
+const styleStore = useStyleStore();
+const { version } = storeToRefs(useMenuStore());
+
+function hideMenu() {
+  styleStore.hideMenu();
+}
+
+function openHelp() {
+  chrome.tabs.create({
+    url: "https://github.com/nolequen/Authenticator/issues",
+  });
+}
+
+function openLink(url: string) {
+  window.open(url, "_blank");
+  return;
+}
+
+function showInfo(tab: string) {
+  if (accounts.currentlyEncrypted) {
+    if (tab === "SetPasswordPage") {
+      notification.alert(i18n.phrase_incorrect);
       return;
-    },
-    showInfo(tab: string) {
-      if (this.$store.getters["accounts/currentlyEncrypted"]) {
-        if (tab === "SetPasswordPage") {
-          this.$store.commit("notification/alert", this.i18n.phrase_incorrect);
-          return;
-        }
+    }
+  }
+  styleStore.showInfo();
+  currentView.changeView(tab);
+  return;
+}
+
+function syncClock() {
+  chrome.permissions.request(
+    { origins: ["https://www.google.com/"] },
+    async (granted) => {
+      if (granted) {
+        await UserSettings.updateItems();
+        const message = await syncTimeWithGoogle();
+        notification.alert(i18n[message]);
       }
-      this.$store.commit("style/showInfo");
-      this.$store.commit("currentView/changeView", tab);
       return;
     },
-    syncClock() {
-      chrome.permissions.request(
-        { origins: ["https://www.google.com/"] },
-        async (granted) => {
-          if (granted) {
-            await UserSettings.updateItems();
-            const message = await syncTimeWithGoogle();
-            this.$store.commit("notification/alert", this.i18n[message]);
-          }
-          return;
-        },
-      );
-      return;
-    },
-  },
-});
+  );
+  return;
+}
 </script>

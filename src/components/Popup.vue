@@ -65,47 +65,29 @@
     <input type="text" id="codeClipboard" tabindex="-1" />
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
-import { mapState } from "vuex";
+<script setup lang="ts">
+import { ref } from "vue";
+import { storeToRefs } from "pinia";
 
 import MainHeader from "./Popup/MainHeader.vue";
 import MainBody from "./Popup/MainBody.vue";
 import MenuPage from "./Popup/MenuPage.vue";
 import PageHandler from "./Popup/PageHandler.vue";
 import NotificationHandler from "./Popup/NotificationHandler.vue";
+import { useMenuStore } from "../store/Menu";
+import { useNotificationStore } from "../store/Notification";
+import { useQrStore } from "../store/Qr";
+import { useStyleStore } from "../store/Style";
 
-const computedPrototype = [
-  mapState("style", ["style"]),
-  mapState("menu", ["theme"]),
-  mapState("qr", ["qr"]),
-  mapState("notification", ["notification"]),
-];
+const styleStore = useStyleStore();
+const { style } = storeToRefs(styleStore);
+const { theme } = storeToRefs(useMenuStore());
+const { qr } = storeToRefs(useQrStore());
+const { notification } = storeToRefs(useNotificationStore());
 
-let computed = {};
+const hideoutline = ref(true);
 
-for (const module of computedPrototype) {
-  Object.assign(computed, module);
+function hideQr() {
+  styleStore.hideQr();
 }
-
-export default Vue.extend({
-  data: function () {
-    return {
-      hideoutline: true,
-    };
-  },
-  computed,
-  methods: {
-    hideQr() {
-      this.$store.commit("style/hideQr");
-    },
-  },
-  components: {
-    MainHeader,
-    MainBody,
-    MenuPage,
-    PageHandler,
-    NotificationHandler,
-  },
-});
 </script>

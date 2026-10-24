@@ -52,113 +52,99 @@
     <a-button @click="popOut()">{{ i18n.popout }}</a-button>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
+<script setup lang="ts">
+import { computed, ref } from "vue";
+import { storeToRefs } from "pinia";
 import { isFirefox } from "../../browser";
 import { UserSettings } from "../../models/settings";
+import { i18n } from "../../store/i18n";
+import { useAccountsStore } from "../../store/Accounts";
+import { useCurrentViewStore } from "../../store/CurrentView";
+import { useMenuStore } from "../../store/Menu";
+import { useNotificationStore } from "../../store/Notification";
 
-export default Vue.extend({
-  computed: {
-    zoom: {
-      get(): number {
-        return this.$store.state.menu.zoom;
-      },
-      set(zoom: number) {
-        this.$store.commit("menu/setZoom", zoom);
-      },
-    },
-    useAutofill: {
-      get(): boolean {
-        return this.$store.state.menu.useAutofill;
-      },
-      set(useAutofill: boolean) {
-        this.$store.commit("menu/setAutofill", useAutofill);
-      },
-    },
-    smartFilter: {
-      get(): boolean {
-        return this.$store.state.menu.smartFilter;
-      },
-      set(smartFilter: boolean) {
-        this.$store.commit("menu/setSmartFilter", smartFilter);
-        this.$store.commit(
-          "notification/alert",
-          this.i18n.activate_auto_filter,
-        );
-      },
-    },
-    theme: {
-      get(): string {
-        return this.$store.state.menu.theme;
-      },
-      set(theme: string) {
-        this.$store.commit("menu/setTheme", theme);
-      },
-    },
-    defaultEncryption(): string {
-      return this.$store.state.accounts.defaultEncryption;
-    },
-    autolock: {
-      get(): number {
-        return this.$store.state.menu.autolock;
-      },
-      set(autolock: number) {
-        this.$store.commit("menu/setAutolock", autolock);
-        chrome.runtime.sendMessage({ action: "resetAutolock" });
-      },
-    },
-    browserSync: {
-      get(): boolean {
-        return this.newStorageLocation === "sync";
-      },
-      set(value) {
-        this.newStorageLocation = value ? "sync" : "local";
-      },
-    },
-  },
-  data() {
-    return {
-      newStorageLocation: "",
-    };
-  },
-  created() {
-    UserSettings.updateItems().then(() => {
-      this.newStorageLocation = UserSettings.items.storageLocation || "";
-    });
-  },
-  methods: {
-    popOut() {
-      let windowType;
-      if (isFirefox) {
-        windowType = "detached_panel";
-      } else {
-        windowType = "panel";
-      }
-      chrome.windows.create({
-        url: chrome.runtime.getURL("view/popup.html?popup=true"),
-        type: windowType as chrome.windows.createTypeEnum,
-        height: window.innerHeight,
-        width: window.innerWidth,
-      });
-    },
-    migrateStorage() {
-      this.$store.commit("currentView/changeView", "LoadingPage");
-      this.$store
-        .dispatch("accounts/migrateStorage", this.newStorageLocation)
-        .then(
-          (m) => {
-            this.$store.commit("notification/alert", this.i18n[m]);
-            this.$store.commit("currentView/changeView", "PreferencesPage");
-          },
-          (r: string) => {
-            this.$store.commit(
-              "notification/alert",
-              this.i18n.updateFailure + r,
-            );
-            this.$store.commit("currentView/changeView", "PreferencesPage");
-          },
-        );
-    },
+const accounts = useAccountsStore();
+const currentView = useCurrentViewStore();
+const menu = useMenuStore();
+const notification = useNotificationStore();
+const { defaultEncryption } = storeToRefs(accounts);
+
+const zoom = computed({
+  get: () => menu.zoom,
+  set: (zoom: number | string) => {
+    menu.setZoom(zoom);
   },
 });
+
+const useAutofill = computed({
+  get: () => menu.useAutofill,
+  set: (useAutofill: boolean) => {
+    menu.setAutofill(useAutofill);
+  },
+});
+
+const smartFilter = computed({
+  get: () => menu.smartFilter,
+  set: (smartFilter: boolean) => {
+    menu.setSmartFilter(smartFilter);
+    notification.alert(i18n.activate_auto_filter);
+  },
+});
+
+const theme = computed({
+  get: () => menu.theme,
+  set: (theme: string) => {
+    menu.setTheme(theme);
+  },
+});
+
+const autolock = computed({
+  get: () => menu.autolock,
+  set: (autolock: number) => {
+    menu.setAutolock(autolock);
+    chrome.runtime.sendMessage({ action: "resetAutolock" });
+  },
+});
+
+const newStorageLocation = ref("");
+
+const browserSync = computed({
+  get: () => newStorageLocation.value === "sync",
+  set: (value: boolean) => {
+    newStorageLocation.value = value ? "sync" : "local";
+  },
+});
+
+UserSettings.updateItems().then(() => {
+  newStorageLocation.value = UserSettings.items.storageLocation || "";
+});
+
+function popOut() {
+  let windowType;
+  if (isFirefox) {
+    windowType = "detached_panel";
+  } else {
+    windowType = "panel";
+  }
+  chrome.windows.create({
+    url: chrome.runtime.getURL("view/popup.html?popup=true"),
+    type: windowType as chrome.windows.createTypeEnum,
+    height: window.innerHeight,
+    width: window.innerWidth,
+  });
+}
+
+function migrateStorage() {
+  currentView.changeView("LoadingPage");
+  accounts.migrateStorage(newStorageLocation.value).then(
+    (m) => {
+      notification.alert(i18n[m]);
+      currentView.changeView("PreferencesPage");
+    },
+    (r: string) => {
+      notification.alert(i18n.updateFailure + r);
+      currentView.changeView("PreferencesPage");
+    },
+  );
+}
 </script>

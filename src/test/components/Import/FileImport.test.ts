@@ -3,12 +3,10 @@ import * as chai from "chai";
 import * as sinon from "sinon";
 import * as sinonChai from "sinon-chai";
 
-import Vue from "vue";
-import { mount, createLocalVue, Wrapper } from "@vue/test-utils";
-import CommonComponents from "../../../components/common/index";
+import { mount, VueWrapper } from "@vue/test-utils";
 
 import FileImport from "../../../components/Import/FileImport.vue";
-import { loadI18nMessages } from "../../../store/i18n";
+import { i18n, loadI18nMessages } from "../../../store/i18n";
 import { EntryStorage } from "../../../models/storage";
 import {
   cacheSessionKey,
@@ -16,11 +14,11 @@ import {
   resetStorage,
   storeKey,
 } from "../../storage-helper";
+import { mountOptions } from "../../vue-helper";
 
 chai.should();
 chai.use(sinonChai);
 mocha.setup("bdd");
-const localVue = createLocalVue();
 
 const SECRET = "JBSWY3DPEHPK3PXP";
 
@@ -28,7 +26,16 @@ describe("FileImport", () => {
   let alert: sinon.SinonSpy;
   let alerted: Promise<void>;
 
-  async function importFile(wrapper: Wrapper<Vue>) {
+  async function chooseFile(wrapper: VueWrapper, content: string) {
+    const input = wrapper.find<HTMLInputElement>("input[type='file']");
+    const transfer = new DataTransfer();
+    transfer.items.add(new File([content], "backup.json"));
+    input.element.files = transfer.files;
+    await input.trigger("change");
+    await alerted;
+  }
+
+  async function importFile(wrapper: VueWrapper) {
     const hash = crypto.randomUUID();
     const backup: { [hash: string]: RawOTPStorage } = {
       [hash]: {
@@ -40,24 +47,11 @@ describe("FileImport", () => {
         account: "alice",
       },
     };
-    (
-      wrapper.vm as unknown as {
-        importFile(event: Event, closeWindow: boolean): void;
-      }
-    ).importFile(
-      {
-        target: { files: [new File([JSON.stringify(backup)], "backup.json")] },
-      } as unknown as Event,
-      true,
-    );
-    await alerted;
+    await chooseFile(wrapper, JSON.stringify(backup));
   }
 
   before(async () => {
-    localVue.prototype.i18n = await loadI18nMessages();
-    for (const component of CommonComponents) {
-      localVue.component(component.name, component.component);
-    }
+    await loadI18nMessages();
   });
 
   beforeEach(async () => {
@@ -78,7 +72,7 @@ describe("FileImport", () => {
   it("should import a backup under the current key of the session", async () => {
     await storeKey("session-key");
     const encryption = await cacheSessionKey("session-key");
-    const wrapper = mount(FileImport, { localVue });
+    const wrapper = mount(FileImport, mountOptions());
 
     await importFile(wrapper);
 
@@ -87,20 +81,29 @@ describe("FileImport", () => {
     chai.expect(entries[0].keyId).to.equal("session-key");
     await entries[0].applyEncryption(encryption);
     entries[0].account.should.equal("alice");
-    alert.should.have.been.calledOnceWith(
-      localVue.prototype.i18n.updateSuccess,
-    );
+    alert.should.have.been.calledOnceWith(i18n.updateSuccess);
   });
 
   it("should not import a backup while the accounts are locked", async () => {
     await storeKey("session-key");
-    const wrapper = mount(FileImport, { localVue });
+    const wrapper = mount(FileImport, mountOptions());
 
     await importFile(wrapper);
 
     (await EntryStorage.get()).should.have.lengthOf(0);
-    alert.should.have.been.calledOnceWith(
-      localVue.prototype.i18n.phrase_incorrect,
-    );
+    alert.should.have.been.calledOnceWith(i18n.phrase_incorrect);
+  });
+
+  it("should import an otpauth line from the chosen file", async () => {
+    const wrapper = mount(FileImport, mountOptions());
+
+    await chooseFile(wrapper, `otpauth://totp/Example:alice?secret=${SECRET}`);
+
+    const entries = await EntryStorage.get();
+    entries.should.have.lengthOf(1);
+    chai.expect(entries[0].secret).to.equal(SECRET);
+    entries[0].issuer.should.equal("Example");
+    entries[0].account.should.equal("alice");
+    alert.should.have.been.calledOnceWith(i18n.updateSuccess);
   });
 });

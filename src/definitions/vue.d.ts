@@ -1,14 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Store } from "vuex";
+import ButtonInput from "../components/common/ButtonInput.vue";
+import ButtonLink from "../components/common/ButtonLink.vue";
+import FileInput from "../components/common/FileInput.vue";
+import SelectInput from "../components/common/SelectInput.vue";
+import TextInput from "../components/common/TextInput.vue";
+import ToggleInput from "../components/common/ToggleInput.vue";
 
-declare module "vue/types/vue" {
-  interface Vue {
-    // Only in Popup
-    $store: Store<any>;
-    $dragula: any;
-    // Only in Import
-    $entries: OTPEntryInterface[];
-    // In all
+declare module "vue" {
+  interface ComponentCustomProperties {
     i18n: { [key: string]: string };
+  }
+
+  interface GlobalComponents {
+    AButton: typeof ButtonInput;
+    AButtonLink: typeof ButtonLink;
+    ATextInput: typeof TextInput;
+    ASelectInput: typeof SelectInput;
+    AToggleInput: typeof ToggleInput;
+    AFileInput: typeof FileInput;
   }
 }

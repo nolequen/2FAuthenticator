@@ -44,117 +44,109 @@
     <a-button type="small" @click="addNewAccount()">{{ i18n.ok }}</a-button>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
-import { mapState } from "vuex";
+<script setup lang="ts">
+import { reactive } from "vue";
 import { OTPType, OTPEntry, OTPAlgorithm } from "../../models/otp";
+import { i18n } from "../../store/i18n";
+import { useAccountsStore } from "../../store/Accounts";
+import { useNotificationStore } from "../../store/Notification";
+import { useStyleStore } from "../../store/Style";
 
-export default Vue.extend({
-  data: function (): {
-    newAccount: {
-      issuer: string;
-      account: string;
-      secret: string;
-      type: OTPType;
-      period: number | undefined;
-      digits: number;
-      algorithm: OTPAlgorithm;
-    };
-  } {
-    return {
-      newAccount: {
-        issuer: "",
-        account: "",
-        secret: "",
-        type: OTPType.totp,
-        period: undefined,
-        digits: 6,
-        algorithm: OTPAlgorithm.SHA1,
-      },
-    };
-  },
-  computed: mapState("accounts", ["OTPType", "OTPAlgorithm"]),
-  methods: {
-    async addNewAccount() {
-      this.newAccount.secret = this.newAccount.secret.replace(/ /g, "");
+const accounts = useAccountsStore();
+const notification = useNotificationStore();
+const styleStore = useStyleStore();
 
-      if (this.newAccount.secret.length < 16) {
-        this.$store.commit("notification/alert", this.i18n.errorsecret);
-        return;
-      }
-
-      if (
-        !/^[a-z2-7]+=*$/i.test(this.newAccount.secret) &&
-        !/^[0-9a-f]+$/i.test(this.newAccount.secret)
-      ) {
-        this.$store.commit("notification/alert", this.i18n.errorsecret);
-        return;
-      }
-      let type: OTPType;
-      if (
-        !/^[a-z2-7]+=*$/i.test(this.newAccount.secret) &&
-        /^[0-9a-f]+$/i.test(this.newAccount.secret) &&
-        this.newAccount.type === OTPType.totp
-      ) {
-        type = OTPType.hex;
-      } else if (
-        !/^[a-z2-7]+=*$/i.test(this.newAccount.secret) &&
-        /^[0-9a-f]+$/i.test(this.newAccount.secret) &&
-        this.newAccount.type === OTPType.hotp
-      ) {
-        type = OTPType.hhex;
-      } else {
-        type = this.newAccount.type;
-      }
-
-      if (type === OTPType.hhex || type === OTPType.hotp) {
-        this.newAccount.period = undefined;
-      } else if (
-        typeof this.newAccount.period !== "number" ||
-        this.newAccount.period < 1
-      ) {
-        this.newAccount.period = undefined;
-      }
-
-      const defaultEncyptionKey = this.$store.state.accounts.defaultEncryption;
-      const encryption =
-        this.$store.state.accounts.encryption.get(defaultEncyptionKey);
-
-      const entry = new OTPEntry(
-        {
-          type,
-          index: 0,
-          issuer: this.newAccount.issuer,
-          account: this.newAccount.account,
-          encrypted: false,
-          secret: this.newAccount.secret,
-          counter: 0,
-          period: this.newAccount.period,
-          digits: this.newAccount.digits,
-          algorithm: this.newAccount.algorithm,
-        },
-        encryption,
-      );
-
-      try {
-        await entry.create();
-      } catch (error) {
-        await this.$store.dispatch("accounts/showWriteFailure", error);
-        return;
-      }
-      await this.$store.dispatch("accounts/addCode", entry);
-      this.$store.commit("style/hideInfo");
-      this.$store.commit("style/toggleEdit");
-
-      const codes = document.getElementById("codes");
-      if (codes) {
-        // wait vue apply changes to dom
-        setTimeout(() => {
-          codes.scrollTop = 0;
-        }, 0);
-      }
-      return;
-    },
-  },
+const newAccount: {
+  issuer: string;
+  account: string;
+  secret: string;
+  type: OTPType;
+  period: number | undefined;
+  digits: number;
+  algorithm: OTPAlgorithm;
+} = reactive({
+  issuer: "",
+  account: "",
+  secret: "",
+  type: OTPType.totp,
+  period: undefined,
+  digits: 6,
+  algorithm: OTPAlgorithm.SHA1,
 });
+
+async function addNewAccount() {
+  newAccount.secret = newAccount.secret.replace(/ /g, "");
+
+  if (newAccount.secret.length < 16) {
+    notification.alert(i18n.errorsecret);
+    return;
+  }
+
+  if (
+    !/^[a-z2-7]+=*$/i.test(newAccount.secret) &&
+    !/^[0-9a-f]+$/i.test(newAccount.secret)
+  ) {
+    notification.alert(i18n.errorsecret);
+    return;
+  }
+  let type: OTPType;
+  if (
+    !/^[a-z2-7]+=*$/i.test(newAccount.secret) &&
+    /^[0-9a-f]+$/i.test(newAccount.secret) &&
+    newAccount.type === OTPType.totp
+  ) {
+    type = OTPType.hex;
+  } else if (
+    !/^[a-z2-7]+=*$/i.test(newAccount.secret) &&
+    /^[0-9a-f]+$/i.test(newAccount.secret) &&
+    newAccount.type === OTPType.hotp
+  ) {
+    type = OTPType.hhex;
+  } else {
+    type = newAccount.type;
+  }
+
+  if (type === OTPType.hhex || type === OTPType.hotp) {
+    newAccount.period = undefined;
+  } else if (typeof newAccount.period !== "number" || newAccount.period < 1) {
+    newAccount.period = undefined;
+  }
+
+  const encryption = accounts.encryption.get(accounts.defaultEncryption);
+
+  const entry = new OTPEntry(
+    {
+      type,
+      index: 0,
+      issuer: newAccount.issuer,
+      account: newAccount.account,
+      encrypted: false,
+      secret: newAccount.secret,
+      counter: 0,
+      period: newAccount.period,
+      digits: newAccount.digits,
+      algorithm: newAccount.algorithm,
+    },
+    encryption,
+  );
+
+  try {
+    await entry.create();
+  } catch (error) {
+    await accounts.showWriteFailure(error);
+    return;
+  }
+  accounts.addCode(entry);
+  styleStore.hideInfo();
+  styleStore.toggleEdit();
+
+  const codes = document.getElementById("codes");
+  if (codes) {
+    // wait vue apply changes to dom
+    setTimeout(() => {
+      codes.scrollTop = 0;
+    }, 0);
+  }
+  return;
+}
 </script>

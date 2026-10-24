@@ -10,8 +10,10 @@
     <div class="message-box" v-show="confirmMessage !== ''">
       <div>{{ confirmMessage }}</div>
       <div class="buttons">
-        <a-button type="small" @click="confirmOK()">{{ i18n.yes }}</a-button>
-        <a-button type="small" @click="confirmCancel()">
+        <a-button type="small" @click="answerConfirm(true)">{{
+          i18n.yes
+        }}</a-button>
+        <a-button type="small" @click="answerConfirm(false)">
           {{ i18n.no }}
         </a-button>
       </div>
@@ -24,30 +26,18 @@
     ></div>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
-import { mapState } from "vuex";
+<script setup lang="ts">
+import { storeToRefs } from "pinia";
+import { useNotificationStore } from "../../store/Notification";
 
-export default Vue.extend({
-  computed: mapState("notification", [
-    "message",
-    "messageIdle",
-    "confirmMessage",
-  ]),
-  methods: {
-    closeAlert() {
-      this.$store.commit("notification/closeAlert");
-    },
-    confirmOK() {
-      const confirmEvent = new CustomEvent("confirm", { detail: true });
-      window.dispatchEvent(confirmEvent);
-      return;
-    },
-    confirmCancel() {
-      const confirmEvent = new CustomEvent("confirm", { detail: false });
-      window.dispatchEvent(confirmEvent);
-      return;
-    },
-  },
-});
+const notification = useNotificationStore();
+const { message, messageIdle, confirmMessage } = storeToRefs(notification);
+
+function closeAlert() {
+  notification.closeAlert();
+}
+
+function answerConfirm(answer: boolean) {
+  notification.answerConfirm(answer);
+}
 </script>

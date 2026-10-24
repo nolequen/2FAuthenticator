@@ -42,27 +42,22 @@
         class="icon"
         id="i-edit"
         v-bind:title="i18n.edit"
-        v-if="!style.isEditing"
         v-on:click="editEntry()"
       >
-        <IconPencil />
-      </div>
-      <div
-        class="icon"
-        id="i-edit"
-        v-bind:title="i18n.edit"
-        v-else
-        v-on:click="editEntry()"
-      >
-        <IconCheck />
+        <IconPencil v-if="!style.isEditing" />
+        <IconCheck v-else />
       </div>
     </div>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
-import { mapState } from "vuex";
+<script setup lang="ts">
+import { storeToRefs } from "pinia";
 import { getCurrentTab, okToInjectContentScript } from "../../utils";
+import { i18n } from "../../store/i18n";
+import { useAccountsStore } from "../../store/Accounts";
+import { useCurrentViewStore } from "../../store/CurrentView";
+import { useNotificationStore } from "../../store/Notification";
+import { useStyleStore } from "../../store/Style";
 
 // Icons
 import IconCog from "../../../svg/cog.svg";
@@ -73,102 +68,86 @@ import IconCheck from "../../../svg/check.svg";
 import IconPlus from "../../../svg/plus.svg";
 import { isFirefox } from "../../browser";
 
-const computedPrototype = [
-  mapState("style", ["style"]),
-  mapState("accounts", ["defaultEncryption"]),
-];
+const accounts = useAccountsStore();
+const currentView = useCurrentViewStore();
+const notification = useNotificationStore();
+const styleStore = useStyleStore();
+const { style } = storeToRefs(styleStore);
+const { defaultEncryption } = storeToRefs(accounts);
 
-let computed = {};
-
-for (const module of computedPrototype) {
-  Object.assign(computed, module);
+function isPopup() {
+  const params = new URLSearchParams(document.location.search.substring(1));
+  return params.get("popup");
 }
 
-export default Vue.extend({
-  computed,
-  methods: {
-    isPopup() {
-      const params = new URLSearchParams(document.location.search.substring(1));
-      return params.get("popup");
-    },
-    popOut() {
-      let windowType;
-      if (isFirefox) {
-        windowType = "detached_panel";
-      } else {
-        windowType = "panel";
-      }
-      chrome.windows.create({
-        url: chrome.runtime.getURL("view/popup.html?popup=true"),
-        type: windowType as chrome.windows.createTypeEnum,
-        height: window.innerHeight,
-        width: window.innerWidth,
-      });
-      window.close();
-    },
-    showMenu() {
-      this.$store.commit("style/showMenu");
-    },
-    showInfo(page: string) {
-      this.$store.commit("style/showInfo");
-      this.$store.commit("currentView/changeView", page);
-    },
-    editEntry() {
-      this.$store.commit("style/toggleEdit");
-      this.$store.commit("accounts/stopFilter");
-    },
-    lock() {
-      chrome.runtime.sendMessage({ action: "lock" }, window.close);
-      return;
-    },
-    async beginCapture() {
-      if (this.$store.getters["accounts/currentlyEncrypted"]) {
-        this.$store.commit("notification/alert", this.i18n.phrase_incorrect);
+function popOut() {
+  let windowType;
+  if (isFirefox) {
+    windowType = "detached_panel";
+  } else {
+    windowType = "panel";
+  }
+  chrome.windows.create({
+    url: chrome.runtime.getURL("view/popup.html?popup=true"),
+    type: windowType as chrome.windows.createTypeEnum,
+    height: window.innerHeight,
+    width: window.innerWidth,
+  });
+  window.close();
+}
+
+function showMenu() {
+  styleStore.showMenu();
+}
+
+function showInfo(page: string) {
+  styleStore.showInfo();
+  currentView.changeView(page);
+}
+
+function editEntry() {
+  styleStore.toggleEdit();
+  accounts.stopFilter();
+}
+
+function lock() {
+  chrome.runtime.sendMessage({ action: "lock" }, window.close);
+  return;
+}
+
+async function beginCapture() {
+  if (accounts.currentlyEncrypted) {
+    notification.alert(i18n.phrase_incorrect);
+    return;
+  }
+
+  const tab = await getCurrentTab();
+  // Insert content script
+  if (okToInjectContentScript(tab)) {
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ["/dist/content.js"],
+    });
+    await chrome.scripting.insertCSS({
+      target: { tabId: tab.id },
+      files: ["/css/content.css"],
+    });
+
+    if (tab.url?.startsWith("file:")) {
+      if (await notification.confirm(i18n.capture_local_file_failed)) {
+        window.open("import.html?QrImport", "_blank");
         return;
       }
+    }
 
-      const tab = await getCurrentTab();
-      // Insert content script
-      if (okToInjectContentScript(tab)) {
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          files: ["/dist/content.js"],
-        });
-        await chrome.scripting.insertCSS({
-          target: { tabId: tab.id },
-          files: ["/css/content.css"],
-        });
-
-        if (tab.url?.startsWith("file:")) {
-          if (
-            await this.$store.dispatch(
-              "notification/confirm",
-              this.i18n.capture_local_file_failed,
-            )
-          ) {
-            window.open("import.html?QrImport", "_blank");
-            return;
-          }
-        }
-
-        chrome.runtime.sendMessage({ action: "updateContentTab", data: tab });
-        chrome.tabs.sendMessage(tab.id, { action: "capture" }, (result) => {
-          if (result !== "beginCapture") {
-            this.$store.commit("notification/alert", this.i18n.capture_failed);
-          } else {
-            window.close();
-          }
-        });
+    chrome.runtime.sendMessage({ action: "updateContentTab", data: tab });
+    chrome.tabs.sendMessage(tab.id, { action: "capture" }, (result) => {
+      if (result !== "beginCapture") {
+        notification.alert(i18n.capture_failed);
+      } else {
+        window.close();
       }
-    },
-  },
-  components: {
-    IconCog,
-    IconLock,
-    IconScan,
-    IconPencil,
-    IconCheck,
-    IconPlus,
-  },
-});
+    });
+  }
+}
 </script>

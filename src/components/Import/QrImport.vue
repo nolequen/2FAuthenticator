@@ -7,90 +7,84 @@
       button-type="file"
       accept="image/*"
       @change="importQr($event, true)"
-      multiple="true"
+      multiple
       :label="i18n.import_backup_qr"
     />
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
+<script setup lang="ts">
 // @ts-ignore
 import QRCode from "qrcode-reader";
 import jsQR from "jsqr";
 import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
 import { importUnderSession } from "../../models/session";
+import { i18n } from "../../store/i18n";
 
-export default Vue.extend({
-  methods: {
-    async importQr(event: Event, closeWindow: Boolean) {
-      const target = event.target as HTMLInputElement;
-      if (!target || !target.files) {
+async function importQr(event: Event, closeWindow: boolean) {
+  const target = event.target as HTMLInputElement;
+  if (!target || !target.files) {
+    return;
+  }
+  if (target.files.length) {
+    const otpUrlList: string[] = [];
+    let hasFailedResults = false;
+    for (let fileIndex = 0; fileIndex < target.files.length; fileIndex++) {
+      const file = target.files[fileIndex];
+      const otpUrl = await getOtpUrlFromQrFile(file);
+      if (otpUrl !== null) {
+        otpUrlList.push(otpUrl);
+      } else {
+        hasFailedResults = true;
+      }
+    }
+
+    const result = await getEntryDataFromOTPAuthPerLine(otpUrlList.join("\n"));
+
+    let importData: {
+      // @ts-ignore
+      key?: { enc: string; hash: string };
+      [hash: string]: RawOTPStorage;
+    } = result.exportData;
+
+    const { failedCount, succeededCount } = result;
+
+    let decryptedFileData: { [hash: string]: RawOTPStorage } = importData;
+
+    if (Object.keys(decryptedFileData).length) {
+      if (!(await importUnderSession(decryptedFileData))) {
+        alert(i18n.phrase_incorrect);
+        target.value = "";
         return;
       }
-      if (target.files.length) {
-        const otpUrlList: string[] = [];
-        let hasFailedResults = false;
-        for (let fileIndex = 0; fileIndex < target.files.length; fileIndex++) {
-          const file = target.files[fileIndex];
-          const otpUrl = await getOtpUrlFromQrFile(file);
-          if (otpUrl !== null) {
-            otpUrlList.push(otpUrl);
-          } else {
-            hasFailedResults = true;
-          }
-        }
 
-        const result = await getEntryDataFromOTPAuthPerLine(
-          otpUrlList.join("\n"),
-        );
-
-        let importData: {
-          // @ts-ignore
-          key?: { enc: string; hash: string };
-          [hash: string]: RawOTPStorage;
-        } = result.exportData;
-
-        const { failedCount, succeededCount } = result;
-
-        let decryptedFileData: { [hash: string]: RawOTPStorage } = importData;
-
-        if (Object.keys(decryptedFileData).length) {
-          if (!(await importUnderSession(decryptedFileData))) {
-            alert(this.i18n.phrase_incorrect);
-            target.value = "";
-            return;
-          }
-
-          if (hasFailedResults) {
-            alert(this.i18n.import_backup_qr_partly_failed);
-          } else if (failedCount && succeededCount) {
-            alert(this.i18n.migration_partly_fail);
-          } else if (succeededCount) {
-            alert(this.i18n.updateSuccess);
-          } else {
-            alert(this.i18n.migration_fail);
-          }
-
-          if (closeWindow) {
-            window.close();
-          }
-        } else {
-          alert(this.i18n.errorqr);
-          if (closeWindow) {
-            window.close();
-          }
-        }
+      if (hasFailedResults) {
+        alert(i18n.import_backup_qr_partly_failed);
+      } else if (failedCount && succeededCount) {
+        alert(i18n.migration_partly_fail);
+      } else if (succeededCount) {
+        alert(i18n.updateSuccess);
       } else {
-        alert(this.i18n.updateFailure);
-        if (closeWindow) {
-          window.alert(this.i18n.updateFailure);
-          window.close();
-        }
+        alert(i18n.migration_fail);
       }
-      return;
-    },
-  },
-});
+
+      if (closeWindow) {
+        window.close();
+      }
+    } else {
+      alert(i18n.errorqr);
+      if (closeWindow) {
+        window.close();
+      }
+    }
+  } else {
+    alert(i18n.updateFailure);
+    if (closeWindow) {
+      window.alert(i18n.updateFailure);
+      window.close();
+    }
+  }
+  return;
+}
 
 async function getOtpUrlFromQrFile(file: File): Promise<string | null> {
   return new Promise((resolve) => {

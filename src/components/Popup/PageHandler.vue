@@ -7,11 +7,14 @@
     >
       <IconXCircle />
     </div>
-    <component v-bind:is="info" id="infoContent"></component>
+    <component v-bind:is="pages[info]" id="infoContent"></component>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
+<script setup lang="ts">
+import type { Component } from "vue";
+import { storeToRefs } from "pinia";
+import { useCurrentViewStore } from "../../store/CurrentView";
+import { useStyleStore } from "../../store/Style";
 
 import IconXCircle from "../../../svg/x-circle.svg";
 
@@ -23,26 +26,20 @@ import BackupPage from "./BackupPage.vue";
 import PreferencesPage from "./PreferencesPage.vue";
 import LoadingPage from "./LoadingPage.vue";
 
-export default Vue.extend({
-  computed: {
-    info: function () {
-      return this.$store.state.currentView.info;
-    },
-  },
-  methods: {
-    hideInfo() {
-      this.$store.commit("style/hideInfo");
-    },
-  },
-  components: {
-    IconXCircle,
-    AddAccountPage,
-    AddMethodPage,
-    SetPasswordPage,
-    EnterPasswordPage,
-    BackupPage,
-    PreferencesPage,
-    LoadingPage,
-  },
-});
+const pages: { [name: string]: Component } = {
+  AddAccountPage,
+  AddMethodPage,
+  SetPasswordPage,
+  EnterPasswordPage,
+  BackupPage,
+  PreferencesPage,
+  LoadingPage,
+};
+
+const styleStore = useStyleStore();
+const { info } = storeToRefs(useCurrentViewStore());
+
+function hideInfo() {
+  styleStore.hideInfo();
+}
 </script>

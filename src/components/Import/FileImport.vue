@@ -19,105 +19,100 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
+<script setup lang="ts">
+import { ref } from "vue";
 import { decryptBackupData } from "../../models/backup";
 import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
 import { importUnderSession } from "../../models/session";
+import { i18n } from "../../store/i18n";
 
-export default Vue.extend({
-  data: function () {
-    return {
-      getFilePassphrase: false,
-      readFilePassphrase: false,
-      importFilePassphrase: "",
-    };
-  },
-  methods: {
-    importFile(event: Event, closeWindow: Boolean) {
-      const target = event.target as HTMLInputElement;
-      if (!target || !target.files) {
-        return;
+const getFilePassphrase = ref(false);
+const readFilePassphrase = ref(false);
+const importFilePassphrase = ref("");
+
+function importFile(event: Event, closeWindow: boolean) {
+  const target = event.target as HTMLInputElement;
+  if (!target || !target.files) {
+    return;
+  }
+  if (target.files[0]) {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      let importData: { [hash: string]: OTPStorage | Key } = {};
+      let failedCount = 0;
+      let succeededCount = 0;
+      try {
+        importData = JSON.parse(reader.result as string);
+        succeededCount = Object.keys(importData).length;
+      } catch (e) {
+        console.warn(e);
+        const result = await getEntryDataFromOTPAuthPerLine(
+          reader.result as string,
+        );
+        importData = result.exportData;
+        failedCount = result.failedCount;
+        succeededCount = result.succeededCount;
       }
-      if (target.files[0]) {
-        const reader = new FileReader();
-        reader.onload = async () => {
-          let importData: { [hash: string]: OTPStorage | Key } = {};
-          let failedCount = 0;
-          let succeededCount = 0;
-          try {
-            importData = JSON.parse(reader.result as string);
-            succeededCount = Object.keys(importData).length;
-          } catch (e) {
-            console.warn(e);
-            const result = await getEntryDataFromOTPAuthPerLine(
-              reader.result as string,
-            );
-            importData = result.exportData;
-            failedCount = result.failedCount;
-            succeededCount = result.succeededCount;
-          }
 
-          let decryptedFileData: { [hash: string]: RawOTPStorage } = {};
-          try {
-            const passphrase = Object.values(importData).some(
-              (entry) => entry.dataType === "EncOTPStorage",
-            )
-              ? await this.getOldPassphrase()
-              : null;
-            decryptedFileData = await decryptBackupData(importData, passphrase);
-          } catch (e) {
-            console.warn(e);
-          }
-          if (Object.keys(decryptedFileData).length) {
-            if (!(await importUnderSession(decryptedFileData))) {
-              alert(this.i18n.phrase_incorrect);
-              target.value = "";
-              this.getFilePassphrase = false;
-              this.importFilePassphrase = "";
-              return;
-            }
-            if (failedCount === 0) {
-              alert(this.i18n.updateSuccess);
-            } else if (succeededCount) {
-              alert(this.i18n.migration_partly_fail);
-            } else {
-              alert(this.i18n.migration_fail);
-            }
+      let decryptedFileData: { [hash: string]: RawOTPStorage } = {};
+      try {
+        const passphrase = Object.values(importData).some(
+          (entry) => entry.dataType === "EncOTPStorage",
+        )
+          ? await getOldPassphrase()
+          : null;
+        decryptedFileData = await decryptBackupData(importData, passphrase);
+      } catch (e) {
+        console.warn(e);
+      }
+      if (Object.keys(decryptedFileData).length) {
+        if (!(await importUnderSession(decryptedFileData))) {
+          alert(i18n.phrase_incorrect);
+          target.value = "";
+          getFilePassphrase.value = false;
+          importFilePassphrase.value = "";
+          return;
+        }
+        if (failedCount === 0) {
+          alert(i18n.updateSuccess);
+        } else if (succeededCount) {
+          alert(i18n.migration_partly_fail);
+        } else {
+          alert(i18n.migration_fail);
+        }
 
-            if (closeWindow) {
-              window.close();
-            }
-          } else {
-            alert(this.i18n.migration_fail);
-            this.getFilePassphrase = false;
-            this.importFilePassphrase = "";
-          }
-        };
-        reader.readAsText(target.files[0], "utf8");
-      } else {
-        alert(this.i18n.migration_fail);
         if (closeWindow) {
           window.close();
         }
+      } else {
+        alert(i18n.migration_fail);
+        getFilePassphrase.value = false;
+        importFilePassphrase.value = "";
       }
-      return;
-    },
-    async getOldPassphrase() {
-      this.getFilePassphrase = true;
-      while (true) {
-        if (this.readFilePassphrase) {
-          if (this.importFilePassphrase) {
-            this.readFilePassphrase = false;
-            break;
-          } else {
-            this.readFilePassphrase = false;
-          }
-        }
-        await new Promise((resolve) => setTimeout(resolve, 250));
+    };
+    reader.readAsText(target.files[0], "utf8");
+  } else {
+    alert(i18n.migration_fail);
+    if (closeWindow) {
+      window.close();
+    }
+  }
+  return;
+}
+
+async function getOldPassphrase() {
+  getFilePassphrase.value = true;
+  while (true) {
+    if (readFilePassphrase.value) {
+      if (importFilePassphrase.value) {
+        readFilePassphrase.value = false;
+        break;
+      } else {
+        readFilePassphrase.value = false;
       }
-      return this.importFilePassphrase;
-    },
-  },
-});
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  return importFilePassphrase.value;
+}
 </script>

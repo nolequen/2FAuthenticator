@@ -13,48 +13,72 @@
     <a-button-link
       download="authenticator.txt"
       :href="exportOneLineOtpAuthFile"
+      v-if="exportOneLineOtpAuthFile"
       >{{ i18n.download_backup }}</a-button-link
     >
     <a-button-link
       download="authenticator.json"
       :href="exportEncryptedFile"
-      v-if="!!defaultEncryption"
+      v-if="!!defaultEncryption && exportEncryptedFile"
       >{{ i18n.download_enc_backup }}</a-button-link
     >
     <a-button-link href="import.html">{{ i18n.import_backup }}</a-button-link>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
+<script setup lang="ts">
+import { ref, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { BrowserStorage, EntryStorage } from "../../models/storage";
+import { useAccountsStore } from "../../store/Accounts";
+import { useStyleStore } from "../../store/Style";
 
-export default Vue.extend({
-  data: function () {
-    const exportData = this.$store.state.accounts.exportData;
-    const exportEncData = this.$store.state.accounts.exportEncData;
-    const key = this.$store.state.accounts.key;
+const accounts = useAccountsStore();
+const { defaultEncryption, currentlyEncrypted } = storeToRefs(accounts);
+const { style } = storeToRefs(useStyleStore());
 
-    return {
-      exportEncryptedFile: getBackupFile(exportEncData, key),
-      exportOneLineOtpAuthFile: getOneLineOtpBackupFile(exportData),
-    };
+const exportEncryptedFile = ref("");
+const exportOneLineOtpAuthFile = ref("");
+let builds = 0;
+
+buildBackupFiles();
+
+watch(
+  () => style.value.fadein,
+  (shown) => {
+    if (shown) {
+      buildBackupFiles();
+    }
   },
-  computed: {
-    defaultEncryption: function () {
-      return this.$store.state.accounts.defaultEncryption;
-    },
-    currentlyEncrypted: function () {
-      return this.$store.getters["accounts/currentlyEncrypted"];
-    },
-  },
-});
+);
 
-function getBackupFile(
-  entryData: { [hash: string]: RawOTPStorage },
-  key?: Object,
-) {
-  if (key) {
-    Object.assign(entryData, { key: key });
+async function buildBackupFiles() {
+  const build = ++builds;
+  exportEncryptedFile.value = "";
+  exportOneLineOtpAuthFile.value = "";
+
+  const exportData = (await EntryStorage.getExport(accounts.entries)) as {
+    [hash: string]: RawOTPStorage;
+  };
+  const exportEncData = (await EntryStorage.getExport(
+    accounts.entries,
+    true,
+  )) as { [hash: string]: OTPStorage };
+  const keys = (await BrowserStorage.getKeys()).reduce(
+    (prev: { [id: string]: Key }, key) => {
+      prev[key.id] = key;
+      return prev;
+    },
+    {},
+  );
+
+  if (build !== builds) {
+    return;
   }
+  exportEncryptedFile.value = getBackupFile({ ...exportEncData, ...keys });
+  exportOneLineOtpAuthFile.value = getOneLineOtpBackupFile(exportData);
+}
+
+function getBackupFile(entryData: { [hash: string]: OTPStorage | Key }) {
   let json = JSON.stringify(entryData, null, 2);
   // for windows notepad
   json = json.replace(/\n/g, "\r\n");
@@ -65,15 +89,13 @@ function getOneLineOtpBackupFile(entryData: { [hash: string]: RawOTPStorage }) {
   const otpAuthLines: string[] = [];
   for (const hash of Object.keys(entryData)) {
     const otpStorage = entryData[hash];
-    if (otpStorage.issuer) {
-      otpStorage.issuer = removeUnsafeData(otpStorage.issuer);
-    }
-    if (otpStorage.account) {
-      otpStorage.account = removeUnsafeData(otpStorage.account);
-    }
-    const label = otpStorage.issuer
-      ? otpStorage.issuer + ":" + (otpStorage.account || "")
-      : otpStorage.account || "";
+    const issuer = otpStorage.issuer
+      ? removeUnsafeData(otpStorage.issuer)
+      : otpStorage.issuer;
+    const account = otpStorage.account
+      ? removeUnsafeData(otpStorage.account)
+      : otpStorage.account;
+    const label = issuer ? issuer + ":" + (account || "") : account || "";
     let type = "";
     if (otpStorage.type === "totp" || otpStorage.type === "hex") {
       type = "totp";
@@ -90,7 +112,7 @@ function getOneLineOtpBackupFile(entryData: { [hash: string]: RawOTPStorage }) {
       label +
       "?secret=" +
       otpStorage.secret +
-      (otpStorage.issuer ? "&issuer=" + otpStorage.issuer : "") +
+      (issuer ? "&issuer=" + issuer : "") +
       (type === "hotp" ? "&counter=" + otpStorage.counter : "") +
       (type === "totp" && otpStorage.period
         ? "&period=" + otpStorage.period

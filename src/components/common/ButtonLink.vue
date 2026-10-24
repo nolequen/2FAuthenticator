@@ -8,10 +8,6 @@
     <slot></slot>
   </a>
 </template>
-<script lang="ts">
-import Vue from "vue";
-
-export default Vue.extend({
-  props: ["type", "href", "download"],
-});
+<script setup lang="ts">
+defineProps<{ type?: string; href?: string; download?: string }>();
 </script>

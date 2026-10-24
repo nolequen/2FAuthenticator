@@ -1,20 +1,18 @@
 // Vue
-import Vue from "vue";
-import Vuex from "vuex";
-import { Vue2Dragula } from "vue2-dragula";
+import { createApp } from "vue";
+import { createPinia } from "pinia";
 
 // Components
 import Popup from "./components/Popup.vue";
 import CommonComponents from "./components/common/index";
 
 // Other
-import { loadI18nMessages } from "./store/i18n";
-import { Style } from "./store/Style";
-import { Accounts } from "./store/Accounts";
-import { CurrentView } from "./store/CurrentView";
-import { Menu } from "./store/Menu";
-import { Notification } from "./store/Notification";
-import { Qr } from "./store/Qr";
+import { i18n, loadI18nMessages } from "./store/i18n";
+import { useStyleStore } from "./store/Style";
+import { useAccountsStore } from "./store/Accounts";
+import { useCurrentViewStore } from "./store/CurrentView";
+import { useMenuStore } from "./store/Menu";
+import { useNotificationStore } from "./store/Notification";
 import { syncTimeWithGoogle } from "./syncTime";
 import { UserSettings } from "./models/settings";
 
@@ -22,55 +20,52 @@ async function init() {
   await UserSettings.updateItems();
 
   // Add globals
-  Vue.prototype.i18n = await loadI18nMessages();
+  await loadI18nMessages();
+
+  const app = createApp(Popup);
 
   // Load modules
-  Vue.use(Vuex);
-  Vue.use(Vue2Dragula);
+  const pinia = createPinia();
+  app.use(pinia);
 
   // Load common components globally
   for (const component of CommonComponents) {
-    Vue.component(component.name, component.component);
+    app.component(component.name, component.component);
   }
 
+  app.config.globalProperties.i18n = i18n;
+
   // State
-  const store = new Vuex.Store({
-    modules: {
-      accounts: await new Accounts().getModule(),
-      currentView: new CurrentView().getModule(),
-      menu: await new Menu().getModule(),
-      notification: new Notification().getModule(),
-      qr: new Qr().getModule(),
-      style: new Style().getModule(),
-    },
-  });
+  const accounts = useAccountsStore(pinia);
+  const currentView = useCurrentViewStore(pinia);
+  const menu = useMenuStore(pinia);
+  const notification = useNotificationStore(pinia);
+  const style = useStyleStore(pinia);
+  await accounts.init();
+  await menu.init();
 
   // Render
-  const instance = new Vue({
-    render: (h) => h(Popup),
-    store,
-    mounted() {
-      // Update time based entries' codes
-      this.$store.commit("accounts/updateCodes");
-      setInterval(() => {
-        this.$store.commit("accounts/updateCodes");
-      }, 1000);
-    },
-  }).$mount("#authenticator");
+  app.mount("#authenticator");
+
+  // Update time based entries' codes
+  accounts.updateCodes();
+  setInterval(() => {
+    accounts.updateCodes();
+  }, 1000);
 
   // Prompt for password if needed
-  if (instance.$store.state.accounts.shouldShowPassphrase) {
+  if (accounts.shouldShowPassphrase) {
     // If we have cached password, use that
-    if (instance.$store.state.accounts.defaultEncryption) {
-      instance.$store.commit("currentView/changeView", "LoadingPage");
-      await instance.$store.dispatch("accounts/updateEntries");
+    if (accounts.defaultEncryption) {
+      currentView.changeView("LoadingPage");
+      await accounts.updateEntries();
     } else {
-      instance.$store.commit("style/showInfo", true);
-      instance.$store.commit("currentView/changeView", "EnterPasswordPage");
+      style.showInfo(true);
+      currentView.changeView("EnterPasswordPage");
     }
   } else {
     // Set init complete if no encryption is present, otherwise this will be set in updateEntries.
-    instance.$store.commit("accounts/initComplete");
+    accounts.completeInit();
   }
 
   // Auto focus on first entry
@@ -78,18 +73,18 @@ async function init() {
 
   // Set document title
   try {
-    document.title = instance.i18n.extName;
+    document.title = i18n.extName;
   } catch (e) {
     console.error(e);
   }
 
   // Backup reminder / run backup
   const backupReminder = setInterval(() => {
-    if (instance.$store.state.accounts.entries.length === 0) {
+    if (accounts.entries.length === 0) {
       return;
     }
 
-    if (instance.$store.getters["accounts/currentlyEncrypted"]) {
+    if (accounts.currentlyEncrypted) {
       return;
     }
 
@@ -103,7 +98,7 @@ async function init() {
       clientTime - Number(UserSettings.items.lastRemindingBackupTime) >= 30 ||
       clientTime - Number(UserSettings.items.lastRemindingBackupTime) < 0
     ) {
-      instance.$store.commit("notification/alert", instance.i18n.remind_backup);
+      notification.alert(i18n.remind_backup);
       UserSettings.items.lastRemindingBackupTime = clientTime;
       UserSettings.commitItems();
     }
@@ -115,12 +110,12 @@ async function init() {
     "keyup",
     (e) => {
       if (e.key === "/") {
-        if (instance.$store.getters["style/isMenuShown"]) {
+        if (style.isMenuShown) {
           return;
         }
-        instance.$store.commit("accounts/stopFilter");
+        accounts.stopFilter();
         // It won't focus the texfield if vue unhides the div
-        instance.$store.commit("accounts/showSearch");
+        accounts.openSearch();
         const searchDiv = document.getElementById("search");
         const searchInput = document.getElementById("searchInput");
         if (!searchInput || !searchDiv) {
@@ -134,7 +129,7 @@ async function init() {
   );
 
   // Show search box if more than 10 entries
-  instance.$store.dispatch("accounts/showSearchIfNeeded");
+  accounts.showSearchIfNeeded();
 
   const query = new URLSearchParams(document.location.search.substring(1));
   // Resize window to proper size if popup

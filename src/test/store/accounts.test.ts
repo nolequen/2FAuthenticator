@@ -1,12 +1,14 @@
 import "mocha";
 import * as chai from "chai";
 import * as sinon from "sinon";
-import { createLocalVue } from "@vue/test-utils";
-import Vuex, { Store } from "vuex";
+import { createPinia, setActivePinia } from "pinia";
 
-import { Accounts } from "../../store/Accounts";
+import { useAccountsStore } from "../../store/Accounts";
+import { useCurrentViewStore } from "../../store/CurrentView";
+import { useStyleStore } from "../../store/Style";
 import { Encryption } from "../../models/encryption";
 import { EntryStorage } from "../../models/storage";
+import { OTPEntry, OTPType } from "../../models/otp";
 import { StorageLocation, UserSettings } from "../../models/settings";
 import {
   holdStorageLock,
@@ -17,8 +19,6 @@ import {
 
 chai.should();
 mocha.setup("bdd");
-const localVue = createLocalVue();
-localVue.use(Vuex);
 
 const SECRET = "JBSWY3DPEHPK3PXP";
 const OLD_HASH = "0123456789abcdef0123456789abcdef";
@@ -56,23 +56,13 @@ async function clearSession() {
 }
 
 async function createStore() {
-  return new Vuex.Store({
-    modules: {
-      accounts: await new Accounts().getModule(),
-      currentView: {
-        namespaced: true,
-        mutations: { changeView: sinon.fake() },
-      },
-      style: {
-        namespaced: true,
-        mutations: { hideInfo: sinon.fake() },
-      },
-    },
-  });
-}
-
-function accountsState(store: Store<unknown>) {
-  return (store.state as { accounts: AccountsState }).accounts;
+  const pinia = createPinia();
+  setActivePinia(pinia);
+  sinon.stub(useCurrentViewStore(pinia), "changeView");
+  sinon.stub(useStyleStore(pinia), "hideInfo");
+  const accounts = useAccountsStore(pinia);
+  await accounts.init();
+  return accounts;
 }
 
 async function decryptStoredAccounts(
@@ -117,16 +107,16 @@ describe("Accounts", () => {
 
     for (const [seconds, offset, expected] of cases) {
       it(`should count ${expected} seconds at ${seconds} seconds with offset ${offset}`, async () => {
-        const module = await new Accounts().getModule();
+        const accounts = await createStore();
         UserSettings.items.offset = offset;
         clock = sinon.useFakeTimers({
           now: new Date(2026, 0, 1, 12, 0, seconds).getTime(),
           toFake: ["Date"],
         });
 
-        module.mutations.updateCodes(module.state as unknown as AccountsState);
+        accounts.updateCodes();
 
-        module.state.second.should.equal(expected);
+        accounts.second.should.equal(expected);
       });
     }
   });
@@ -145,28 +135,27 @@ describe("Accounts", () => {
       await EntryStorage.import(new Encryption(PASSPHRASE, KEY_ID), data);
     }
 
-    async function enterPassword(store: Store<unknown>) {
-      const state = accountsState(store);
-      state.entries.should.have.lengthOf(0);
-      state.encryption.set(KEY_ID, new Encryption(PASSPHRASE, KEY_ID));
-      await store.dispatch("accounts/updateEntries");
-      return state;
+    async function enterPassword(store: ReturnType<typeof useAccountsStore>) {
+      chai.expect(store.entries).to.have.lengthOf(0);
+      store.encryption.set(KEY_ID, new Encryption(PASSPHRASE, KEY_ID));
+      await store.updateEntries();
+      return store;
     }
 
     it("should show the search box after the password is entered with 10 accounts", async () => {
       await storeEncryptedEntries(10);
-      const state = await enterPassword(await createStore());
+      const store = await enterPassword(await createStore());
 
-      state.entries.should.have.lengthOf(10);
-      state.showSearch.should.equal(true);
+      chai.expect(store.entries).to.have.lengthOf(10);
+      store.showSearch.should.equal(true);
     });
 
     it("should not show the search box after the password is entered with 9 accounts", async () => {
       await storeEncryptedEntries(9);
-      const state = await enterPassword(await createStore());
+      const store = await enterPassword(await createStore());
 
-      state.entries.should.have.lengthOf(9);
-      state.showSearch.should.equal(false);
+      chai.expect(store.entries).to.have.lengthOf(9);
+      store.showSearch.should.equal(false);
     });
   });
 
@@ -198,11 +187,10 @@ describe("Accounts", () => {
       const storedB = (await chrome.storage.local.get())[hashB];
 
       const store = await createStore();
-      const state = accountsState(store);
-      state.encryption.set(keyA, new Encryption(passphraseA, keyA));
-      state.defaultEncryption = keyA;
-      await store.dispatch("accounts/updateEntries");
-      await store.dispatch("accounts/changePassphrase", "new password");
+      store.encryption.set(keyA, new Encryption(passphraseA, keyA));
+      store.defaultEncryption = keyA;
+      await store.updateEntries();
+      await store.changePassphrase("new password");
 
       const stored = await chrome.storage.local.get();
       chai.expect(stored[keyB]).to.deep.equal(key(keyB));
@@ -223,10 +211,9 @@ describe("Accounts", () => {
       });
 
       const store = await createStore();
-      await store.dispatch("accounts/changePassphrase", "new password");
+      await store.changePassphrase("new password");
 
-      const state = accountsState(store);
-      const encryption = state.encryption.get(state.defaultEncryption);
+      const encryption = store.encryption.get(store.defaultEncryption);
       chai.expect(encryption).to.not.equal(undefined);
       const stored = await chrome.storage.local.get();
       chai.expect(stored[OLD_HASH]).to.equal(undefined);
@@ -247,28 +234,25 @@ describe("Accounts", () => {
       await chrome.storage.local.set({
         [hash]: { ...rawEntry(hash, "alice", 0), dataType: "OTPStorage" },
       });
-      await (
-        await createStore()
-      ).dispatch("accounts/changePassphrase", "right password");
+      await (await createStore()).changePassphrase("right password");
       await clearSession();
 
       const store = await createStore();
-      const state = accountsState(store);
-      state.shouldShowPassphrase.should.equal(true);
+      store.shouldShowPassphrase.should.equal(true);
 
-      await store.dispatch("accounts/applyPassphrase", "wrong password");
-      state.wrongPassword.should.equal(true);
-      chai.expect(state.defaultEncryption).to.equal(undefined);
-      state.entries.should.have.lengthOf(1);
-      chai.expect(state.entries[0].secret).to.equal(null);
+      await store.applyPassphrase("wrong password");
+      store.wrongPassword.should.equal(true);
+      chai.expect(store.defaultEncryption).to.equal("");
+      chai.expect(store.entries).to.have.lengthOf(1);
+      chai.expect(store.entries[0].secret).to.equal(null);
 
-      await store.dispatch("accounts/applyPassphrase", "right password");
+      await store.applyPassphrase("right password");
       chai
-        .expect(state.encryption.get(state.defaultEncryption))
+        .expect(store.encryption.get(store.defaultEncryption))
         .to.not.equal(undefined);
-      state.entries.should.have.lengthOf(1);
-      state.entries[0].account.should.equal("alice");
-      chai.expect(state.entries[0].secret).to.equal(SECRET);
+      chai.expect(store.entries).to.have.lengthOf(1);
+      store.entries[0].account.should.equal("alice");
+      chai.expect(store.entries[0].secret).to.equal(SECRET);
     });
   });
 
@@ -280,12 +264,10 @@ describe("Accounts", () => {
       });
       const store = await createStore();
       const release = await holdStorageLock();
-      const migrating = store
-        .dispatch("accounts/migrateStorage", StorageLocation.Sync)
-        .then(
-          (result: string) => result,
-          (error: unknown) => error,
-        );
+      const migrating = store.migrateStorage(StorageLocation.Sync).then(
+        (result: string) => result,
+        (error: unknown) => error,
+      );
       try {
         await waitForStorageLockRequests();
         (await chrome.storage.sync.get()).should.deep.equal({});
@@ -315,14 +297,85 @@ describe("Accounts", () => {
       UserSettings.items.storageLocation = StorageLocation.Sync;
 
       chai
-        .expect(
-          await store.dispatch("accounts/migrateStorage", StorageLocation.Sync),
-        )
+        .expect(await store.migrateStorage(StorageLocation.Sync))
         .to.equal("updateSuccess");
 
       chai
         .expect((await chrome.storage.sync.get())[hash])
         .to.not.equal(undefined);
+    });
+  });
+
+  describe("order", () => {
+    async function storeAccounts(...accounts: Array<[string, boolean]>) {
+      const items: { [hash: string]: RawOTPStorage } = {};
+      accounts.forEach(([account, pinned], index) => {
+        const hash = crypto.randomUUID();
+        items[hash] = {
+          ...rawEntry(hash, account, index),
+          dataType: "OTPStorage",
+          pinned,
+        };
+      });
+      await chrome.storage.local.set(items);
+    }
+
+    function accountNames(entries: OTPEntryInterface[]) {
+      return entries.map((entry) => entry.account);
+    }
+
+    it("should store the order of the screen when an account is moved past a pinned one", async () => {
+      await storeAccounts(["alice", false], ["bob", false], ["carol", true]);
+      const store = await createStore();
+      accountNames(store.orderedEntries).should.deep.equal([
+        "carol",
+        "alice",
+        "bob",
+      ]);
+
+      const list = [...store.orderedEntries];
+      list.splice(1, 0, list.splice(2, 1)[0]);
+      await store.reorderEntries(list);
+
+      accountNames(store.orderedEntries).should.deep.equal([
+        "carol",
+        "bob",
+        "alice",
+      ]);
+      const stored = await chrome.storage.local.get();
+      const indexes: { [account: string]: number } = {};
+      for (const entry of store.entries) {
+        indexes[entry.account] = stored[entry.hash].index;
+      }
+      indexes.should.deep.equal({ carol: 0, bob: 1, alice: 2 });
+      accountNames(await EntryStorage.get()).should.deep.equal([
+        "carol",
+        "bob",
+        "alice",
+      ]);
+    });
+
+    it("should pin the clicked account after an account was added", async () => {
+      await storeAccounts(["alice", false], ["bob", false]);
+      const store = await createStore();
+      store.addCode(
+        new OTPEntry({
+          type: OTPType.totp,
+          index: 0,
+          account: "new",
+          encrypted: false,
+          secret: SECRET,
+        }),
+      );
+
+      const bob = store.entries.find((entry) => entry.account === "bob");
+      store.pinEntry(bob as OTPEntryInterface);
+
+      const pinned: { [account: string]: boolean } = {};
+      for (const entry of store.entries) {
+        pinned[entry.account] = !!entry.pinned;
+      }
+      pinned.should.deep.equal({ new: false, alice: false, bob: true });
     });
   });
 });

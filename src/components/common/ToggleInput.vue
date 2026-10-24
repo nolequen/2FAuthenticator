@@ -4,22 +4,19 @@
     <input
       class="checkbox"
       type="checkbox"
-      :checked="checked"
-      @change="$emit('change', $event.target.checked)"
+      :checked="model"
+      @change="change($event)"
     />
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
+<script setup lang="ts">
+defineProps<{ label?: string }>();
+const model = defineModel<boolean>();
+const emit = defineEmits<{ change: [checked: boolean] }>();
 
-export default Vue.extend({
-  props: {
-    label: String,
-    checked: Boolean,
-  },
-  model: {
-    prop: "checked",
-    event: "change",
-  },
-});
+function change(event: Event) {
+  const checked = (event.target as HTMLInputElement).checked;
+  model.value = checked;
+  emit("change", checked);
+}
 </script>

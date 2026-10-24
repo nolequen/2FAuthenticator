@@ -1,15 +1,8 @@
 <template>
-  <button
-    :class="{ 'button-small': type === 'small', button: !type }"
-    v-on="$listeners"
-  >
+  <button :class="{ 'button-small': type === 'small', button: !type }">
     <slot></slot>
   </button>
 </template>
-<script lang="ts">
-import Vue from "vue";
-
-export default Vue.extend({
-  props: ["type"],
-});
+<script setup lang="ts">
+defineProps<{ type?: string }>();
 </script>

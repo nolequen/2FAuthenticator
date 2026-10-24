@@ -4,16 +4,13 @@
     <input
       id="import_file"
       type="file"
-      v-on="$listeners"
+      @change="emit('change', $event)"
       :accept="accept"
       :multiple="multiple"
     />
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
-
-export default Vue.extend({
-  props: ["label", "multiple", "accept"],
-});
+<script setup lang="ts">
+defineProps<{ label?: string; multiple?: boolean; accept?: string }>();
+const emit = defineEmits<{ change: [event: Event] }>();
 </script>

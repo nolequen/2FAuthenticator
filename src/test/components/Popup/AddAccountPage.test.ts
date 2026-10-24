@@ -3,31 +3,54 @@ import * as chai from "chai";
 import * as sinon from "sinon";
 import * as sinonChai from "sinon-chai";
 
-import { mount, createLocalVue } from "@vue/test-utils";
-import Vuex from "vuex";
-import CommonComponents from "../../../components/common/index";
+import { mount, VueWrapper } from "@vue/test-utils";
+import type { Pinia } from "pinia";
 
 import AddAccountPage from "../../../components/Popup/AddAccountPage.vue";
-import { loadI18nMessages } from "../../../store/i18n";
+import TextInput from "../../../components/common/TextInput.vue";
+import { i18n, loadI18nMessages } from "../../../store/i18n";
+import { useAccountsStore } from "../../../store/Accounts";
+import { useNotificationStore } from "../../../store/Notification";
+import { useStyleStore } from "../../../store/Style";
 import { Encryption } from "../../../models/encryption";
-import { OTPAlgorithm, OTPType } from "../../../models/otp";
+import { OTPAlgorithm } from "../../../models/otp";
 import { randomPassphrase, resetStorage, storeKey } from "../../storage-helper";
+import { createTestPinia, mountOptions } from "../../vue-helper";
 
 chai.should();
 chai.use(sinonChai);
 mocha.setup("bdd");
-const localVue = createLocalVue();
 
 const SECRET = "JBSWY3DPEHPK3PXP";
 const SHA512_SECRET = "blxnmpn2m2ebd4glchipydbbsclfvh553vnjqlmuqlzyxlbjsgga";
 
+function stubStores(pinia: Pinia) {
+  const accounts = useAccountsStore(pinia);
+  let added: (entry: OTPEntryInterface) => void = () => undefined;
+  const entryAdded = new Promise<OTPEntryInterface>((resolve) => {
+    added = resolve;
+  });
+  const addCode = sinon.stub(accounts, "addCode").callsFake(added);
+  sinon.stub(useNotificationStore(pinia), "alert");
+  const style = useStyleStore(pinia);
+  sinon.stub(style, "hideInfo");
+  sinon.stub(style, "toggleEdit");
+  return { accounts, addCode, entryAdded };
+}
+
+async function setText(wrapper: VueWrapper, label: string, value: string) {
+  const field = wrapper
+    .findAllComponents(TextInput)
+    .find((input) => input.find("label").text() === label);
+  if (!field) {
+    throw new Error(`No text field ${label}`);
+  }
+  await field.find("input").setValue(value);
+}
+
 describe("AddAccountPage", () => {
   before(async () => {
-    localVue.prototype.i18n = await loadI18nMessages();
-    localVue.use(Vuex);
-    for (const component of CommonComponents) {
-      localVue.component(component.name, component.component);
-    }
+    await loadI18nMessages();
   });
 
   beforeEach(() => resetStorage());
@@ -35,51 +58,20 @@ describe("AddAccountPage", () => {
 
   it("should save a new account encrypted when a password is set", async () => {
     await storeKey("test-key-id");
-    const store = new Vuex.Store({
-      modules: {
-        accounts: {
-          namespaced: true,
-          state: {
-            defaultEncryption: "test-key-id",
-            encryption: new Map([
-              [
-                "test-key-id",
-                new Encryption(randomPassphrase(), "test-key-id"),
-              ],
-            ]),
-            OTPType,
-            OTPAlgorithm,
-          },
-          actions: { addCode: sinon.fake() },
-        },
-        notification: {
-          namespaced: true,
-          mutations: { alert: sinon.fake() },
-        },
-        style: {
-          namespaced: true,
-          mutations: { hideInfo: sinon.fake(), toggleEdit: sinon.fake() },
-        },
-      },
-    });
-    const wrapper = mount(AddAccountPage, { store, localVue });
+    const pinia = createTestPinia();
+    const { accounts, entryAdded } = stubStores(pinia);
+    accounts.defaultEncryption = "test-key-id";
+    accounts.encryption.set(
+      "test-key-id",
+      new Encryption(randomPassphrase(), "test-key-id"),
+    );
+    const wrapper = mount(AddAccountPage, mountOptions(pinia));
 
-    await wrapper.setData({
-      newAccount: {
-        issuer: "Example",
-        account: "user",
-        secret: SECRET,
-        type: OTPType.totp,
-        period: undefined,
-        digits: 6,
-        algorithm: OTPAlgorithm.SHA1,
-      },
-    });
-    await (
-      wrapper.vm as unknown as {
-        addNewAccount(): Promise<void>;
-      }
-    ).addNewAccount();
+    await setText(wrapper, i18n.issuer, "Example");
+    await setText(wrapper, i18n.secret, SECRET);
+    await setText(wrapper, i18n.accountName, "user");
+    await wrapper.find("button").trigger("click");
+    await entryAdded;
 
     const stored = await chrome.storage.local.get();
     const entries = Object.keys(stored)
@@ -100,57 +92,33 @@ describe("AddAccountPage", () => {
     });
 
     it("should add the account with the selected algorithm and digits", async () => {
-      const addCode = sinon.fake();
-      const store = new Vuex.Store({
-        modules: {
-          accounts: {
-            namespaced: true,
-            state: {
-              defaultEncryption: "",
-              encryption: new Map(),
-              OTPType,
-              OTPAlgorithm,
-            },
-            actions: { addCode },
-          },
-          notification: {
-            namespaced: true,
-            mutations: { alert: sinon.fake() },
-          },
-          style: {
-            namespaced: true,
-            mutations: { hideInfo: sinon.fake(), toggleEdit: sinon.fake() },
-          },
-        },
+      const pinia = createTestPinia();
+      const { addCode, entryAdded } = stubStores(pinia);
+      clock = sinon.useFakeTimers({
+        now: 1700000000 * 1000,
+        toFake: ["Date"],
       });
-      const wrapper = mount(AddAccountPage, { store, localVue });
-      await wrapper.setData({
-        newAccount: { issuer: "Example", secret: SHA512_SECRET },
-      });
+      const wrapper = mount(AddAccountPage, mountOptions(pinia));
+      clock.tick(1000);
+      await setText(wrapper, i18n.issuer, "Example");
+      await setText(wrapper, i18n.secret, SHA512_SECRET);
 
       const selects = wrapper.findAll("select");
       const choose = async (optionText: string, value: string) => {
-        const select = selects
-          .filter((item) => item.text().includes(optionText))
-          .at(0);
+        const select = selects.filter((item) =>
+          item.text().includes(optionText),
+        )[0];
         (select.element as HTMLSelectElement).value = value;
         await select.trigger("input");
       };
       await choose("SHA-512", String(OTPAlgorithm.SHA512));
       await choose("8", "8");
 
-      clock = sinon.useFakeTimers({
-        now: 1700000000 * 1000,
-        toFake: ["Date"],
-      });
-      await (
-        wrapper.vm as unknown as {
-          addNewAccount(): Promise<void>;
-        }
-      ).addNewAccount();
+      await wrapper.find("button").trigger("click");
+      await entryAdded;
 
       addCode.should.have.been.calledOnce;
-      const entry = addCode.lastCall.args[1];
+      const entry = addCode.lastCall.args[0];
       chai.expect(entry.algorithm).to.equal(OTPAlgorithm.SHA512);
       chai.expect(entry.digits).to.equal(8);
       chai.expect(entry.code).to.equal("79500213");

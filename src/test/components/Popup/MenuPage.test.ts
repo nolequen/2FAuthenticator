@@ -2,37 +2,28 @@ import "mocha";
 import * as chai from "chai";
 import { assert } from "chai";
 import * as sinonChai from "sinon-chai";
-import { createLocalVue, mount, Wrapper } from "@vue/test-utils";
-import Vuex, { Store } from "vuex";
+import { mount, VueWrapper } from "@vue/test-utils";
+import type { Pinia } from "pinia";
 
 import { loadI18nMessages } from "../../../store/i18n";
+import { useMenuStore } from "../../../store/Menu";
 import MenuPage from "../../../components/Popup/MenuPage.vue";
+import { createTestPinia, mountOptions } from "../../vue-helper";
 
 import chrome from "sinon-chrome";
 
 chai.should();
 chai.use(sinonChai);
 mocha.setup("bdd");
-const localVue = createLocalVue();
 
 describe("MenuPage", () => {
   before(async () => {
-    localVue.prototype.i18n = await loadI18nMessages();
-    localVue.use(Vuex);
+    await loadI18nMessages();
   });
 
-  let storeOpts = {
-    menu: {
-      state: {
-        version: "1.2.3",
-      },
-      namespaced: true,
-    },
-  };
+  let pinia: Pinia;
 
-  let store: Store<{}>;
-
-  let wrapper: Wrapper<any>;
+  let wrapper: VueWrapper;
 
   before(() => {
     // mock the chrome global object
@@ -40,17 +31,13 @@ describe("MenuPage", () => {
   });
 
   beforeEach(async () => {
-    store = new Vuex.Store({
-      modules: storeOpts,
-    });
-    wrapper = mount(MenuPage, {
-      store,
-      localVue,
-    });
+    pinia = createTestPinia();
+    useMenuStore(pinia).version = "1.2.3";
+    wrapper = mount(MenuPage, mountOptions(pinia));
   });
 
   const clickMenuPageButtonByTitle = async (
-    wrapper: Wrapper<any>,
+    wrapper: VueWrapper,
     title: string,
   ) => wrapper.find(`*[title='${title}']`).trigger("click");
 
@@ -79,10 +66,7 @@ describe("MenuPage", () => {
 
     beforeEach(() => {
       chrome.tabs.create.resetHistory();
-      wrapper = mount(MenuPage, {
-        store,
-        localVue,
-      });
+      wrapper = mount(MenuPage, mountOptions(pinia));
     });
 
     it("should open a new tab to the issues page of the fork when the feedback button is clicked", async () => {

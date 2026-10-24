@@ -13,6 +13,7 @@ const BIN = {
   eslint: "node_modules/eslint/bin/eslint.js",
   webpack: "node_modules/webpack-cli/bin/cli.js",
   tsc: "node_modules/typescript/bin/tsc",
+  vueTsc: "node_modules/vue-tsc/bin/vue-tsc.js",
   sass: "node_modules/sass/sass.js",
   licenses: "node_modules/npm-license-generator/build/npm-license-generator",
 };
@@ -61,6 +62,7 @@ function lint() {
     fail("Run `npm run format` to fix code style.", result.status ?? 1);
   }
   runOrExit("eslint", ["."]);
+  runOrExit("vueTsc", ["--noEmit", "-p", "tsconfig.json"]);
 }
 
 function copyCssExtras(dir) {

@@ -14,28 +14,21 @@
     <a-button type="small" @click="applyPassphrase()">{{ i18n.ok }}</a-button>
   </div>
 </template>
-<script lang="ts">
-import Vue from "vue";
+<script setup lang="ts">
+import { ref } from "vue";
+import { storeToRefs } from "pinia";
+import { useAccountsStore } from "../../store/Accounts";
 
-export default Vue.extend({
-  data: function () {
-    return {
-      password: "",
-    };
-  },
-  computed: {
-    wrongPassword() {
-      return this.$store.state.accounts.wrongPassword;
-    },
-  },
-  methods: {
-    async applyPassphrase() {
-      await this.$store.dispatch("accounts/applyPassphrase", this.password);
-      const firstEntry = document.querySelector(
-        ".entry[tabindex='0']",
-      ) as HTMLElement;
-      firstEntry?.focus();
-    },
-  },
-});
+const accounts = useAccountsStore();
+const { wrongPassword } = storeToRefs(accounts);
+
+const password = ref("");
+
+async function applyPassphrase() {
+  await accounts.applyPassphrase(password.value);
+  const firstEntry = document.querySelector(
+    ".entry[tabindex='0']",
+  ) as HTMLElement;
+  firstEntry?.focus();
+}
 </script>

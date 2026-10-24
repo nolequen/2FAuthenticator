@@ -1,11 +1,12 @@
+import { defineStore } from "pinia";
+import { computed, markRaw, ref } from "vue";
 import {
   EntryStorage,
   BrowserStorage,
   withStorageLock,
 } from "../models/storage";
 import { Encryption } from "../models/encryption";
-import { OTPType, OTPAlgorithm } from "../models/otp";
-import { ActionContext } from "vuex";
+import { OTPType } from "../models/otp";
 import { getSiteName, getMatchedEntriesHash } from "../utils";
 import { isChromium } from "../browser";
 import { StorageLocation, UserSettings } from "../models/settings";
@@ -17,445 +18,391 @@ import {
   unlock,
   upgradeLegacyEntries,
 } from "../models/keyring";
+import { useCurrentViewStore } from "./CurrentView";
+import { useNotificationStore } from "./Notification";
+import { useStyleStore } from "./Style";
 
-export class Accounts implements Module {
-  async getModule() {
-    const cachedKeyInfo = await this.getCachedKeyInfo();
-    const encryption: Map<string, EncryptionInterface> = new Map();
-    if (cachedKeyInfo.cachedKeyId) {
+export const useAccountsStore = defineStore("accounts", () => {
+  const currentView = useCurrentViewStore();
+  const notification = useNotificationStore();
+  const style = useStyleStore();
+
+  const entries = ref<OTPEntryInterface[]>([]);
+  const encryption: Map<string, EncryptionInterface> = markRaw(new Map());
+  const defaultEncryption = ref("");
+  const shouldShowPassphrase = ref(false);
+  const sectorStart = ref(false); // Should display timer circles?
+  const sectorOffset = ref(0); // Offset in seconds for animations
+  const second = ref(0); // Offset in seconds for math
+  const filter = ref(true);
+  const siteName = ref<(string | null)[]>([]);
+  const showSearch = ref(false);
+  const wrongPassword = ref(false);
+  const initComplete = ref(false);
+
+  async function init() {
+    const { cachedPassphrase, cachedKeyId } =
+      await chrome.storage.session.get();
+    if (cachedKeyId) {
       encryption.set(
-        cachedKeyInfo.cachedKeyId,
-        new Encryption(
-          cachedKeyInfo.cachedPassphrase,
-          cachedKeyInfo.cachedKeyId,
-        ),
+        cachedKeyId,
+        markRaw(new Encryption(cachedPassphrase, cachedKeyId)),
       );
     }
-    const shouldShowPassphrase = await EntryStorage.hasEncryptionKey();
-    const entries = shouldShowPassphrase ? [] : await this.getEntries();
+    defaultEncryption.value = cachedKeyId ?? "";
+    shouldShowPassphrase.value = await EntryStorage.hasEncryptionKey();
+    entries.value = shouldShowPassphrase.value ? [] : await EntryStorage.get();
 
     await UserSettings.updateItems();
 
-    return {
-      state: {
-        entries,
-        encryption,
-        defaultEncryption: cachedKeyInfo.cachedKeyId,
-        OTPType,
-        OTPAlgorithm,
-        shouldShowPassphrase,
-        sectorStart: false, // Should display timer circles?
-        sectorOffset: 0, // Offset in seconds for animations
-        second: 0, // Offset in seconds for math
-        filter: true,
-        siteName: await getSiteName(),
-        showSearch: false,
-        exportData: await EntryStorage.getExport(entries),
-        exportEncData: await EntryStorage.getExport(entries, true),
-        keys: await BrowserStorage.getKeys(),
-        wrongPassword: false,
-        initComplete: false,
-      },
-      getters: {
-        shouldFilter(
-          state: AccountsState,
-          getters: { matchedEntries: string[] },
-        ) {
-          return (
-            UserSettings.items.smartFilter === true &&
-            getters.matchedEntries.length
-          );
-        },
-        matchedEntries: (state: AccountsState) => {
-          return getMatchedEntriesHash(state.siteName, state.entries);
-        },
-        currentlyEncrypted(state: AccountsState) {
-          for (const entry of state.entries) {
-            if (entry.secret === null) {
-              return true;
-            }
-          }
-          return false;
-        },
-        entries(state: AccountsState) {
-          const pinnedEntries = state.entries.filter((entry) => entry.pinned);
-          const unpinnedEntries = state.entries.filter(
-            (entry) => !entry.pinned,
-          );
-          return [...pinnedEntries, ...unpinnedEntries];
-        },
-      },
-      mutations: {
-        stopFilter(state: AccountsState) {
-          state.filter = false;
-        },
-        showSearch(state: AccountsState) {
-          state.showSearch = true;
-        },
-        updateCodes(state: AccountsState) {
-          let second = new Date().getSeconds();
-          if (UserSettings.items.offset) {
-            second += Number(UserSettings.items.offset);
-          }
+    siteName.value = await getSiteName();
+  }
 
-          // prevent second from negative
-          second = ((second % 60) + 60) % 60;
-          state.second = second;
+  const matchedEntries = computed(() =>
+    getMatchedEntriesHash(siteName.value, entries.value),
+  );
 
-          let currentlyEncrypted = false;
+  const shouldFilter = computed(
+    () =>
+      UserSettings.items.smartFilter === true &&
+      !!matchedEntries.value &&
+      matchedEntries.value.length > 0,
+  );
 
-          for (const entry of state.entries) {
-            if (entry.secret === null) {
-              currentlyEncrypted = true;
-            }
-          }
+  const currentlyEncrypted = computed(() => {
+    for (const entry of entries.value) {
+      if (entry.secret === null) {
+        return true;
+      }
+    }
+    return false;
+  });
 
-          if (
-            !state.sectorStart &&
-            state.entries.length > 0 &&
-            !currentlyEncrypted
-          ) {
-            state.sectorStart = true;
-            state.sectorOffset = -second;
-          }
+  const orderedEntries = computed(() => {
+    const pinnedEntries = entries.value.filter((entry) => entry.pinned);
+    const unpinnedEntries = entries.value.filter((entry) => !entry.pinned);
+    return [...pinnedEntries, ...unpinnedEntries];
+  });
 
-          // if (second > 25) {
-          //   app.class.timeout = true;
-          // } else {
-          //   app.class.timeout = false;
-          // }
-          // if (second < 1) {
-          //   const entries = app.entries as OTP[];
-          //   for (let i = 0; i < entries.length; i++) {
-          //     if (entries[i].type !== OTPType.hotp &&
-          //         entries[i].type !== OTPType.hhex) {
-          //       entries[i].generate();
-          //     }
-          //   }
-          // }
-          const entries = state.entries as OTPEntryInterface[];
-          for (let i = 0; i < entries.length; i++) {
-            if (
-              entries[i].type !== OTPType.hotp &&
-              entries[i].type !== OTPType.hhex
-            ) {
-              entries[i].generate();
-            }
-          }
-        },
-        loadCodes(state: AccountsState, newCodes: OTPEntryInterface[]) {
-          state.entries = newCodes;
-        },
-        moveCode(state: AccountsState, opts: { from: number; to: number }) {
-          state.entries.splice(
-            opts.to,
-            0,
-            state.entries.splice(opts.from, 1)[0],
-          );
+  function stopFilter() {
+    filter.value = false;
+  }
 
-          for (let i = 0; i < state.entries.length; i++) {
-            if (state.entries[i].index !== i) {
-              state.entries[i].index = i;
-            }
-          }
-        },
-        pinEntry(state: AccountsState, entry: OTPEntryInterface) {
-          state.entries[entry.index].pinned = !entry.pinned;
-        },
-        updateExport(
-          state: AccountsState,
-          exportData: { [k: string]: OTPEntryInterface },
-        ) {
-          state.exportData = exportData;
-        },
-        updateEncExport(
-          state: AccountsState,
-          data: {
-            entries: { [k: string]: OTPEntryInterface };
-            keys: Key[];
-          },
-        ) {
-          const keys = data.keys.reduce((prev: { [id: string]: Key }, key) => {
-            prev[key.id] = key;
-            return prev;
-          }, {});
-          state.exportEncData = { ...data.entries, ...keys };
-        },
-        wrongPassword(state: AccountsState) {
-          state.wrongPassword = true;
-        },
-        initComplete(state: AccountsState) {
-          state.initComplete = true;
-        },
-      },
-      actions: {
-        deleteCode: async (
-          state: ActionContext<AccountsState, object>,
-          hash: string,
-        ) => {
-          const index = state.state.entries.findIndex(
-            (entry) => entry.hash === hash,
-          );
-          if (index > -1) {
-            state.state.entries.splice(index, 1);
-          }
-          state.commit(
-            "updateExport",
-            await EntryStorage.getExport(state.state.entries),
-          );
-          state.commit("updateEncExport", {
-            entries: await EntryStorage.getExport(state.state.entries, true),
-            keys: await BrowserStorage.getKeys(),
-          });
-        },
-        addCode: async (
-          state: ActionContext<AccountsState, object>,
-          entry: OTPEntryInterface,
-        ) => {
-          state.state.entries.unshift(entry);
-          state.commit(
-            "updateExport",
-            await EntryStorage.getExport(state.state.entries),
-          );
-          state.commit("updateEncExport", {
-            entries: await EntryStorage.getExport(state.state.entries, true),
-            keys: await BrowserStorage.getKeys(),
-          });
-        },
-        applyPassphrase: async (
-          state: ActionContext<AccountsState, object>,
-          password: string,
-        ) => {
-          if (!password) {
-            return;
-          }
+  function openSearch() {
+    showSearch.value = true;
+  }
 
-          state.commit("currentView/changeView", "LoadingPage", { root: true });
+  function updateCodes() {
+    let currentSecond = new Date().getSeconds();
+    if (UserSettings.items.offset) {
+      currentSecond += Number(UserSettings.items.offset);
+    }
 
-          try {
-            // Decrypt entries
-            const unlocked = await unlock(password);
-            if (unlocked) {
-              for (const [keyId, encryption] of unlocked.encryptions) {
-                state.state.encryption.set(keyId, encryption);
-              }
-              state.state.defaultEncryption = unlocked.defaultKeyId;
-            }
+    // prevent second from negative
+    currentSecond = ((currentSecond % 60) + 60) % 60;
+    second.value = currentSecond;
 
-            await state.dispatch("updateEntries");
+    if (
+      !sectorStart.value &&
+      entries.value.length > 0 &&
+      !currentlyEncrypted.value
+    ) {
+      sectorStart.value = true;
+      sectorOffset.value = -currentSecond;
+    }
 
-            if (!unlocked) {
-              state.commit("wrongPassword");
-              state.commit("currentView/changeView", "EnterPasswordPage", {
-                root: true,
-              });
-              return;
-            }
+    // if (second > 25) {
+    //   app.class.timeout = true;
+    // } else {
+    //   app.class.timeout = false;
+    // }
+    // if (second < 1) {
+    //   const entries = app.entries as OTP[];
+    //   for (let i = 0; i < entries.length; i++) {
+    //     if (entries[i].type !== OTPType.hotp &&
+    //         entries[i].type !== OTPType.hhex) {
+    //       entries[i].generate();
+    //     }
+    //   }
+    // }
+    for (const entry of entries.value) {
+      if (entry.type !== OTPType.hotp && entry.type !== OTPType.hhex) {
+        entry.generate();
+      }
+    }
+  }
 
-            const defaultEncryption = unlocked.encryptions.get(
-              unlocked.defaultKeyId,
-            );
-            if (!defaultEncryption) {
-              throw new Error(
-                "defaultEncryption is empty, this should never happen!",
-              );
-            }
-            if (await adoptEntries(state.state.entries, defaultEncryption)) {
-              await state.dispatch("updateEntries");
-            }
+  function loadCodes(newCodes: OTPEntryInterface[]) {
+    entries.value = newCodes;
+  }
 
-            if (!state.getters.currentlyEncrypted) {
-              chrome.runtime.sendMessage({
-                action: "cachePassphrase",
-                value: unlocked.passphrase,
-                keyId: unlocked.defaultKeyId,
-              });
-            }
+  async function reorderEntries(list: OTPEntryInterface[]) {
+    entries.value = list;
 
-            state.commit("style/hideInfo", true, { root: true });
-          } catch (error) {
-            console.error(error);
-            state.commit(
-              "notification/alert",
-              chrome.i18n.getMessage("updateFailure"),
-              { root: true },
-            );
-            state.commit("currentView/changeView", "EnterPasswordPage", {
-              root: true,
-            });
-          }
-          return;
-        },
-        changePassphrase: async (
-          state: ActionContext<AccountsState, object>,
-          password: string,
-        ) => {
-          const restoreEntries = async (error: unknown) => {
-            await state.dispatch("updateEntries");
-            throw error;
-          };
-          const currentKeyId = state.state.encryption
-            .get(state.state.defaultEncryption)
-            ?.getEncryptionKeyId();
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].index !== i) {
+        list[i].index = i;
+      }
+    }
 
-          if (password) {
-            const { encryption, passphrase } = await setPassword(
-              password,
-              state.state.encryption,
-              currentKeyId,
-            ).catch(restoreEntries);
-            const keyId = encryption.getEncryptionKeyId();
+    try {
+      await withStorageLock(() => EntryStorage.set(entries.value));
+    } catch (error) {
+      await showWriteFailure(error);
+    }
+  }
 
-            state.state.encryption.clear();
-            state.state.encryption.set(keyId, encryption);
-            state.state.defaultEncryption = keyId;
+  function pinEntry(entry: OTPEntryInterface) {
+    const target = entries.value.find((item) => item.hash === entry.hash);
+    if (target) {
+      target.pinned = !target.pinned;
+    }
+  }
 
-            chrome.runtime.sendMessage({
-              action: "cachePassphrase",
-              value: passphrase,
-              keyId,
-            });
+  function markWrongPassword() {
+    wrongPassword.value = true;
+  }
 
-            await state.dispatch("updateEntries");
+  function completeInit() {
+    initComplete.value = true;
+  }
 
-            // https://github.com/Authenticator-Extension/Authenticator/issues/412
-            if (isChromium) {
-              await BrowserStorage.clearLogs();
-            }
-          } else {
-            await removePassword(state.state.encryption, currentKeyId).catch(
-              restoreEntries,
-            );
-            state.state.encryption.clear();
-            state.state.defaultEncryption = "";
+  function deleteCode(hash: string) {
+    const index = entries.value.findIndex((entry) => entry.hash === hash);
+    if (index > -1) {
+      entries.value.splice(index, 1);
+    }
+  }
 
-            chrome.runtime.sendMessage({
-              action: "lock",
-            });
+  function addCode(entry: OTPEntryInterface) {
+    entries.value.unshift(entry);
+  }
 
-            await state.dispatch("updateEntries");
-          }
-        },
-        updateEntries: async (state: ActionContext<AccountsState, object>) => {
-          const entries = await loadEntries(state.state.encryption);
+  async function applyPassphrase(password: string) {
+    if (!password) {
+      return;
+    }
 
-          await upgradeLegacyEntries(entries);
+    currentView.changeView("LoadingPage");
 
-          state.commit("loadCodes", entries);
-          state.commit("updateCodes");
-          state.commit(
-            "updateExport",
-            await EntryStorage.getExport(state.state.entries),
-          );
-          state.commit("updateEncExport", {
-            entries: await EntryStorage.getExport(state.state.entries, true),
-            keys: await BrowserStorage.getKeys(),
-          });
-          state.commit("initComplete");
-          await state.dispatch("showSearchIfNeeded");
-          return;
-        },
-        showWriteFailure: async (
-          state: ActionContext<AccountsState, object>,
-          error: unknown,
-        ) => {
-          console.error(error);
-          state.commit(
-            "notification/alert",
-            chrome.i18n.getMessage("updateFailure"),
-            { root: true },
-          );
-          await state.dispatch("updateEntries");
-        },
-        showSearchIfNeeded: (state: ActionContext<AccountsState, object>) => {
-          if (
-            state.state.entries.length >= 10 &&
-            !(state.getters.shouldFilter && state.state.filter)
-          ) {
-            state.commit("showSearch");
-          }
-        },
-        clearFilter: (state: ActionContext<AccountsState, object>) => {
-          state.commit("stopFilter");
-          if (state.state.entries.length >= 10) {
-            state.commit("showSearch");
-          }
-        },
-        migrateStorage: (
-          state: ActionContext<AccountsState, object>,
-          newStorageLocation: string,
-        ) =>
-          withStorageLock(async () => {
-            await UserSettings.updateItems();
+    try {
+      // Decrypt entries
+      const unlocked = await unlock(password);
+      if (unlocked) {
+        for (const [keyId, keyEncryption] of unlocked.encryptions) {
+          encryption.set(keyId, markRaw(keyEncryption));
+        }
+        defaultEncryption.value = unlocked.defaultKeyId;
+      }
 
-            // sync => local
-            if (
-              UserSettings.items.storageLocation === StorageLocation.Sync &&
-              newStorageLocation === StorageLocation.Local
-            ) {
-              const syncData = await chrome.storage.sync.get();
-              await chrome.storage.local.set(syncData); // userSettings will be handled later
-              const localData = await chrome.storage.local.get();
+      await updateEntries();
 
-              // Double check if data was set
-              if (
-                Object.keys(syncData).every(
-                  (value) => Object.keys(localData).indexOf(value) >= 0,
-                )
-              ) {
-                UserSettings.items.storageLocation = StorageLocation.Local;
-                await chrome.storage.sync.clear();
-                await chrome.storage.local.set({
-                  UserSettings: UserSettings.items,
-                });
-                return "updateSuccess";
-              } else {
-                throw " All data not transferred successfully.";
-              }
-              // local => sync
-            } else if (
-              UserSettings.items.storageLocation === StorageLocation.Local &&
-              newStorageLocation === StorageLocation.Sync
-            ) {
-              const localData = await chrome.storage.local.get();
-              if (localData?.UserSettings) {
-                delete localData.UserSettings;
-                await chrome.storage.sync.set(localData);
-              }
-              const syncData = await chrome.storage.sync.get();
+      if (!unlocked) {
+        markWrongPassword();
+        currentView.changeView("EnterPasswordPage");
+        return;
+      }
 
-              // Double check if data was set
-              if (
-                Object.keys(localData).every(
-                  (value) => Object.keys(syncData).indexOf(value) >= 0,
-                )
-              ) {
-                UserSettings.items.storageLocation = StorageLocation.Sync;
-                await chrome.storage.local.clear();
-                await UserSettings.commitItems();
-                return "updateSuccess";
-              } else {
-                throw " All data not transferred successfully.";
-              }
-            }
+      const unlockedEncryption = unlocked.encryptions.get(
+        unlocked.defaultKeyId,
+      );
+      if (!unlockedEncryption) {
+        throw new Error(
+          "defaultEncryption is empty, this should never happen!",
+        );
+      }
+      if (await adoptEntries(entries.value, unlockedEncryption)) {
+        await updateEntries();
+      }
 
-            // No change
-            return "updateSuccess";
-          }),
-      },
-      namespaced: true,
+      if (!currentlyEncrypted.value) {
+        chrome.runtime.sendMessage({
+          action: "cachePassphrase",
+          value: unlocked.passphrase,
+          keyId: unlocked.defaultKeyId,
+        });
+      }
+
+      style.hideInfo(true);
+    } catch (error) {
+      console.error(error);
+      notification.alert(chrome.i18n.getMessage("updateFailure"));
+      currentView.changeView("EnterPasswordPage");
+    }
+    return;
+  }
+
+  async function changePassphrase(password: string) {
+    const restoreEntries = async (error: unknown) => {
+      await updateEntries();
+      throw error;
     };
+    const currentKeyId = encryption
+      .get(defaultEncryption.value)
+      ?.getEncryptionKeyId();
+
+    if (password) {
+      const { encryption: newEncryption, passphrase } = await setPassword(
+        password,
+        encryption,
+        currentKeyId,
+      ).catch(restoreEntries);
+      const keyId = newEncryption.getEncryptionKeyId();
+
+      encryption.clear();
+      encryption.set(keyId, markRaw(newEncryption));
+      defaultEncryption.value = keyId;
+
+      chrome.runtime.sendMessage({
+        action: "cachePassphrase",
+        value: passphrase,
+        keyId,
+      });
+
+      await updateEntries();
+
+      // https://github.com/Authenticator-Extension/Authenticator/issues/412
+      if (isChromium) {
+        await BrowserStorage.clearLogs();
+      }
+    } else {
+      await removePassword(encryption, currentKeyId).catch(restoreEntries);
+      encryption.clear();
+      defaultEncryption.value = "";
+
+      chrome.runtime.sendMessage({
+        action: "lock",
+      });
+
+      await updateEntries();
+    }
   }
 
-  private async getCachedKeyInfo() {
-    const { cachedPassphrase, cachedKeyId } =
-      await chrome.storage.session.get();
+  async function updateEntries() {
+    const loadedEntries = await loadEntries(encryption);
 
-    return { cachedPassphrase, cachedKeyId };
+    await upgradeLegacyEntries(loadedEntries);
+
+    loadCodes(loadedEntries);
+    updateCodes();
+    completeInit();
+    showSearchIfNeeded();
+    return;
   }
 
-  private async getEntries() {
-    const otpEntries = await EntryStorage.get();
-    return otpEntries;
+  async function showWriteFailure(error: unknown) {
+    console.error(error);
+    notification.alert(chrome.i18n.getMessage("updateFailure"));
+    await updateEntries();
   }
-}
+
+  function showSearchIfNeeded() {
+    if (entries.value.length >= 10 && !(shouldFilter.value && filter.value)) {
+      openSearch();
+    }
+  }
+
+  function clearFilter() {
+    stopFilter();
+    if (entries.value.length >= 10) {
+      openSearch();
+    }
+  }
+
+  function migrateStorage(newStorageLocation: string) {
+    return withStorageLock(async () => {
+      await UserSettings.updateItems();
+
+      // sync => local
+      if (
+        UserSettings.items.storageLocation === StorageLocation.Sync &&
+        newStorageLocation === StorageLocation.Local
+      ) {
+        const syncData = await chrome.storage.sync.get();
+        await chrome.storage.local.set(syncData); // userSettings will be handled later
+        const localData = await chrome.storage.local.get();
+
+        // Double check if data was set
+        if (
+          Object.keys(syncData).every(
+            (value) => Object.keys(localData).indexOf(value) >= 0,
+          )
+        ) {
+          UserSettings.items.storageLocation = StorageLocation.Local;
+          await chrome.storage.sync.clear();
+          await chrome.storage.local.set({
+            UserSettings: UserSettings.items,
+          });
+          return "updateSuccess";
+        } else {
+          throw " All data not transferred successfully.";
+        }
+        // local => sync
+      } else if (
+        UserSettings.items.storageLocation === StorageLocation.Local &&
+        newStorageLocation === StorageLocation.Sync
+      ) {
+        const localData = await chrome.storage.local.get();
+        if (localData?.UserSettings) {
+          delete localData.UserSettings;
+          await chrome.storage.sync.set(localData);
+        }
+        const syncData = await chrome.storage.sync.get();
+
+        // Double check if data was set
+        if (
+          Object.keys(localData).every(
+            (value) => Object.keys(syncData).indexOf(value) >= 0,
+          )
+        ) {
+          UserSettings.items.storageLocation = StorageLocation.Sync;
+          await chrome.storage.local.clear();
+          await UserSettings.commitItems();
+          return "updateSuccess";
+        } else {
+          throw " All data not transferred successfully.";
+        }
+      }
+
+      // No change
+      return "updateSuccess";
+    });
+  }
+
+  return {
+    entries,
+    encryption,
+    defaultEncryption,
+    shouldShowPassphrase,
+    sectorStart,
+    sectorOffset,
+    second,
+    filter,
+    siteName,
+    showSearch,
+    wrongPassword,
+    initComplete,
+    matchedEntries,
+    shouldFilter,
+    currentlyEncrypted,
+    orderedEntries,
+    init,
+    stopFilter,
+    openSearch,
+    updateCodes,
+    loadCodes,
+    reorderEntries,
+    pinEntry,
+    markWrongPassword,
+    completeInit,
+    deleteCode,
+    addCode,
+    applyPassphrase,
+    changePassphrase,
+    updateEntries,
+    showWriteFailure,
+    showSearchIfNeeded,
+    clearFilter,
+    migrateStorage,
+  };
+});

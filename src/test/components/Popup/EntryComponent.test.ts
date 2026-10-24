@@ -4,9 +4,15 @@ import * as sinon from "sinon";
 import * as sinonChai from "sinon-chai";
 import jsQR from "jsqr";
 
+import { mount } from "@vue/test-utils";
+import { nextTick } from "vue";
+
 import EntryComponent from "../../../components/Popup/EntryComponent.vue";
 import { OTPEntry, OTPType } from "../../../models/otp";
 import { parseOTPAuthURI } from "../../../models/otpauth";
+import { getQrUrl } from "../../../models/qr";
+import { loadI18nMessages } from "../../../store/i18n";
+import { createTestPinia, mountOptions } from "../../vue-helper";
 
 chai.should();
 chai.use(sinonChai);
@@ -31,7 +37,6 @@ function decodeQr(dataUrl: string) {
 
 describe("EntryComponent", () => {
   it("should leave the site out of the QR code label of an issuer with a site", async () => {
-    const commit = sinon.fake();
     const entry = new OTPEntry({
       type: OTPType.totp,
       index: 0,
@@ -40,18 +45,8 @@ describe("EntryComponent", () => {
       encrypted: false,
       secret: "JBSWY3DPEHPK3PXP",
     });
-    const { methods } = (
-      EntryComponent as unknown as {
-        options: {
-          methods: { showQr(this: unknown, entry: OTPEntry): void };
-        };
-      }
-    ).options;
 
-    methods.showQr.call({ $store: { commit } }, entry);
-
-    commit.should.have.been.calledWith("qr/setQr");
-    const text = await decodeQr(commit.firstCall.args[1]);
+    const text = await decodeQr(getQrUrl(entry));
     chai.expect(text).to.be.a("string");
     const result = parseOTPAuthURI(text as string);
     if ("error" in result) {
@@ -59,5 +54,62 @@ describe("EntryComponent", () => {
     }
     (result.entry.issuer as string).should.equal("Google");
     (result.entry.account as string).should.equal("alice");
+  });
+
+  describe("next code of a counter based account", () => {
+    let clock: sinon.SinonFakeTimers;
+
+    before(async () => {
+      await loadI18nMessages();
+    });
+
+    beforeEach(() => {
+      clock = sinon.useFakeTimers({
+        toFake: ["setTimeout", "clearTimeout", "Date"],
+      });
+      sinon.replace(
+        chrome.permissions,
+        "request",
+        sinon.fake() as unknown as typeof chrome.permissions.request,
+      );
+    });
+
+    afterEach(() => {
+      clock.restore();
+    });
+
+    it("should be disabled for 3 seconds after a click", async () => {
+      const entry = new OTPEntry({
+        type: OTPType.hotp,
+        index: 0,
+        issuer: "Example",
+        account: "alice",
+        encrypted: false,
+        secret: "JBSWY3DPEHPK3PXP",
+      });
+      const next = sinon.stub(entry, "next").resolves();
+      const wrapper = mount(EntryComponent, {
+        ...mountOptions(createTestPinia()),
+        props: { entry, tabindex: 0 },
+      });
+      clock.tick(1);
+      const counter = wrapper.find(".counter");
+      counter.classes().should.not.include("disabled");
+
+      await counter.trigger("click");
+      await nextTick();
+      counter.classes().should.include("disabled");
+      await counter.trigger("click");
+      next.should.have.been.calledOnce;
+
+      clock.tick(2999);
+      await nextTick();
+      counter.classes().should.include("disabled");
+      clock.tick(1);
+      await nextTick();
+      counter.classes().should.not.include("disabled");
+      await counter.trigger("click");
+      next.should.have.been.calledTwice;
+    });
   });
 });
