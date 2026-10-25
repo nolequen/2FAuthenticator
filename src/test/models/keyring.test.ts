@@ -1,5 +1,6 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 import * as sinon from "sinon";
 import * as CryptoJS from "crypto-js";
 import argon2 from "argon2-browser";
@@ -39,7 +40,6 @@ import {
   waitForStorageLockRequests,
 } from "../storage-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 const HOTP_HASH = "0d9b7e14-3c2a-4f58-8e61-7a4b2c9d3e02";

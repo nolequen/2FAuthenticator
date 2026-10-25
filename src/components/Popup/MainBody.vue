@@ -1,22 +1,22 @@
 <template>
   <div
     id="codes"
-    v-bind:class="{ filter: shouldFilter && filter, search: showSearch }"
+    :class="{ filter: shouldFilter && filter, search: showSearch }"
   >
     <!-- Filter -->
-    <div class="under-header" id="filter" v-on:click="clearFilter()">
+    <div id="filter" class="under-header" @click="clearFilter()">
       {{ i18n.show_all_entries }}
     </div>
     <!-- Search -->
-    <div class="under-header" id="search">
+    <div id="search" class="under-header">
       <input
         id="searchInput"
         v-model="searchText"
-        v-bind:placeholder="i18n.search"
+        :placeholder="i18n.search"
         type="text"
         tabindex="-1"
       />
-      <div id="searchHint" v-if="searchText === ''">
+      <div v-if="searchText === ''" id="searchHint">
         <div></div>
         <div id="searchHintBorder">/</div>
         <div></div>
@@ -25,20 +25,20 @@
     <!-- Entries -->
     <div
       ref="entryList"
-      v-on:keydown.down="focusNextEntry()"
-      v-on:keydown.right="focusNextEntry()"
-      v-on:keydown.up="focusLastEntry()"
-      v-on:keydown.left="focusLastEntry()"
+      @keydown.down="focusNextEntry()"
+      @keydown.right="focusNextEntry()"
+      @keydown.up="focusLastEntry()"
+      @keydown.left="focusLastEntry()"
     >
       <EntryComponent
         v-for="entry in entries"
         :key="entry.hash"
-        v-bind:filtered="(!entry.pinned && !isMatchedEntry(entry)) || null"
-        v-bind:notSearched="!isSearchedEntry(entry) || null"
-        v-bind:entry="entry"
-        v-bind:tabindex="getTabindex(entry)"
+        :filtered="(!entry.pinned && !isMatchedEntry(entry)) || null"
+        :not-searched="!isSearchedEntry(entry) || null"
+        :entry="entry"
+        :tabindex="getTabindex(entry)"
       />
-      <div class="no-entry" v-if="entries.length === 0 && initComplete">
+      <div v-if="entries.length === 0 && initComplete" class="no-entry">
         <IconKey />
         <p>
           {{ i18n.no_entires }}

@@ -1,8 +1,8 @@
 <template>
   <div>
     <a-select-input
-      :label="i18n.theme"
       v-model="theme"
+      :label="i18n.theme"
       style="margin-left: 10px"
     >
       <option value="normal">{{ i18n.theme_light }}</option>
@@ -13,8 +13,8 @@
       <option value="flat">{{ i18n.theme_flat }}</option>
     </a-select-input>
     <a-select-input
-      :label="i18n.scale"
       v-model="zoom"
+      :label="i18n.scale"
       style="margin-left: 10px"
     >
       <option value="125">125%</option>
@@ -29,21 +29,21 @@
       <option value="25">25%</option>
       <option value="20">20%</option>
     </a-select-input>
-    <a-toggle-input :label="i18n.use_autofill" v-model="useAutofill" />
+    <a-toggle-input v-model="useAutofill" :label="i18n.use_autofill" />
     <a-toggle-input
-      :label="i18n.browser_sync"
       v-model="browserSync"
+      :label="i18n.browser_sync"
       @change="migrateStorage()"
     />
-    <a-toggle-input :label="i18n.smart_filter" v-model="smartFilter" />
-    <div class="control-group" v-show="!!defaultEncryption">
+    <a-toggle-input v-model="smartFilter" :label="i18n.smart_filter" />
+    <div v-show="!!defaultEncryption" class="control-group">
       <label class="combo-label">{{ i18n.autolock }}</label>
       <input
+        v-model="autolock"
         class="input"
         type="number"
         min="0"
         style="width: 70px; text-align: center"
-        v-model="autolock"
       />
       <span class="combo-label" style="margin-left: 0; margin-right: 20px">{{
         i18n.minutes
@@ -128,7 +128,7 @@ function popOut() {
   }
   chrome.windows.create({
     url: chrome.runtime.getURL("view/popup.html?popup=true"),
-    type: windowType as chrome.windows.createTypeEnum,
+    type: windowType as chrome.windows.CreateType,
     height: window.innerHeight,
     width: window.innerWidth,
   });

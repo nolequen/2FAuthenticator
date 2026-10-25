@@ -1,11 +1,11 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 import * as sinon from "sinon";
 
 import { KeyUtilities } from "../../models/key-utilities";
 import { OTPAlgorithm, OTPType } from "../../models/otp";
 
-chai.should();
 mocha.setup("bdd");
 
 function asciiToHex(text: string) {

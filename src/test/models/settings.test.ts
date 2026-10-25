@@ -1,10 +1,9 @@
 import "mocha";
-import * as chai from "chai";
+import "chai/register-should";
 
 import { StorageLocation, UserSettings } from "../../models/settings";
 import { resetStorage } from "../storage-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 const LEGACY_KEYS = [
@@ -17,7 +16,9 @@ const LEGACY_KEYS = [
 ];
 
 async function storedSettings(location: StorageLocation) {
-  return (await chrome.storage[location].get("UserSettings")).UserSettings;
+  return (
+    await chrome.storage[location].get<{ UserSettings: object }>("UserSettings")
+  ).UserSettings;
 }
 
 describe("UserSettings", () => {

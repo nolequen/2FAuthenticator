@@ -1,49 +1,44 @@
 <template>
   <div class="header">
-    <span v-on:dblclick="popOut()">{{ i18n.extName }}</span>
+    <span @dblclick="popOut()">{{ i18n.extName }}</span>
     <div v-show="!isPopup()">
       <div
-        class="icon"
-        id="i-menu"
-        v-bind:title="i18n.settings"
-        v-on:click="showMenu()"
         v-show="!style.isEditing"
+        id="i-menu"
+        class="icon"
+        :title="i18n.settings"
+        @click="showMenu()"
       >
         <IconCog />
       </div>
       <div
-        class="icon"
-        id="i-plus"
-        v-bind:title="i18n.add_code"
-        v-on:click="showInfo('AddMethodPage')"
         v-show="style.isEditing"
+        id="i-plus"
+        class="icon"
+        :title="i18n.add_code"
+        @click="showInfo('AddMethodPage')"
       >
         <IconPlus />
       </div>
       <div
-        class="icon"
-        id="i-lock"
-        v-bind:title="i18n.lock"
-        v-on:click="lock()"
         v-show="!style.isEditing && !!defaultEncryption"
+        id="i-lock"
+        class="icon"
+        :title="i18n.lock"
+        @click="lock()"
       >
         <IconLock />
       </div>
       <div
-        class="icon"
-        id="i-qr"
-        v-bind:title="i18n.add_qr"
         v-show="!style.isEditing"
-        v-on:click="beginCapture()"
+        id="i-qr"
+        class="icon"
+        :title="i18n.add_qr"
+        @click="beginCapture()"
       >
         <IconScan />
       </div>
-      <div
-        class="icon"
-        id="i-edit"
-        v-bind:title="i18n.edit"
-        v-on:click="editEntry()"
-      >
+      <div id="i-edit" class="icon" :title="i18n.edit" @click="editEntry()">
         <IconPencil v-if="!style.isEditing" />
         <IconCheck v-else />
       </div>
@@ -89,7 +84,7 @@ function popOut() {
   }
   chrome.windows.create({
     url: chrome.runtime.getURL("view/popup.html?popup=true"),
-    type: windowType as chrome.windows.createTypeEnum,
+    type: windowType as chrome.windows.CreateType,
     height: window.innerHeight,
     width: window.innerWidth,
   });

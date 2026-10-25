@@ -2,16 +2,17 @@ import { Encryption } from "./encryption";
 import { BrowserStorage, EntryStorage, withStorageLock } from "./storage";
 
 export async function getSessionEncryption() {
-  const { cachedPassphrase, cachedKeyId } = await chrome.storage.session.get([
-    "cachedPassphrase",
-    "cachedKeyId",
-  ]);
+  const { cachedPassphrase, cachedKeyId } =
+    await chrome.storage.session.get<SessionData>([
+      "cachedPassphrase",
+      "cachedKeyId",
+    ]);
   const keys = await BrowserStorage.getKeys();
 
   if (!cachedPassphrase) {
     return keys.length ? null : new Encryption("", "");
   }
-  if (!keys.some((key) => key.id === cachedKeyId)) {
+  if (!cachedKeyId || !keys.some((key) => key.id === cachedKeyId)) {
     return null;
   }
   return new Encryption(cachedPassphrase, cachedKeyId);

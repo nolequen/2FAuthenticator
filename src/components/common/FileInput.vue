@@ -4,9 +4,9 @@
     <input
       id="import_file"
       type="file"
-      @change="emit('change', $event)"
       :accept="accept"
       :multiple="multiple"
+      @change="emit('change', $event)"
     />
   </div>
 </template>

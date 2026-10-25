@@ -14,6 +14,8 @@ export enum CodeState {
   Encrypted = "-2",
 }
 
+export const MASK_DIGIT = "•";
+
 export enum OTPAlgorithm {
   SHA1 = 1,
   SHA256,
@@ -112,7 +114,7 @@ export class OTPEntry implements OTPEntryInterface {
   encData?: string;
   legacyData?: string;
   keyId?: string;
-  code = "&bull;&bull;&bull;&bull;&bull;&bull;";
+  code = MASK_DIGIT.repeat(6);
 
   constructor(
     entry:

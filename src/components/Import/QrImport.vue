@@ -6,14 +6,14 @@
     <a-file-input
       button-type="file"
       accept="image/*"
-      @change="importQr($event, true)"
       multiple
       :label="i18n.import_backup_qr"
+      @change="importQr($event, true)"
     />
   </div>
 </template>
 <script setup lang="ts">
-// @ts-ignore
+// @ts-expect-error - no typings
 import QRCode from "qrcode-reader";
 import jsQR from "jsqr";
 import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
@@ -40,15 +40,11 @@ async function importQr(event: Event, closeWindow: boolean) {
 
     const result = await getEntryDataFromOTPAuthPerLine(otpUrlList.join("\n"));
 
-    let importData: {
-      // @ts-ignore
-      key?: { enc: string; hash: string };
-      [hash: string]: RawOTPStorage;
-    } = result.exportData;
+    const importData: { [hash: string]: RawOTPStorage } = result.exportData;
 
     const { failedCount, succeededCount } = result;
 
-    let decryptedFileData: { [hash: string]: RawOTPStorage } = importData;
+    const decryptedFileData: { [hash: string]: RawOTPStorage } = importData;
 
     if (Object.keys(decryptedFileData).length) {
       if (!(await importUnderSession(decryptedFileData))) {

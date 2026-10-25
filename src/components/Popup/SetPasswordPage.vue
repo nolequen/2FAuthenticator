@@ -2,16 +2,16 @@
   <div>
     <div class="text warning">{{ i18n.security_warning }}</div>
     <a-text-input
+      v-show="!!defaultEncryption"
+      v-model="currentPhrase"
       :label="i18n.current_phrase"
       type="password"
-      v-model="currentPhrase"
-      v-show="!!defaultEncryption"
     />
-    <a-text-input :label="i18n.phrase" type="password" v-model="phrase" />
+    <a-text-input v-model="phrase" :label="i18n.phrase" type="password" />
     <a-text-input
+      v-model="confirm"
       :label="i18n.confirm_phrase"
       type="password"
-      v-model="confirm"
       @enter="changePassphrase()"
     />
     <a-button id="security-save" @click="changePassphrase()">

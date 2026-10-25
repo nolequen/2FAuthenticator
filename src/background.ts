@@ -47,7 +47,8 @@ chrome.alarms.onAlarm.addListener(() => {
 });
 
 chrome.commands.onCommand.addListener(async (command: string) => {
-  const { cachedPassphrase, cachedKeyId } = await chrome.storage.session.get();
+  const { cachedPassphrase, cachedKeyId } =
+    await chrome.storage.session.get<SessionData>();
 
   let tab: chrome.tabs.Tab | undefined;
 
@@ -70,7 +71,10 @@ chrome.commands.onCommand.addListener(async (command: string) => {
 
         const siteName = await getSiteName();
         const entries = await EntryStorage.get();
-        const encryption = new Encryption(cachedPassphrase, cachedKeyId);
+        const encryption = new Encryption(
+          cachedPassphrase ?? "",
+          cachedKeyId ?? "",
+        );
         for (const entry of entries) {
           await entry.applyEncryption(encryption);
         }

@@ -1,5 +1,6 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 
 import { getSessionEncryption, importUnderSession } from "../../models/session";
 import { EntryStorage } from "../../models/storage";
@@ -12,7 +13,6 @@ import {
   waitForStorageLockRequests,
 } from "../storage-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 const SECRET = "JBSWY3DPEHPK3PXP";

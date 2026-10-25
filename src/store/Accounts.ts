@@ -42,11 +42,11 @@ export const useAccountsStore = defineStore("accounts", () => {
 
   async function init() {
     const { cachedPassphrase, cachedKeyId } =
-      await chrome.storage.session.get();
+      await chrome.storage.session.get<SessionData>();
     if (cachedKeyId) {
       encryption.set(
         cachedKeyId,
-        markRaw(new Encryption(cachedPassphrase, cachedKeyId)),
+        markRaw(new Encryption(cachedPassphrase ?? "", cachedKeyId)),
       );
     }
     defaultEncryption.value = cachedKeyId ?? "";

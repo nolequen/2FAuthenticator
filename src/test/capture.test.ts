@@ -1,7 +1,8 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 import * as sinon from "sinon";
-import * as sinonChai from "sinon-chai";
+import sinonChai from "sinon-chai";
 
 import {
   handleCaptureMessage,
@@ -17,7 +18,6 @@ import {
   storeKey,
 } from "./storage-helper";
 
-chai.should();
 chai.use(sinonChai);
 mocha.setup("bdd");
 

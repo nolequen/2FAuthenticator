@@ -1,7 +1,8 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 import * as sinon from "sinon";
-import * as sinonChai from "sinon-chai";
+import sinonChai from "sinon-chai";
 
 import { mount } from "@vue/test-utils";
 
@@ -13,7 +14,6 @@ import { UserSettings } from "../../../models/settings";
 import { resetStorage } from "../../storage-helper";
 import { createTestPinia, mountOptions } from "../../vue-helper";
 
-chai.should();
 chai.use(sinonChai);
 mocha.setup("bdd");
 

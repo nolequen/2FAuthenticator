@@ -1,5 +1,5 @@
 import "mocha";
-import * as chai from "chai";
+import "chai/register-should";
 
 import { mount, VueWrapper } from "@vue/test-utils";
 import { nextTick } from "vue";
@@ -10,7 +10,6 @@ import { i18n, loadI18nMessages } from "../../../store/i18n";
 import { useNotificationStore } from "../../../store/Notification";
 import { createTestPinia, mountOptions } from "../../vue-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 describe("NotificationHandler", () => {

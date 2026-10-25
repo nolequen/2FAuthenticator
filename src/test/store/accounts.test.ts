@@ -1,5 +1,6 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 import * as sinon from "sinon";
 import { createPinia, setActivePinia } from "pinia";
 
@@ -17,7 +18,6 @@ import {
   waitForStorageLockRequests,
 } from "../storage-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 const SECRET = "JBSWY3DPEHPK3PXP";
@@ -192,7 +192,9 @@ describe("Accounts", () => {
       await store.updateEntries();
       await store.changePassphrase("new password");
 
-      const stored = await chrome.storage.local.get();
+      const stored = await chrome.storage.local.get<{
+        [hash: string]: OTPStorage;
+      }>();
       chai.expect(stored[keyB]).to.deep.equal(key(keyB));
       chai.expect(stored[hashB]).to.deep.equal(storedB);
       (
@@ -215,7 +217,9 @@ describe("Accounts", () => {
 
       const encryption = store.encryption.get(store.defaultEncryption);
       chai.expect(encryption).to.not.equal(undefined);
-      const stored = await chrome.storage.local.get();
+      const stored = await chrome.storage.local.get<{
+        [hash: string]: OTPStorage;
+      }>();
       chai.expect(stored[OLD_HASH]).to.equal(undefined);
       const accounts = await decryptStoredAccounts(
         stored,
@@ -342,7 +346,9 @@ describe("Accounts", () => {
         "bob",
         "alice",
       ]);
-      const stored = await chrome.storage.local.get();
+      const stored = await chrome.storage.local.get<{
+        [hash: string]: OTPStorage;
+      }>();
       const indexes: { [account: string]: number } = {};
       for (const entry of store.entries) {
         indexes[entry.account] = stored[entry.hash].index;

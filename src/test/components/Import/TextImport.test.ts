@@ -1,7 +1,8 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 import * as sinon from "sinon";
-import * as sinonChai from "sinon-chai";
+import sinonChai from "sinon-chai";
 
 import { mount, VueWrapper } from "@vue/test-utils";
 
@@ -16,7 +17,6 @@ import {
 } from "../../storage-helper";
 import { mountOptions } from "../../vue-helper";
 
-chai.should();
 chai.use(sinonChai);
 mocha.setup("bdd");
 

@@ -1,7 +1,7 @@
 <template>
   <div
     v-cloak
-    v-bind:class="{
+    :class="{
       'theme-normal':
         theme !== 'accessibility' &&
         theme !== 'dark' &&
@@ -15,25 +15,25 @@
       'theme-flat': theme === 'flat',
       hideoutline,
     }"
-    v-on:mousedown="hideoutline = true"
-    v-on:keydown="hideoutline = false"
+    @mousedown="hideoutline = true"
+    @keydown="hideoutline = false"
   >
     <MainHeader />
     <MainBody
-      v-bind:class="{
+      :class="{
         timeout: style.timeout && !style.isEditing,
         edit: style.isEditing,
       }"
     />
 
     <MenuPage
-      id="menu"
       v-show="style.slidein || style.slideout"
-      v-bind:class="{ slidein: style.slidein, slideout: style.slideout }"
+      id="menu"
+      :class="{ slidein: style.slidein, slideout: style.slideout }"
     />
 
     <PageHandler
-      v-bind:class="{
+      :class="{
         fadein: style.fadein,
         fadeout: style.fadeout,
         show: style.show,
@@ -45,7 +45,7 @@
     <!-- EPHERMAL MESSAGE -->
     <div
       id="notification"
-      v-bind:class="{
+      :class="{
         fadein: style.notificationFadein,
         fadeout: style.notificationFadeout,
       }"
@@ -56,13 +56,13 @@
     <!-- QR -->
     <div
       id="qr"
-      v-bind:class="{ qrfadein: style.qrfadein, qrfadeout: style.qrfadeout }"
-      v-bind:style="{ 'background-image': qr }"
-      v-on:click="hideQr()"
+      :class="{ qrfadein: style.qrfadein, qrfadeout: style.qrfadeout }"
+      :style="{ 'background-image': qr }"
+      @click="hideQr()"
     ></div>
 
     <!-- CLIPBOARD -->
-    <input type="text" id="codeClipboard" tabindex="-1" />
+    <input id="codeClipboard" type="text" tabindex="-1" />
   </div>
 </template>
 <script setup lang="ts">

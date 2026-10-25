@@ -1,13 +1,13 @@
 <template>
   <div>
     <!-- MESSAGE -->
-    <div class="message-box" v-show="message.length && messageIdle">
+    <div v-show="message.length && messageIdle" class="message-box">
       <div>{{ message.length ? message[0] : "" }}</div>
       <a-button type="small" @click="closeAlert()">{{ i18n.ok }}</a-button>
     </div>
 
     <!-- CONFIRM -->
-    <div class="message-box" v-show="confirmMessage !== ''">
+    <div v-show="confirmMessage !== ''" class="message-box">
       <div>{{ confirmMessage }}</div>
       <div class="buttons">
         <a-button type="small" @click="answerConfirm(true)">{{
@@ -21,8 +21,8 @@
 
     <!-- OVERLAY -->
     <div
-      id="overlay"
       v-show="(message.length && messageIdle) || confirmMessage !== ''"
+      id="overlay"
     ></div>
   </div>
 </template>

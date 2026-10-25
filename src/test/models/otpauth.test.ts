@@ -1,5 +1,6 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 
 import {
   getEntryDataFromOTPAuthPerLine,
@@ -7,7 +8,6 @@ import {
   parseOTPAuthURI,
 } from "../../models/otpauth";
 
-chai.should();
 mocha.setup("bdd");
 
 const SECRET = "JBSWY3DPEHPK3PXP";

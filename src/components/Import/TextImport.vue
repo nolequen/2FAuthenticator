@@ -2,8 +2,8 @@
   <div>
     <div class="import_code">
       <textarea
-        spellcheck="false"
         v-model="importCode"
+        spellcheck="false"
         placeholder="otpauth://totp/...
 otpauth://totp/...
 otpauth://hotp/...
@@ -11,14 +11,14 @@ otpauth://hotp/...
       ></textarea>
     </div>
     <div class="import_encrypted">
-      <input type="checkbox" id="encryptedCode" v-model="importEncrypted" />
+      <input id="encryptedCode" v-model="importEncrypted" type="checkbox" />
       <label for="encryptedCode">{{ i18n.encrypted }}</label>
     </div>
     <a-text-input
-      :label="i18n.phrase"
-      v-model="importPassphrase"
-      type="password"
       v-show="importEncrypted"
+      v-model="importPassphrase"
+      :label="i18n.phrase"
+      type="password"
     />
     <a-button @click="importBackupCode()">
       {{ i18n.import_backup_code }}
@@ -37,7 +37,7 @@ const importEncrypted = ref(false);
 const importPassphrase = ref("");
 
 async function importBackupCode() {
-  let exportData: { [hash: string]: OTPStorage | Key } = {};
+  let exportData: { [hash: string]: OTPStorage | Key };
   let failedCount = 0;
   let succeededCount = 0;
   try {
@@ -51,32 +51,27 @@ async function importBackupCode() {
     succeededCount = result.succeededCount;
   }
 
-  try {
-    const passphrase: string | null =
-      importEncrypted.value && importPassphrase.value
-        ? importPassphrase.value
-        : null;
-    const decryptedbackupData = await decryptBackupData(exportData, passphrase);
+  const passphrase: string | null =
+    importEncrypted.value && importPassphrase.value
+      ? importPassphrase.value
+      : null;
+  const decryptedbackupData = await decryptBackupData(exportData, passphrase);
 
-    if (Object.keys(decryptedbackupData).length) {
-      if (!(await importUnderSession(decryptedbackupData))) {
-        alert(i18n.phrase_incorrect);
-        return;
-      }
-      if (failedCount === 0) {
-        alert(i18n.updateSuccess);
-      } else if (succeededCount) {
-        alert(i18n.import_backup_qr_partly_failed);
-      } else {
-        alert(i18n.updateFailure);
-      }
-      window.close();
+  if (Object.keys(decryptedbackupData).length) {
+    if (!(await importUnderSession(decryptedbackupData))) {
+      alert(i18n.phrase_incorrect);
+      return;
+    }
+    if (failedCount === 0) {
+      alert(i18n.updateSuccess);
+    } else if (succeededCount) {
+      alert(i18n.import_backup_qr_partly_failed);
     } else {
       alert(i18n.updateFailure);
     }
-    return;
-  } catch (error) {
-    throw error;
+    window.close();
+  } else {
+    alert(i18n.updateFailure);
   }
 }
 </script>

@@ -2,43 +2,37 @@
   <div>
     <div class="header">
       <span id="menuName">{{ i18n.settings }}</span>
-      <div class="icon" id="i-close" v-on:click="hideMenu()">
+      <div id="i-close" class="icon" @click="hideMenu()">
         <IconArrowLeft />
       </div>
     </div>
     <div id="menuBody">
       <div class="menuList">
-        <p v-bind:title="i18n.backup" v-on:click="showInfo('BackupPage')">
+        <p :title="i18n.backup" @click="showInfo('BackupPage')">
           <span><IconExchange /></span>{{ i18n.backup }}
         </p>
-        <p
-          v-bind:title="i18n.security"
-          v-on:click="showInfo('SetPasswordPage')"
-        >
+        <p :title="i18n.security" @click="showInfo('SetPasswordPage')">
           <span><IconLock /></span>{{ i18n.security }}
         </p>
-        <p v-bind:title="i18n.sync_clock" v-on:click="syncClock()">
+        <p :title="i18n.sync_clock" @click="syncClock()">
           <span><IconSync /></span>{{ i18n.sync_clock }}
         </p>
-        <p
-          v-bind:title="i18n.resize_popup_page"
-          v-on:click="showInfo('PreferencesPage')"
-        >
+        <p :title="i18n.resize_popup_page" @click="showInfo('PreferencesPage')">
           <span><IconWrench /></span>{{ i18n.resize_popup_page }}
         </p>
       </div>
       <div class="menuList">
-        <p v-bind:title="i18n.feedback" v-on:click="openHelp()">
+        <p :title="i18n.feedback" @click="openHelp()">
           <span><IconComments /></span>{{ i18n.feedback }}
         </p>
         <p
-          v-bind:title="i18n.source"
-          v-on:click="openLink('https://github.com/nolequen/Authenticator')"
+          :title="i18n.source"
+          @click="openLink('https://github.com/nolequen/Authenticator')"
         >
           <span><IconCode /></span>{{ i18n.source }}
         </p>
         <a href="licenses.html" target="_blank" style="text-decoration: none">
-          <p v-bind:title="i18n.about">
+          <p :title="i18n.about">
             <span><IconInfo /></span>{{ i18n.about }}
           </p>
         </a>

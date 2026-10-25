@@ -1,32 +1,32 @@
 <template>
   <div>
     <!-- File Backup -->
-    <div class="text warning" v-if="!defaultEncryption">
+    <div v-if="!defaultEncryption" class="text warning">
       {{ i18n.export_info }}
     </div>
     <div class="text">
       {{ i18n.backup_file_info }}
     </div>
-    <div class="text warning" v-if="currentlyEncrypted">
+    <div v-if="currentlyEncrypted" class="text warning">
       {{ i18n.phrase_incorrect_export }}
     </div>
     <a-button-link
+      v-if="exportOneLineOtpAuthFile"
       download="authenticator.txt"
       :href="exportOneLineOtpAuthFile"
-      v-if="exportOneLineOtpAuthFile"
       >{{ i18n.download_backup }}</a-button-link
     >
     <a-button-link
+      v-if="!!defaultEncryption && exportEncryptedFile"
       download="authenticator.json"
       :href="exportEncryptedFile"
-      v-if="!!defaultEncryption && exportEncryptedFile"
       >{{ i18n.download_enc_backup }}</a-button-link
     >
     <a-button-link href="import.html">{{ i18n.import_backup }}</a-button-link>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { BrowserStorage, EntryStorage } from "../../models/storage";
 import { useAccountsStore } from "../../store/Accounts";
@@ -51,10 +51,14 @@ watch(
   },
 );
 
+onUnmounted(() => {
+  builds++;
+  revokeBackupFiles();
+});
+
 async function buildBackupFiles() {
   const build = ++builds;
-  exportEncryptedFile.value = "";
-  exportOneLineOtpAuthFile.value = "";
+  revokeBackupFiles();
 
   const exportData = (await EntryStorage.getExport(accounts.entries)) as {
     [hash: string]: RawOTPStorage;
@@ -78,6 +82,15 @@ async function buildBackupFiles() {
   exportOneLineOtpAuthFile.value = getOneLineOtpBackupFile(exportData);
 }
 
+function revokeBackupFiles() {
+  for (const file of [exportEncryptedFile, exportOneLineOtpAuthFile]) {
+    if (file.value) {
+      URL.revokeObjectURL(file.value);
+      file.value = "";
+    }
+  }
+}
+
 function getBackupFile(entryData: { [hash: string]: OTPStorage | Key }) {
   let json = JSON.stringify(entryData, null, 2);
   // for windows notepad
@@ -96,7 +109,7 @@ function getOneLineOtpBackupFile(entryData: { [hash: string]: RawOTPStorage }) {
       ? removeUnsafeData(otpStorage.account)
       : otpStorage.account;
     const label = issuer ? issuer + ":" + (account || "") : account || "";
-    let type = "";
+    let type: string;
     if (otpStorage.type === "totp" || otpStorage.type === "hex") {
       type = "totp";
     } else if (otpStorage.type === "hotp" || otpStorage.type === "hhex") {

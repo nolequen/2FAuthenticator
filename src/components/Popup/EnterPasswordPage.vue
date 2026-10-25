@@ -1,14 +1,14 @@
 <template>
-  <div v-on:keydown.stop>
+  <div @keydown.stop>
     <div class="text">{{ i18n.passphrase_info }}</div>
     <a-text-input
-      type="password"
       v-model="password"
-      @enter="applyPassphrase()"
+      type="password"
       :class="{ badInput: wrongPassword }"
       :autofocus="true"
+      @enter="applyPassphrase()"
     />
-    <label class="warning" v-show="wrongPassword">{{
+    <label v-show="wrongPassword" class="warning">{{
       i18n.phrase_not_match
     }}</label>
     <a-button type="small" @click="applyPassphrase()">{{ i18n.ok }}</a-button>

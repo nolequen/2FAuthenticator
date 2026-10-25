@@ -2,29 +2,29 @@
   <a
     role="button"
     data-x-role="entry"
-    v-bind:tabindex="tabindex"
-    v-bind:class="{
+    :tabindex="tabindex"
+    :class="{
       entry: true,
       pinnedEntry: entry.pinned,
       'no-copy': noCopy(entry.code),
     }"
-    v-on:click="copyCode(entry)"
-    v-on:keydown.enter="copyCode(entry)"
+    @click="copyCode(entry)"
+    @keydown.enter="copyCode(entry)"
   >
-    <div class="deleteAction" v-on:click="removeEntry(entry)">
+    <div class="deleteAction" @click="removeEntry(entry)">
       <IconMinusCircle />
     </div>
     <div
-      class="sector"
       v-if="entry.type !== OTPType.hotp && entry.type !== OTPType.hhex"
       v-show="sectorStart"
+      class="sector"
     >
       <svg viewBox="0 0 16 16">
         <circle
           cx="8"
           cy="8"
           r="4"
-          v-bind:style="{
+          :style="{
             animationDuration: entry.period + 's',
             animationDelay: (sectorOffset % entry.period) + 's',
           }"
@@ -32,9 +32,9 @@
       </svg>
     </div>
     <div
-      v-bind:class="{ counter: true, disabled: style.hotpDisabled }"
       v-if="entry.type === OTPType.hotp || entry.type === OTPType.hhex"
-      v-on:click="nextCode(entry)"
+      :class="{ counter: true, disabled: style.hotpDisabled }"
+      @click="nextCode(entry)"
     >
       <IconRedo />
     </div>
@@ -46,37 +46,37 @@
     </div>
     <div class="issuerEdit">
       <input
-        v-bind:placeholder="i18n.issuer"
-        type="text"
         v-model="entry.issuer"
-        v-on:change="entry.update()"
+        :placeholder="i18n.issuer"
+        type="text"
+        @change="entry.update()"
       />
     </div>
     <div
-      v-bind:class="{
+      :class="{
         code: true,
         hotp: entry.type === OTPType.hotp || entry.type === OTPType.hhex,
         timeout: entry.period - (second % entry.period) < 5,
       }"
-      v-html="style.isEditing ? showBulls(entry) : showCode(entry.code)"
+      v-text="style.isEditing ? showBulls(entry) : showCode(entry.code)"
     ></div>
     <div class="issuer account">{{ entry.account }}</div>
     <div class="issuerEdit">
       <input
-        v-bind:placeholder="i18n.accountName"
-        type="text"
         v-model="entry.account"
-        v-on:change="entry.update()"
+        :placeholder="i18n.accountName"
+        type="text"
+        @change="entry.update()"
       />
     </div>
     <div
-      class="showqr"
       v-if="shouldShowQrIcon(entry)"
-      v-on:click.stop="showQr(entry)"
+      class="showqr"
+      @click.stop="showQr(entry)"
     >
       <IconQr />
     </div>
-    <div class="pin" v-on:click.stop="pin(entry)">
+    <div class="pin" @click.stop="pin(entry)">
       <IconPin />
     </div>
     <div class="movehandle">
@@ -86,7 +86,7 @@
 </template>
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { OTPType, CodeState } from "../../models/otp";
+import { OTPType, CodeState, MASK_DIGIT } from "../../models/otp";
 import { EntryStorage, withStorageLock } from "../../models/storage";
 import { getQrUrl } from "../../models/qr";
 import { getCurrentTab, okToInjectContentScript } from "../../utils";
@@ -123,7 +123,7 @@ function noCopy(code: string) {
   return (
     code === CodeState.Encrypted ||
     code === CodeState.Invalid ||
-    code.startsWith("&bull;")
+    code.startsWith(MASK_DIGIT)
   );
 }
 
@@ -148,11 +148,11 @@ function showBulls(entry: OTPEntryInterface) {
     return i18n.invalid;
   }
 
-  if (entry.code.startsWith("&bull;")) {
+  if (entry.code.startsWith(MASK_DIGIT)) {
     return entry.code;
   }
 
-  return new Array(entry.digits).fill("&bull;").join("");
+  return MASK_DIGIT.repeat(entry.digits);
 }
 
 async function removeEntry(entry: OTPEntryInterface) {
@@ -202,7 +202,7 @@ async function copyCode(entry: OTPEntryInterface) {
   if (
     style.value.isEditing ||
     entry.code === CodeState.Invalid ||
-    entry.code.startsWith("&bull;")
+    entry.code.startsWith(MASK_DIGIT)
   ) {
     return;
   }
@@ -250,7 +250,7 @@ async function copyCode(entry: OTPEntryInterface) {
 }
 
 async function insertContentScript() {
-  let tab = await getCurrentTab();
+  const tab = await getCurrentTab();
   if (okToInjectContentScript(tab)) {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },

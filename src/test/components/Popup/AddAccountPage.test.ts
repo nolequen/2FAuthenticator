@@ -1,7 +1,8 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 import * as sinon from "sinon";
-import * as sinonChai from "sinon-chai";
+import sinonChai from "sinon-chai";
 
 import { mount, VueWrapper } from "@vue/test-utils";
 import type { Pinia } from "pinia";
@@ -17,7 +18,6 @@ import { OTPAlgorithm } from "../../../models/otp";
 import { randomPassphrase, resetStorage, storeKey } from "../../storage-helper";
 import { createTestPinia, mountOptions } from "../../vue-helper";
 
-chai.should();
 chai.use(sinonChai);
 mocha.setup("bdd");
 
@@ -73,7 +73,9 @@ describe("AddAccountPage", () => {
     await wrapper.find("button").trigger("click");
     await entryAdded;
 
-    const stored = await chrome.storage.local.get();
+    const stored = await chrome.storage.local.get<{
+      [key: string]: { dataType: string; data: string };
+    }>();
     const entries = Object.keys(stored)
       .map((key) => stored[key])
       .filter((item) => item.dataType !== undefined && item.dataType !== "Key");

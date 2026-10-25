@@ -1,5 +1,5 @@
 import "mocha";
-import * as chai from "chai";
+import "chai/register-should";
 
 import { getOTPAuthPerLineFromOPTAuthMigration } from "../../models/migration";
 import { getEntryDataFromOTPAuthPerLine } from "../../models/otpauth";
@@ -11,7 +11,6 @@ import {
   SECRET_BYTES,
 } from "../migration-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 const SECRET = "JBSWY3DPEHPK3PXP";

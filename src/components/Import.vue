@@ -3,24 +3,24 @@
     <div v-if="!shouldShowPassphrase">
       <div class="import_tab">
         <input
-          type="radio"
           id="import_file_radio"
-          value="FileImport"
           v-model="importType"
+          type="radio"
+          value="FileImport"
         />
         <label for="import_file_radio">{{ i18n.import_backup_file }}</label>
         <input
-          type="radio"
           id="import_qr_radio"
-          value="QrImport"
           v-model="importType"
+          type="radio"
+          value="QrImport"
         />
         <label for="import_qr_radio">{{ i18n.import_backup_qr }}</label>
         <input
-          type="radio"
           id="import_code_radio"
-          value="TextImport"
           v-model="importType"
+          type="radio"
+          value="TextImport"
         />
         <label for="import_code_radio">{{ i18n.import_backup_code }}</label>
       </div>
@@ -29,7 +29,7 @@
           {{ i18n.otp_backup_inform }}
         </p>
       </div>
-      <component v-bind:is="pages[importType]" />
+      <component :is="pages[importType]" />
     </div>
     <div v-if="shouldShowPassphrase" class="error_password">
       {{ i18n.import_error_password }}

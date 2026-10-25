@@ -1,34 +1,34 @@
 <template>
   <div>
     <a-text-input
-      :label="i18n.issuer"
       v-model="newAccount.issuer"
+      :label="i18n.issuer"
     ></a-text-input>
     <a-text-input
-      :label="i18n.secret"
       v-model="newAccount.secret"
+      :label="i18n.secret"
     ></a-text-input>
     <details>
       <summary>{{ i18n.advanced }}</summary>
       <a-text-input
-        :label="i18n.accountName"
         v-model="newAccount.account"
+        :label="i18n.accountName"
       ></a-text-input>
       <label>{{ i18n.period }}</label>
       <input
+        v-model.number="newAccount.period"
         type="number"
         min="1"
         class="input"
-        v-model.number="newAccount.period"
         :disabled="newAccount.type === OTPType.hotp"
       />
-      <a-select-input :label="i18n.digits" v-model.number="newAccount.digits">
+      <a-select-input v-model.number="newAccount.digits" :label="i18n.digits">
         <option value="6">6</option>
         <option value="8">8</option>
       </a-select-input>
       <a-select-input
-        :label="i18n.algorithm"
         v-model.number="newAccount.algorithm"
+        :label="i18n.algorithm"
       >
         <option :value="OTPAlgorithm.SHA1">SHA-1</option>
         <option :value="OTPAlgorithm.SHA256">SHA-256</option>
@@ -36,7 +36,7 @@
         <option :value="OTPAlgorithm.GOST3411_2012_256">GOST 34.11 256</option>
         <option :value="OTPAlgorithm.GOST3411_2012_512">GOST 34.11 512</option>
       </a-select-input>
-      <a-select-input :label="i18n.type" v-model.number="newAccount.type">
+      <a-select-input v-model.number="newAccount.type" :label="i18n.type">
         <option :value="OTPType.totp">{{ i18n.based_on_time }}</option>
         <option :value="OTPType.hotp">{{ i18n.based_on_counter }}</option>
       </a-select-input>

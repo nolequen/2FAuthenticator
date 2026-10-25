@@ -2,11 +2,11 @@
   <div>
     <h2>{{ i18n.delete_all }}</h2>
     <p>{{ i18n.delete_all_warning }}</p>
-    <input type="checkbox" id="checkbox" v-model="deleteConfirm" />
+    <input id="checkbox" v-model="deleteConfirm" type="checkbox" />
     <label for="checkbox">{{ i18n.confirm_delete_all }}</label>
     <br />
     <br />
-    <button v-on:click="deleteEverything()" v-bind:disabled="!deleteConfirm">
+    <button :disabled="!deleteConfirm" @click="deleteEverything()">
       {{ i18n.delete_all }}
     </button>
     <br />

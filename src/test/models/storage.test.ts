@@ -1,7 +1,8 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 import * as sinon from "sinon";
-import * as sinonChai from "sinon-chai";
+import sinonChai from "sinon-chai";
 import * as CryptoJS from "crypto-js";
 
 import { Encryption } from "../../models/encryption";
@@ -10,7 +11,6 @@ import { StorageLocation, UserSettings } from "../../models/settings";
 import { BrowserStorage, EntryStorage } from "../../models/storage";
 import { randomPassphrase, resetStorage, storeKey } from "../storage-helper";
 
-chai.should();
 chai.use(sinonChai);
 mocha.setup("bdd");
 
@@ -181,7 +181,9 @@ describe("EntryStorage", () => {
         const raw = rawEntry(fields);
         await EntryStorage.import(encryption, { [raw.hash]: raw });
 
-        const stored = await chrome.storage.local.get();
+        const stored = await chrome.storage.local.get<{
+          [hash: string]: EncOTPStorage;
+        }>();
         stored[raw.hash].dataType.should.equal("EncOTPStorage");
         stored[raw.hash].data.should.match(/^v4:/);
         JSON.stringify(stored).should.not.contain(raw.secret);

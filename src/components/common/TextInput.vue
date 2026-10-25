@@ -2,12 +2,12 @@
   <div>
     <label>{{ label }}</label>
     <input
+      ref="textInput"
       :type="type ? type : 'text'"
       class="input"
       :value="model"
       @input="model = ($event.target as HTMLInputElement).value"
       @keyup.enter="emit('enter')"
-      ref="textInput"
     />
   </div>
 </template>

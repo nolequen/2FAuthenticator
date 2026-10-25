@@ -1,13 +1,13 @@
 <template>
   <div id="info">
     <div
-      id="infoClose"
       v-if="!(info === 'EnterPasswordPage' || info === 'LoadingPage')"
-      v-on:click="hideInfo()"
+      id="infoClose"
+      @click="hideInfo()"
     >
       <IconXCircle />
     </div>
-    <component v-bind:is="pages[info]" id="infoContent"></component>
+    <component :is="pages[info]" id="infoContent"></component>
   </div>
 </template>
 <script setup lang="ts">

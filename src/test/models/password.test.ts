@@ -1,5 +1,6 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 import * as sinon from "sinon";
 import argon2 from "argon2-browser";
 
@@ -7,7 +8,6 @@ import { createKey, unlockKey } from "../../models/password";
 import { V3_FIXTURE } from "../fixtures/v3-storage";
 import { BROKEN_KEYS, V3_KEY } from "../fixture-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 describe("password", function () {

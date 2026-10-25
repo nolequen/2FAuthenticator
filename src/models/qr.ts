@@ -1,4 +1,4 @@
-import * as QRGen from "qrcode-generator";
+import qrcode from "qrcode-generator";
 import { OTPAlgorithm, OTPType } from "./otp";
 
 export function getQrUrl(entry: OTPEntryInterface) {
@@ -32,7 +32,7 @@ export function getQrUrl(entry: OTPEntryInterface) {
     (entry.algorithm !== OTPAlgorithm.SHA1
       ? "&algorithm=" + OTPAlgorithm[entry.algorithm]
       : "");
-  const qr = QRGen(0, "L");
+  const qr = qrcode(0, "L");
   qr.addData(otpauth);
   qr.make();
   return qr.createDataURL(5);

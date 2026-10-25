@@ -1,12 +1,12 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 
 import { Encryption } from "../../models/encryption";
 import { V3_FIXTURE, V3_FIXTURE_ENTRIES } from "../fixtures/v3-storage";
 import { V3_KEY_ID } from "../fixture-helper";
 import { randomPassphrase } from "../storage-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 const ENTRY: RawOTPStorage = {

@@ -1,7 +1,9 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 import { assert } from "chai";
-import * as sinonChai from "sinon-chai";
+import * as sinon from "sinon";
+import sinonChai from "sinon-chai";
 import { mount, VueWrapper } from "@vue/test-utils";
 import type { Pinia } from "pinia";
 
@@ -10,9 +12,6 @@ import { useMenuStore } from "../../../store/Menu";
 import MenuPage from "../../../components/Popup/MenuPage.vue";
 import { createTestPinia, mountOptions } from "../../vue-helper";
 
-import chrome from "sinon-chrome";
-
-chai.should();
 chai.use(sinonChai);
 mocha.setup("bdd");
 
@@ -24,11 +23,6 @@ describe("MenuPage", () => {
   let pinia: Pinia;
 
   let wrapper: VueWrapper;
-
-  before(() => {
-    // mock the chrome global object
-    global.chrome.tabs.create = chrome.tabs.create;
-  });
 
   beforeEach(async () => {
     pinia = createTestPinia();
@@ -64,19 +58,19 @@ describe("MenuPage", () => {
       });
     };
 
+    let createTab: sinon.SinonSpy;
+
     beforeEach(() => {
-      chrome.tabs.create.resetHistory();
+      createTab = sinon.fake.resolves(undefined);
+      sinon.replace(chrome.tabs, "create", createTab);
       wrapper = mount(MenuPage, mountOptions(pinia));
     });
 
     it("should open a new tab to the issues page of the fork when the feedback button is clicked", async () => {
       await clickMenuPageButtonByTitle(wrapper, "Feedback");
-      assert.ok(
-        chrome.tabs.create.withArgs({
-          url: "https://github.com/nolequen/Authenticator/issues",
-        }).calledOnce,
-        "Tab create should be called with the issues URL",
-      );
+      createTab.should.have.been.calledOnceWithExactly({
+        url: "https://github.com/nolequen/Authenticator/issues",
+      });
     });
 
     it("should open the same issues page when the user agent is Firefox", async () => {
@@ -84,12 +78,9 @@ describe("MenuPage", () => {
         "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0",
       );
       await clickMenuPageButtonByTitle(wrapper, "Feedback");
-      assert.ok(
-        chrome.tabs.create.withArgs({
-          url: "https://github.com/nolequen/Authenticator/issues",
-        }).calledOnce,
-        "Tab create should be called with the issues URL",
-      );
+      createTab.should.have.been.calledOnceWithExactly({
+        url: "https://github.com/nolequen/Authenticator/issues",
+      });
     });
   });
 

@@ -1,5 +1,6 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 
 import { decryptBackupData } from "../../models/backup";
 import { Encryption } from "../../models/encryption";
@@ -9,7 +10,6 @@ import { V3_FIXTURE, V3_FIXTURE_ENTRIES } from "../fixtures/v3-storage";
 import { expectFixtureAccounts } from "../fixture-helper";
 import { randomPassphrase, resetStorage } from "../storage-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 const BACKUP_PASSWORD = "backup password";
@@ -82,7 +82,9 @@ describe("decryptBackupData", function () {
 
     await importBackup(backup, new Encryption("", ""));
 
-    const stored = await chrome.storage.local.get();
+    const stored = await chrome.storage.local.get<{
+      [hash: string]: Required<RawOTPStorage>;
+    }>();
     for (const hash of Object.keys(V3_FIXTURE_ENTRIES)) {
       stored[hash].dataType.should.equal("OTPStorage");
       stored[hash].encrypted.should.equal(false);
@@ -96,7 +98,9 @@ describe("decryptBackupData", function () {
 
     await importBackup(backup, encryption);
 
-    const stored = await chrome.storage.local.get();
+    const stored = await chrome.storage.local.get<{
+      [hash: string]: EncOTPStorage;
+    }>();
     for (const hash of Object.keys(V3_FIXTURE_ENTRIES)) {
       stored[hash].dataType.should.equal("EncOTPStorage");
       stored[hash].keyId.should.equal("session-key");

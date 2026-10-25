@@ -1,5 +1,5 @@
 import "mocha";
-import * as chai from "chai";
+import "chai/register-should";
 import * as sinon from "sinon";
 
 import { mount, VueWrapper } from "@vue/test-utils";
@@ -8,6 +8,7 @@ import type { Pinia } from "pinia";
 
 import BackupPage from "../../../components/Popup/BackupPage.vue";
 import PageHandler from "../../../components/Popup/PageHandler.vue";
+import { BrowserStorage } from "../../../models/storage";
 import { loadI18nMessages } from "../../../store/i18n";
 import { useAccountsStore } from "../../../store/Accounts";
 import { useCurrentViewStore } from "../../../store/CurrentView";
@@ -15,13 +16,13 @@ import { useStyleStore } from "../../../store/Style";
 import { resetStorage } from "../../storage-helper";
 import { createTestPinia, mountOptions } from "../../vue-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 const SECRET = "JBSWY3DPEHPK3PXP";
 
 describe("BackupPage", () => {
   let blobs: Map<string, Blob>;
+  let revoked: string[];
 
   async function storeAccounts(...accounts: Partial<RawOTPStorage>[]) {
     const items: { [hash: string]: RawOTPStorage } = {};
@@ -70,6 +71,7 @@ describe("BackupPage", () => {
   beforeEach(async () => {
     await resetStorage();
     blobs = new Map();
+    revoked = [];
     sinon.replace(
       URL,
       "createObjectURL",
@@ -77,6 +79,13 @@ describe("BackupPage", () => {
         const url = `blob:test-${blobs.size}`;
         blobs.set(url, blob);
         return url;
+      }),
+    );
+    sinon.replace(
+      URL,
+      "revokeObjectURL",
+      sinon.fake((url: string) => {
+        revoked.push(url);
       }),
     );
   });
@@ -131,5 +140,65 @@ describe("BackupPage", () => {
         `otpauth://hotp/Counter:bob?secret=${SECRET}&issuer=Counter&counter=1`,
       ]);
     wrapper.unmount();
+  });
+
+  it("should revoke the files of the previous backup when the page is opened again", async () => {
+    await storeAccounts({ issuer: "My Bank", account: "alice" });
+    const pinia = await openAccounts();
+    const currentView = useCurrentViewStore(pinia);
+    const style = useStyleStore(pinia);
+    const wrapper = mount(PageHandler, mountOptions(pinia));
+    const open = async () => {
+      style.showInfo();
+      currentView.changeView("BackupPage");
+      await readTextBackup(wrapper);
+      return [...blobs.keys()];
+    };
+
+    const first = await open();
+    first.should.have.lengthOf(2);
+    await wrapper.find("#infoClose").trigger("click");
+    revoked.should.deep.equal([]);
+
+    (await open()).should.have.lengthOf(4);
+    revoked.should.have.members(first);
+    wrapper.unmount();
+  });
+
+  it("should revoke the files when the page is closed", async () => {
+    await storeAccounts({ issuer: "My Bank", account: "alice" });
+    const pinia = await openAccounts();
+    const wrapper = mount(BackupPage, mountOptions(pinia));
+    await readTextBackup(wrapper);
+    blobs.size.should.equal(2);
+
+    wrapper.unmount();
+
+    revoked.should.have.members([...blobs.keys()]);
+  });
+
+  it("should not create files when the page is closed before the backup is built", async () => {
+    await storeAccounts({ issuer: "My Bank", account: "alice" });
+    const pinia = await openAccounts();
+    const keys = await BrowserStorage.getKeys();
+    let readKeys: () => void = () => undefined;
+    const getKeys = sinon.fake(
+      () =>
+        new Promise<Key[]>((resolve) => {
+          readKeys = () => resolve(keys);
+        }),
+    );
+    sinon.replace(BrowserStorage, "getKeys", getKeys);
+    const wrapper = mount(BackupPage, mountOptions(pinia));
+    for (let i = 0; i < 100 && !getKeys.called; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    getKeys.calledOnce.should.equal(true);
+
+    wrapper.unmount();
+    readKeys();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    blobs.size.should.equal(0);
   });
 });

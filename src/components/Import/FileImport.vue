@@ -1,19 +1,19 @@
 <template>
   <div>
     <a-file-input
+      v-if="!getFilePassphrase"
       button-type="file"
       accept="application/json, text/plain"
-      v-if="!getFilePassphrase"
-      @change="importFile($event, true)"
       :label="i18n.import_backup_file"
+      @change="importFile($event, true)"
     />
-    <div class="import_file_passphrase" v-else>
+    <div v-else class="import_file_passphrase">
       <p class="error_password">{{ i18n.passphrase_info }}</p>
       <a-text-input
+        v-model="importFilePassphrase"
         :label="i18n.phrase"
         type="password"
         @enter="readFilePassphrase = true"
-        v-model="importFilePassphrase"
       />
       <a-button @click="readFilePassphrase = true">{{ i18n.ok }}</a-button>
     </div>
@@ -38,9 +38,9 @@ function importFile(event: Event, closeWindow: boolean) {
   if (target.files[0]) {
     const reader = new FileReader();
     reader.onload = async () => {
-      let importData: { [hash: string]: OTPStorage | Key } = {};
+      let importData: { [hash: string]: OTPStorage | Key };
       let failedCount = 0;
-      let succeededCount = 0;
+      let succeededCount: number;
       try {
         importData = JSON.parse(reader.result as string);
         succeededCount = Object.keys(importData).length;

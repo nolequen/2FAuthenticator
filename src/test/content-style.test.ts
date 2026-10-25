@@ -1,7 +1,7 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 
-chai.should();
 mocha.setup("bdd");
 
 describe("content style", () => {

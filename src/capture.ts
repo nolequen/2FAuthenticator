@@ -33,7 +33,8 @@ export async function handleCaptureMessage(
 }
 
 export async function stopCaptureOnAutolock() {
-  const { contentTabId } = await chrome.storage.session.get("contentTabId");
+  const { contentTabId } =
+    await chrome.storage.session.get<SessionData>("contentTabId");
   if (contentTabId !== undefined) {
     chrome.tabs
       .sendMessage(contentTabId, { action: "stopCapture" })
@@ -43,7 +44,7 @@ export async function stopCaptureOnAutolock() {
 }
 
 export async function startCaptureFromCommand() {
-  const { cachedPassphrase } = await chrome.storage.session.get();
+  const { cachedPassphrase } = await chrome.storage.session.get<SessionData>();
   if (
     (cachedPassphrase === null || cachedPassphrase === undefined) &&
     (await EntryStorage.hasEncryptionKey())

@@ -1,5 +1,6 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 
 import { mount } from "@vue/test-utils";
 
@@ -9,7 +10,6 @@ import { useAccountsStore } from "../../../store/Accounts";
 import { OTPEntry, OTPType } from "../../../models/otp";
 import { createTestPinia, mountOptions } from "../../vue-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 function entry(issuer: string, account: string, index: number) {
@@ -38,11 +38,11 @@ describe("MainBody", () => {
 
     const [alpha, beta] = wrapper.findAll("a.entry");
     alpha.text().should.contain("Alpha");
-    chai.expect(alpha.attributes("notsearched")).to.equal(undefined);
-    chai.expect(beta.attributes("notsearched")).to.not.equal(undefined);
+    chai.expect(alpha.attributes("not-searched")).to.equal(undefined);
+    chai.expect(beta.attributes("not-searched")).to.not.equal(undefined);
 
     await wrapper.find("#searchInput").setValue("");
 
-    chai.expect(beta.attributes("notsearched")).to.equal(undefined);
+    chai.expect(beta.attributes("not-searched")).to.equal(undefined);
   });
 });

@@ -1,20 +1,21 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 import * as sinon from "sinon";
-import * as sinonChai from "sinon-chai";
+import sinonChai from "sinon-chai";
 import jsQR from "jsqr";
 
 import { mount } from "@vue/test-utils";
-import { nextTick } from "vue";
+import { nextTick, reactive } from "vue";
 
 import EntryComponent from "../../../components/Popup/EntryComponent.vue";
 import { OTPEntry, OTPType } from "../../../models/otp";
 import { parseOTPAuthURI } from "../../../models/otpauth";
 import { getQrUrl } from "../../../models/qr";
 import { loadI18nMessages } from "../../../store/i18n";
+import { useStyleStore } from "../../../store/Style";
 import { createTestPinia, mountOptions } from "../../vue-helper";
 
-chai.should();
 chai.use(sinonChai);
 mocha.setup("bdd");
 
@@ -110,6 +111,67 @@ describe("EntryComponent", () => {
       counter.classes().should.not.include("disabled");
       await counter.trigger("click");
       next.should.have.been.calledTwice;
+    });
+  });
+
+  describe("masked code", () => {
+    let request: sinon.SinonSpy;
+
+    before(async () => {
+      await loadI18nMessages();
+    });
+
+    beforeEach(() => {
+      request = sinon.fake();
+      sinon.replace(
+        chrome.permissions,
+        "request",
+        request as unknown as typeof chrome.permissions.request,
+      );
+    });
+
+    function mountEntry(type: OTPType, digits: number) {
+      const entry = reactive(
+        new OTPEntry({
+          type,
+          index: 0,
+          issuer: "Example",
+          account: "alice",
+          encrypted: false,
+          secret: "JBSWY3DPEHPK3PXP",
+          digits,
+        }),
+      );
+      const pinia = createTestPinia();
+      const wrapper = mount(EntryComponent, {
+        ...mountOptions(pinia),
+        props: { entry, tabindex: 0 },
+      });
+      return { entry, pinia, wrapper };
+    }
+
+    it("should not copy the code of a counter based account before the first click on next", async () => {
+      const { entry, wrapper } = mountEntry(OTPType.hotp, 6);
+      const link = wrapper.find("a.entry");
+      wrapper.find(".code").text().should.equal("••••••");
+      link.classes().should.include("no-copy");
+      await link.trigger("click");
+      request.called.should.equal(false);
+
+      entry.code = "123456";
+      await nextTick();
+      wrapper.find(".code").text().should.equal("123456");
+      link.classes().should.not.include("no-copy");
+      await link.trigger("click");
+      request.calledOnce.should.equal(true);
+    });
+
+    it("should hide every digit of the code in edit mode", async () => {
+      const { entry, pinia, wrapper } = mountEntry(OTPType.totp, 8);
+      entry.code.should.match(/^\d{8}$/);
+      useStyleStore(pinia).style.isEditing = true;
+      await nextTick();
+      wrapper.find(".code").text().should.equal("••••••••");
     });
   });
 });

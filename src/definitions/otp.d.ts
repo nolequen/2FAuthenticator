@@ -70,3 +70,9 @@ interface Key {
   hash: string;
   version: 3;
 }
+
+interface SessionData {
+  cachedPassphrase?: string | null;
+  cachedKeyId?: string | null;
+  contentTabId?: number;
+}

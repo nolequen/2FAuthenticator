@@ -1,9 +1,9 @@
 import "mocha";
 import * as chai from "chai";
+import "chai/register-should";
 
 import { getAlertText } from "../contentAlerts";
 
-chai.should();
 mocha.setup("bdd");
 
 describe("getAlertText", () => {

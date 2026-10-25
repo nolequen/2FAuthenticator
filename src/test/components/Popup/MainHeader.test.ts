@@ -1,5 +1,5 @@
 import "mocha";
-import * as chai from "chai";
+import "chai/register-should";
 
 import { mount } from "@vue/test-utils";
 
@@ -10,7 +10,6 @@ import { loadI18nMessages } from "../../../store/i18n";
 import { useStyleStore } from "../../../store/Style";
 import { createTestPinia, mountOptions } from "../../vue-helper";
 
-chai.should();
 mocha.setup("bdd");
 
 describe("MainHeader", () => {

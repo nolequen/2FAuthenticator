@@ -10,6 +10,9 @@ module.exports = merge(common, {
   },
   // Polyfills for mocha and sinon
   resolve: {
+    alias: {
+      mocha$: require.resolve("mocha/mocha.js"),
+    },
     fallback: {
       "util": require.resolve("util/"),
       "buffer": require.resolve('buffer/'),
