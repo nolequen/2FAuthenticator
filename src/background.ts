@@ -6,7 +6,7 @@ import {
   getCurrentTab,
   okToInjectContentScript,
 } from "./utils";
-import { CodeState } from "./models/otp";
+import { isCodeReady } from "./models/otp";
 
 import { UserSettings } from "./models/settings";
 import {
@@ -83,10 +83,7 @@ chrome.commands.onCommand.addListener(async (command: string) => {
         if (matchedEntries && matchedEntries.length === 1) {
           const entry = matchedEntries[0];
 
-          if (
-            entry.code !== CodeState.Encrypted &&
-            entry.code !== CodeState.Invalid
-          ) {
+          if (isCodeReady(entry.code)) {
             chrome.tabs.sendMessage(tab.id, {
               action: "pastecode",
               code: matchedEntries[0].code,

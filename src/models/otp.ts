@@ -16,6 +16,14 @@ export enum CodeState {
 
 export const MASK_DIGIT = "•";
 
+export function isCodeReady(code: string) {
+  return (
+    code !== CodeState.Encrypted &&
+    code !== CodeState.Invalid &&
+    !code.startsWith(MASK_DIGIT)
+  );
+}
+
 export enum OTPAlgorithm {
   SHA1 = 1,
   SHA256,

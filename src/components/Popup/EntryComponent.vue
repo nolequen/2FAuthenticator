@@ -86,7 +86,7 @@
 </template>
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { OTPType, CodeState, MASK_DIGIT } from "../../models/otp";
+import { OTPType, CodeState, MASK_DIGIT, isCodeReady } from "../../models/otp";
 import { EntryStorage, withStorageLock } from "../../models/storage";
 import { getQrUrl } from "../../models/qr";
 import { getCurrentTab, okToInjectContentScript } from "../../utils";
@@ -120,11 +120,7 @@ const { style } = storeToRefs(styleStore);
 const { theme } = storeToRefs(menu);
 
 function noCopy(code: string) {
-  return (
-    code === CodeState.Encrypted ||
-    code === CodeState.Invalid ||
-    code.startsWith(MASK_DIGIT)
-  );
+  return !isCodeReady(code);
 }
 
 function shouldShowQrIcon(entry: OTPEntryInterface) {
