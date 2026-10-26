@@ -69,7 +69,7 @@ describe("MenuPage", () => {
     it("should open a new tab to the issues page of the fork when the feedback button is clicked", async () => {
       await clickMenuPageButtonByTitle(wrapper, i18n.feedback);
       createTab.should.have.been.calledOnceWithExactly({
-        url: "https://github.com/nolequen/Authenticator/issues",
+        url: "https://github.com/nolequen/2FAuthenticator/issues",
       });
     });
 
@@ -79,7 +79,7 @@ describe("MenuPage", () => {
       );
       await clickMenuPageButtonByTitle(wrapper, i18n.feedback);
       createTab.should.have.been.calledOnceWithExactly({
-        url: "https://github.com/nolequen/Authenticator/issues",
+        url: "https://github.com/nolequen/2FAuthenticator/issues",
       });
     });
   });

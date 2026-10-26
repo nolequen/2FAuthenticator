@@ -8,7 +8,7 @@ const { spawnSync } = require("child_process");
 process.chdir(path.resolve(__dirname, ".."));
 
 const NAME = "2fauthenticator";
-const REPO_URL = "https://github.com/nolequen/Authenticator";
+const REPO_URL = "https://github.com/nolequen/2FAuthenticator";
 const UPDATE_URL = `${REPO_URL}/releases/latest/download/updates.json`;
 const KEY_VARS = ["WEB_EXT_API_KEY", "WEB_EXT_API_SECRET"];
 const WEB_EXT = "node_modules/web-ext/bin/web-ext.js";

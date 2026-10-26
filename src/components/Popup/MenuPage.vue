@@ -66,7 +66,7 @@
           type="button"
           class="row"
           :title="i18n.source"
-          @click="openLink('https://github.com/nolequen/Authenticator')"
+          @click="openLink('https://github.com/nolequen/2FAuthenticator')"
         >
           <span class="row-text">{{ i18n.source }}</span>
           <IconExternalLink class="row-trail" />
@@ -100,7 +100,7 @@ const { version } = storeToRefs(useMenuStore());
 
 function openHelp() {
   chrome.tabs.create({
-    url: "https://github.com/nolequen/Authenticator/issues",
+    url: "https://github.com/nolequen/2FAuthenticator/issues",
   });
 }
 

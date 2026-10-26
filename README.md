@@ -16,7 +16,7 @@ How it differs from the original:
 
 ## Installation
 
-Download the files from the [latest release](https://github.com/nolequen/Authenticator/releases/latest).
+Download the files from the [latest release](https://github.com/nolequen/2FAuthenticator/releases/latest).
 
 ### Firefox
 
