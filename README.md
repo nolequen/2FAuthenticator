@@ -11,7 +11,7 @@ How it differs from the original:
 - its own name and extension ID in Chrome, Edge and Firefox;
 - no cloud backups (Google Drive, Dropbox, OneDrive): backups are exported to a file only;
 - the interface is in English and Russian only;
-- no Advisor, context menu, permissions page, enterprise policies or Steam and Battle.net account types;
+- no Advisor, browser context menu, permissions page, enterprise policies or Steam and Battle.net account types;
 - bug fixes.
 
 ## Installation
