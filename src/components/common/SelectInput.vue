@@ -1,8 +1,9 @@
 <template>
-  <div class="control-group">
-    <label class="combo-label" style="margin: 20px 10px">{{ label }}</label>
+  <div class="field">
+    <label class="field-label" :for="id">{{ label }}</label>
     <select
-      style="margin: 20px 10px"
+      :id="id"
+      class="input"
       :value="model"
       :disabled="disabled"
       @input="model = ($event.target as HTMLSelectElement).value"
@@ -13,7 +14,10 @@
   </div>
 </template>
 <script setup lang="ts">
+import { useId } from "vue";
+
 defineProps<{ label?: string; disabled?: boolean }>();
 const model = defineModel<string | number>();
 const emit = defineEmits<{ change: [] }>();
+const id = useId();
 </script>

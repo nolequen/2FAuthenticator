@@ -1,12 +1,22 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useQrStore = defineStore("qr", () => {
-  const qr = ref("");
+export interface QrCode {
+  url: string;
+  issuer: string;
+  account: string;
+}
 
-  function setQr(url: string) {
-    qr.value = `url(${url})`;
+export const useQrStore = defineStore("qr", () => {
+  const qr = ref<QrCode | null>(null);
+
+  function setQr(code: QrCode) {
+    qr.value = code;
   }
 
-  return { qr, setQr };
+  function hideQr() {
+    qr.value = null;
+  }
+
+  return { qr, setQr, hideQr };
 });

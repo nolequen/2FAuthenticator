@@ -7,124 +7,144 @@
       entry: true,
       pinnedEntry: entry.pinned,
       'no-copy': noCopy(entry.code),
+      copied,
     }"
-    @click="copyCode(entry)"
-    @keydown.enter="copyCode(entry)"
+    @click="activate(entry)"
+    @keydown.enter.prevent="activate(entry)"
+    @keydown.shift.f10.prevent="openMenu($event)"
+    @keydown.context-menu.prevent="openMenu($event)"
+    @contextmenu.prevent="openMenu($event)"
   >
-    <div class="deleteAction" @click="removeEntry(entry)">
-      <IconMinusCircle />
-    </div>
-    <div
-      v-if="entry.type !== OTPType.hotp && entry.type !== OTPType.hhex"
-      v-show="sectorStart"
-      class="sector"
-    >
-      <svg viewBox="0 0 16 16">
-        <circle
-          cx="8"
-          cy="8"
-          r="4"
-          :style="{
-            animationDuration: entry.period + 's',
-            animationDelay: (sectorOffset % entry.period) + 's',
-          }"
+    <EntryAvatar :issuer="entry.issuer" :hash="entry.hash" />
+    <span class="entry-text">
+      <span class="issuer">
+        <span class="issuer-name"
+          >{{ issuerParts[0]
+          }}<mark v-if="issuerParts[1]">{{ issuerParts[1] }}</mark
+          >{{ issuerParts[2] }}</span
+        >
+        <IconPin
+          v-if="entry.pinned"
+          class="pinned-icon"
+          role="img"
+          :aria-label="i18n.pinned"
         />
-      </svg>
-    </div>
-    <div
-      v-if="entry.type === OTPType.hotp || entry.type === OTPType.hhex"
-      :class="{ counter: true, disabled: style.hotpDisabled }"
-      @click="nextCode(entry)"
-    >
-      <IconRedo />
-    </div>
-    <div class="issuer">
-      {{
-        entry.issuer.split("::")[0] +
-        (theme === "compact" ? ` (${entry.account})` : "")
-      }}
-    </div>
-    <div class="issuerEdit">
-      <input
-        v-model="entry.issuer"
-        :placeholder="i18n.issuer"
-        type="text"
-        @change="entry.update()"
-      />
-    </div>
-    <div
+      </span>
+      <span class="account"
+        >{{ accountParts[0]
+        }}<mark v-if="accountParts[1]">{{ accountParts[1] }}</mark
+        >{{ accountParts[2] }}</span
+      >
+    </span>
+    <span
       :class="{
         code: true,
-        hotp: entry.type === OTPType.hotp || entry.type === OTPType.hhex,
-        timeout: entry.period - (second % entry.period) < 5,
+        hotp: isHotp,
+        state: !isCodeShown(entry.code),
+        timeout: !isHotp && remaining < 5,
       }"
-      v-text="style.isEditing ? showBulls(entry) : showCode(entry.code)"
-    ></div>
-    <div class="issuer account">{{ entry.account }}</div>
-    <div class="issuerEdit">
-      <input
-        v-model="entry.account"
-        :placeholder="i18n.accountName"
-        type="text"
-        @change="entry.update()"
-      />
-    </div>
-    <div
-      v-if="shouldShowQrIcon(entry)"
-      class="showqr"
-      @click.stop="showQr(entry)"
+      v-text="showCode(entry.code)"
+    ></span>
+    <svg
+      v-if="!isHotp"
+      v-show="sectorStart"
+      :class="{ ring: true, timeout: remaining < 5 }"
+      viewBox="0 0 28 28"
+      aria-hidden="true"
     >
-      <IconQr />
-    </div>
-    <div class="pin" @click.stop="pin(entry)">
-      <IconPin />
-    </div>
-    <div class="movehandle">
-      <IconBars />
-    </div>
+      <circle class="track" cx="14" cy="14" r="11.5" />
+      <circle
+        class="progress"
+        cx="14"
+        cy="14"
+        r="11.5"
+        :style="{
+          animationDuration: entry.period + 's',
+          animationDelay: (sectorOffset % entry.period) + 's',
+        }"
+      />
+    </svg>
+    <button
+      v-else
+      type="button"
+      :class="{ counter: true, disabled: style.hotpDisabled }"
+      :disabled="style.hotpDisabled"
+      :aria-label="i18n.next_code"
+      :title="i18n.next_code"
+      @click.stop="nextCode(entry)"
+      @keydown.enter.stop
+    >
+      <IconRefresh />
+    </button>
   </a>
 </template>
 <script setup lang="ts">
+import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { OTPType, CodeState, MASK_DIGIT, isCodeReady } from "../../models/otp";
-import { EntryStorage, withStorageLock } from "../../models/storage";
-import { getQrUrl } from "../../models/qr";
-import { getCurrentTab, okToInjectContentScript } from "../../utils";
+import {
+  getCurrentTab,
+  injectContentScript,
+  okToInjectContentScript,
+} from "../../utils";
+import { formatCode, issuerName } from "../../display";
 import { i18n } from "../../store/i18n";
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
+import { useEntryMenuStore } from "../../store/EntryMenu";
 import { useMenuStore } from "../../store/Menu";
 import { useNotificationStore } from "../../store/Notification";
-import { useQrStore } from "../../store/Qr";
 import { useStyleStore } from "../../store/Style";
+import EntryAvatar from "./EntryAvatar.vue";
 
-import IconMinusCircle from "../../../svg/minus-circle.svg";
-import IconRedo from "../../../svg/redo.svg";
-import IconQr from "../../../svg/qrcode.svg";
-import IconBars from "../../../svg/bars.svg";
-import IconPin from "../../../svg/pin.svg";
+import IconPin from "lucide-static/icons/pin.svg";
+import IconRefresh from "lucide-static/icons/rotate-cw.svg";
 
-defineProps<{
+const props = defineProps<{
   entry: OTPEntryInterface;
   tabindex: number;
+  highlight?: string;
 }>();
 
 const accounts = useAccountsStore();
 const currentView = useCurrentViewStore();
+const entryMenu = useEntryMenuStore();
 const menu = useMenuStore();
 const notification = useNotificationStore();
-const qrStore = useQrStore();
 const styleStore = useStyleStore();
 const { sectorStart, sectorOffset, second } = storeToRefs(accounts);
 const { style } = storeToRefs(styleStore);
-const { theme } = storeToRefs(menu);
+const copied = ref(false);
+let copiedTimer: ReturnType<typeof setTimeout> | undefined;
+
+const isHotp = computed(
+  () => props.entry.type === OTPType.hotp || props.entry.type === OTPType.hhex,
+);
+const remaining = computed(
+  () => props.entry.period - (second.value % props.entry.period),
+);
+const issuerParts = computed(() => splitMatch(issuerName(props.entry.issuer)));
+const accountParts = computed(() => splitMatch(props.entry.account));
+
+function splitMatch(text: string) {
+  const query = props.highlight?.toLowerCase() ?? "";
+  const index = query ? text.toLowerCase().indexOf(query) : -1;
+  if (index === -1) {
+    return [text, "", ""];
+  }
+  return [
+    text.slice(0, index),
+    text.slice(index, index + query.length),
+    text.slice(index + query.length),
+  ];
+}
 
 function noCopy(code: string) {
   return !isCodeReady(code);
 }
 
-function shouldShowQrIcon(entry: OTPEntryInterface) {
-  return entry.secret !== null;
+function isCodeShown(code: string) {
+  return code !== CodeState.Encrypted && code !== CodeState.Invalid;
 }
 
 function showCode(code: string) {
@@ -133,48 +153,29 @@ function showCode(code: string) {
   } else if (code === CodeState.Invalid) {
     return i18n.invalid;
   } else {
-    return code;
+    return formatCode(code);
   }
 }
 
-function showBulls(entry: OTPEntryInterface) {
-  if (entry.code === CodeState.Encrypted) {
-    return i18n.encrypted;
-  } else if (entry.code === CodeState.Invalid) {
-    return i18n.invalid;
-  }
-
-  if (entry.code.startsWith(MASK_DIGIT)) {
-    return entry.code;
-  }
-
-  return MASK_DIGIT.repeat(entry.digits);
-}
-
-async function removeEntry(entry: OTPEntryInterface) {
-  if (await notification.confirm(i18n.confirm_delete)) {
-    await entry.delete();
-    accounts.deleteCode(entry.hash);
-  }
-  return;
-}
-
-async function pin(entry: OTPEntryInterface) {
-  accounts.pinEntry(entry);
-  try {
-    await withStorageLock(() => EntryStorage.set(accounts.entries));
-  } catch (error) {
-    await accounts.showWriteFailure(error);
+function activate(entry: OTPEntryInterface) {
+  if (style.value.dragging) {
     return;
   }
-  const codesEl = document.getElementById("codes") as HTMLDivElement;
-  codesEl.scrollTop = 0;
+  copyCode(entry);
 }
 
-function showQr(entry: OTPEntryInterface) {
-  qrStore.setQr(getQrUrl(entry));
-  styleStore.showQr();
-  return;
+function openMenu(event: MouseEvent | KeyboardEvent) {
+  const card = event.currentTarget as HTMLElement;
+  if (
+    event instanceof KeyboardEvent ||
+    document.documentElement.classList.contains("kbd")
+  ) {
+    card.scrollIntoView({ block: "nearest" });
+    const rect = card.getBoundingClientRect();
+    entryMenu.open(props.entry.hash, rect.left + 12, rect.bottom - 8);
+  } else {
+    entryMenu.open(props.entry.hash, event.clientX, event.clientY);
+  }
 }
 
 async function nextCode(entry: OTPEntryInterface) {
@@ -195,67 +196,59 @@ async function nextCode(entry: OTPEntryInterface) {
 }
 
 async function copyCode(entry: OTPEntryInterface) {
-  if (
-    style.value.isEditing ||
-    entry.code === CodeState.Invalid ||
-    entry.code.startsWith(MASK_DIGIT)
-  ) {
+  if (entry.code === CodeState.Invalid || entry.code.startsWith(MASK_DIGIT)) {
     return;
   }
 
   if (entry.code === CodeState.Encrypted) {
-    styleStore.showInfo(true);
-    currentView.changeView("EnterPasswordPage");
+    currentView.lock();
     return;
   }
 
-  chrome.permissions.request(
-    { permissions: ["clipboardWrite"] },
-    async (granted) => {
-      if (granted) {
-        const codeClipboard = document.getElementById(
-          "codeClipboard",
-        ) as HTMLInputElement;
-        if (!codeClipboard) {
-          return;
-        }
+  const codeClipboard = document.getElementById(
+    "codeClipboard",
+  ) as HTMLInputElement;
+  if (!codeClipboard) {
+    return;
+  }
 
-        if (menu.useAutofill) {
-          await insertContentScript();
-          const tab = await getCurrentTab();
-          if (tab && tab.id) {
-            chrome.tabs.sendMessage(tab.id, {
-              action: "pastecode",
-              code: entry.code,
-            });
-          }
-        }
+  const lastActiveElement = document.activeElement as HTMLElement;
+  codeClipboard.value = entry.code;
+  codeClipboard.focus();
+  codeClipboard.select();
+  document.execCommand("Copy");
+  lastActiveElement.focus();
+  notification.ephermalMessage(i18n.copied);
+  showCopied();
 
-        const lastActiveElement = document.activeElement as HTMLElement;
-        codeClipboard.value = entry.code;
-        codeClipboard.focus();
-        codeClipboard.select();
-        document.execCommand("Copy");
-        lastActiveElement.focus();
-        notification.ephermalMessage(i18n.copied);
-      }
-    },
-  );
-
-  return;
+  if (menu.useAutofill) {
+    await pasteCode(entry.code);
+  }
 }
 
-async function insertContentScript() {
-  const tab = await getCurrentTab();
-  if (okToInjectContentScript(tab)) {
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ["/dist/content.js"],
-    });
-    await chrome.scripting.insertCSS({
-      target: { tabId: tab.id },
-      files: ["/css/content.css"],
-    });
+function showCopied() {
+  clearTimeout(copiedTimer);
+  copied.value = false;
+  requestAnimationFrame(() => {
+    copied.value = true;
+    copiedTimer = setTimeout(() => {
+      copied.value = false;
+    }, 300);
+  });
+}
+
+async function pasteCode(code: string) {
+  try {
+    const tab = await getCurrentTab();
+    if (tab && okToInjectContentScript(tab)) {
+      await injectContentScript(tab);
+      chrome.tabs.sendMessage(tab.id, {
+        action: "pastecode",
+        code,
+      });
+    }
+  } catch (error) {
+    console.error(error);
   }
 }
 </script>

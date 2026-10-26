@@ -1,65 +1,80 @@
 <template>
   <div>
-    <a-button @click="beginCapture()">{{ i18n.add_qr }}</a-button>
-    <a-button @click="showInfo('AddAccountPage')">
-      {{ i18n.add_secret }}
-    </a-button>
-    <a-button-link href="import.html?QrImport">{{
-      i18n.import_qr_images
-    }}</a-button-link>
-    <a-button-link href="import.html?TextImport">{{
-      i18n.import_otp_urls
-    }}</a-button-link>
+    <a-page-header :title="i18n.add_code" @back="currentView.back()" />
+    <div class="page-body">
+      <button type="button" class="option primary" @click="startCapture()">
+        <span class="option-icon"><IconScan /></span>
+        <span class="row-text">
+          <span class="option-title">{{ i18n.add_qr }}</span>
+          <span class="row-subtitle">{{ i18n.add_qr_info }}</span>
+        </span>
+      </button>
+      <button type="button" class="option" @click="addManually()">
+        <span class="option-icon"><IconKeyboard /></span>
+        <span class="row-text">
+          <span class="option-title">{{ i18n.add_secret }}</span>
+          <span class="row-subtitle">{{ i18n.add_secret_info }}</span>
+        </span>
+        <IconChevronRight class="row-trail" />
+      </button>
+      <h2 class="section-title">{{ i18n.import_header }}</h2>
+      <div class="panel">
+        <a
+          v-for="item in imports"
+          :key="item.type"
+          class="row"
+          :href="`import.html?${item.type}`"
+          target="_blank"
+        >
+          <span class="row-text">
+            <span class="row-title">{{ item.title }}</span>
+            <span class="row-subtitle">{{ item.info }}</span>
+          </span>
+          <IconExternalLink class="row-trail" />
+        </a>
+      </div>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
-import { getCurrentTab, okToInjectContentScript } from "../../utils";
 import { i18n } from "../../store/i18n";
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
 import { useNotificationStore } from "../../store/Notification";
-import { useStyleStore } from "../../store/Style";
+import { startCapture } from "./startCapture";
+
+import IconScan from "lucide-static/icons/scan-line.svg";
+import IconKeyboard from "lucide-static/icons/keyboard.svg";
+import IconChevronRight from "lucide-static/icons/chevron-right.svg";
+import IconExternalLink from "lucide-static/icons/external-link.svg";
 
 const accounts = useAccountsStore();
 const currentView = useCurrentViewStore();
 const notification = useNotificationStore();
-const styleStore = useStyleStore();
 
-function showInfo(page: string) {
+const imports = [
+  {
+    type: "FileImport",
+    title: i18n.import_backup_file,
+    info: i18n.import_backup_file_info,
+  },
+  {
+    type: "QrImport",
+    title: i18n.import_qr_images,
+    info: i18n.import_qr_images_info,
+  },
+  {
+    type: "TextImport",
+    title: i18n.import_otp_urls,
+    info: i18n.import_otp_urls_info,
+  },
+];
+
+function addManually() {
   if (accounts.currentlyEncrypted) {
     notification.alert(i18n.phrase_incorrect);
     return;
   }
-  styleStore.showInfo();
-  currentView.changeView(page);
-}
-
-async function beginCapture() {
-  if (accounts.currentlyEncrypted) {
-    notification.alert(i18n.phrase_incorrect);
-    return;
-  }
-
-  // Insert content script
-  const tab = await getCurrentTab();
-  if (okToInjectContentScript(tab)) {
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ["/dist/content.js"],
-    });
-    await chrome.scripting.insertCSS({
-      target: { tabId: tab.id },
-      files: ["/css/content.css"],
-    });
-
-    chrome.runtime.sendMessage({ action: "updateContentTab", data: tab });
-    chrome.tabs.sendMessage(tab.id, { action: "capture" }, (result) => {
-      if (result !== "beginCapture") {
-        notification.alert(i18n.capture_failed);
-      } else {
-        window.close();
-      }
-    });
-  }
+  currentView.open("AddAccount");
 }
 </script>

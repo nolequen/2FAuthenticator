@@ -1,28 +1,30 @@
 <template>
-  <div>
-    <div class="import_code">
-      <textarea
-        v-model="importCode"
-        spellcheck="false"
-        placeholder="otpauth://totp/...
+  <div class="import_code">
+    <textarea
+      v-model="importCode"
+      class="input"
+      spellcheck="false"
+      :aria-label="i18n.import_otp_urls"
+      placeholder="otpauth://totp/...
 otpauth://totp/...
 otpauth://hotp/...
 ..."
-      ></textarea>
-    </div>
-    <div class="import_encrypted">
+    ></textarea>
+    <label class="checkbox" for="encryptedCode">
       <input id="encryptedCode" v-model="importEncrypted" type="checkbox" />
-      <label for="encryptedCode">{{ i18n.encrypted }}</label>
-    </div>
+      {{ i18n.import_text_encrypted }}
+    </label>
     <a-text-input
       v-show="importEncrypted"
       v-model="importPassphrase"
       :label="i18n.phrase"
       type="password"
     />
-    <a-button @click="importBackupCode()">
-      {{ i18n.import_backup_code }}
-    </a-button>
+    <div>
+      <a-button variant="primary" @click="importBackupCode()">
+        {{ i18n.import_action }}
+      </a-button>
+    </div>
   </div>
 </template>
 <script setup lang="ts">

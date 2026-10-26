@@ -9,7 +9,6 @@ import { createPinia, setActivePinia } from "pinia";
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
 import { useNotificationStore } from "../../store/Notification";
-import { useStyleStore } from "../../store/Style";
 import { Encryption } from "../../models/encryption";
 import { createKey } from "../../models/password";
 import {
@@ -43,15 +42,14 @@ import {
 mocha.setup("bdd");
 
 const HOTP_HASH = "0d9b7e14-3c2a-4f58-8e61-7a4b2c9d3e02";
-let changeView: sinon.SinonStub;
+let currentView: ReturnType<typeof useCurrentViewStore>;
 let alert: sinon.SinonStub;
 
 async function createStore() {
   const pinia = createPinia();
   setActivePinia(pinia);
-  changeView = sinon.stub(useCurrentViewStore(pinia), "changeView");
+  currentView = useCurrentViewStore(pinia);
   alert = sinon.stub(useNotificationStore(pinia), "alert");
-  sinon.stub(useStyleStore(pinia), "hideInfo");
   const accounts = useAccountsStore(pinia);
   await accounts.init();
   return accounts;
@@ -207,11 +205,13 @@ describe("keyring", function () {
       sinon.stub(argon2, "verify").rejects({ code: -22, message: "memory" });
 
       const store = await createStore();
+      currentView.lock();
       await store.applyPassphrase(V3_FIXTURE.password);
 
       store.wrongPassword.should.equal(false);
       alert.should.have.property("calledOnce", true);
-      chai.expect(changeView.lastCall.args[0]).to.equal("EnterPasswordPage");
+      currentView.locked.should.equal(true);
+      currentView.busy.should.equal(false);
       (await storedItems()).should.deep.equal(before);
     });
 

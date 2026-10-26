@@ -4,6 +4,7 @@ import {
   getSiteName,
   getMatchedEntries,
   getCurrentTab,
+  injectContentScript,
   okToInjectContentScript,
 } from "./utils";
 import { isCodeReady } from "./models/otp";
@@ -60,14 +61,7 @@ chrome.commands.onCommand.addListener(async (command: string) => {
     case "autofill":
       tab = await getCurrentTab();
       if (okToInjectContentScript(tab)) {
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          files: ["/dist/content.js"],
-        });
-        await chrome.scripting.insertCSS({
-          target: { tabId: tab.id },
-          files: ["/css/content.css"],
-        });
+        await injectContentScript(tab);
 
         const siteName = await getSiteName();
         const entries = await EntryStorage.get();

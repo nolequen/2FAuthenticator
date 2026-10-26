@@ -1,46 +1,48 @@
 <template>
-  <div id="import" class="theme-normal">
-    <div v-if="!shouldShowPassphrase">
-      <div class="import_tab">
-        <input
-          id="import_file_radio"
-          v-model="importType"
-          type="radio"
-          value="FileImport"
-        />
-        <label for="import_file_radio">{{ i18n.import_backup_file }}</label>
-        <input
-          id="import_qr_radio"
-          v-model="importType"
-          type="radio"
-          value="QrImport"
-        />
-        <label for="import_qr_radio">{{ i18n.import_backup_qr }}</label>
-        <input
-          id="import_code_radio"
-          v-model="importType"
-          type="radio"
-          value="TextImport"
-        />
-        <label for="import_code_radio">{{ i18n.import_backup_code }}</label>
-      </div>
-      <div>
-        <p id="import_info">
-          {{ i18n.otp_backup_inform }}
-        </p>
-      </div>
-      <component :is="pages[importType]" />
+  <main id="import" class="tab-page">
+    <div class="brand">
+      <IconApp class="brand-icon" aria-hidden="true" />
+      {{ i18n.extName }}
     </div>
-    <div v-if="shouldShowPassphrase" class="error_password">
-      {{ i18n.import_error_password }}
+    <div>
+      <h1>{{ i18n.import_title }}</h1>
+      <p class="lead">{{ i18n.otp_backup_inform }}</p>
     </div>
-  </div>
+    <template v-if="!shouldShowPassphrase">
+      <a-segmented-input
+        v-model="importType"
+        class="import-tabs"
+        :label="i18n.import_source"
+        label-hidden
+        :options="[
+          { value: 'FileImport', label: i18n.import_backup_file },
+          { value: 'QrImport', label: i18n.import_backup_qr },
+          { value: 'TextImport', label: i18n.import_backup_code },
+        ]"
+      />
+      <section class="card">
+        <component :is="pages[importType]" />
+        <div v-if="importType !== 'TextImport'" class="notice info">
+          <IconInfo />
+          <span>{{ i18n.import_google_hint }}</span>
+        </div>
+      </section>
+    </template>
+    <div v-else class="notice warning error_password">
+      <IconTriangle />
+      <span>{{ i18n.import_error_password }}</span>
+    </div>
+  </main>
 </template>
 <script setup lang="ts">
 import { type Component, onMounted, ref } from "vue";
 import FileImport from "./Import/FileImport.vue";
 import QrImport from "./Import/QrImport.vue";
 import TextImport from "./Import/TextImport.vue";
+
+import IconApp from "../../images/icon.svg";
+import IconInfo from "lucide-static/icons/info.svg";
+import IconTriangle from "lucide-static/icons/triangle-alert.svg";
 
 const props = defineProps<{ entries: OTPEntryInterface[] }>();
 

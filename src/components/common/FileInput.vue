@@ -1,16 +1,27 @@
 <template>
-  <div class="import_file">
-    <label for="import_file">{{ label }}</label>
+  <label class="dropzone">
+    <span class="dropzone-icon"><IconUpload /></span>
+    <span class="dropzone-title">{{ label }}</span>
+    <span v-if="description" class="dropzone-text">{{ description }}</span>
+    <span class="button primary small">{{ button }}</span>
     <input
-      id="import_file"
+      class="dropzone-input"
       type="file"
       :accept="accept"
       :multiple="multiple"
       @change="emit('change', $event)"
     />
-  </div>
+  </label>
 </template>
 <script setup lang="ts">
-defineProps<{ label?: string; multiple?: boolean; accept?: string }>();
+import IconUpload from "lucide-static/icons/upload.svg";
+
+defineProps<{
+  label?: string;
+  description?: string;
+  button?: string;
+  multiple?: boolean;
+  accept?: string;
+}>();
 const emit = defineEmits<{ change: [event: Event] }>();
 </script>

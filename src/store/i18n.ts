@@ -1,5 +1,9 @@
 export const i18n: { [key: string]: string } = {};
 
+export function t(key: string, ...substitutions: string[]) {
+  return chrome.i18n.getMessage(key, substitutions);
+}
+
 export async function loadI18nMessages() {
   return new Promise(
     (

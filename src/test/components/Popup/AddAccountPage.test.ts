@@ -11,8 +11,8 @@ import AddAccountPage from "../../../components/Popup/AddAccountPage.vue";
 import TextInput from "../../../components/common/TextInput.vue";
 import { i18n, loadI18nMessages } from "../../../store/i18n";
 import { useAccountsStore } from "../../../store/Accounts";
+import { useCurrentViewStore } from "../../../store/CurrentView";
 import { useNotificationStore } from "../../../store/Notification";
-import { useStyleStore } from "../../../store/Style";
 import { Encryption } from "../../../models/encryption";
 import { OTPAlgorithm } from "../../../models/otp";
 import { randomPassphrase, resetStorage, storeKey } from "../../storage-helper";
@@ -32,10 +32,8 @@ function stubStores(pinia: Pinia) {
   });
   const addCode = sinon.stub(accounts, "addCode").callsFake(added);
   sinon.stub(useNotificationStore(pinia), "alert");
-  const style = useStyleStore(pinia);
-  sinon.stub(style, "hideInfo");
-  sinon.stub(style, "toggleEdit");
-  return { accounts, addCode, entryAdded };
+  const close = sinon.stub(useCurrentViewStore(pinia), "close");
+  return { accounts, addCode, entryAdded, close };
 }
 
 async function setText(wrapper: VueWrapper, label: string, value: string) {
@@ -70,7 +68,7 @@ describe("AddAccountPage", () => {
     await setText(wrapper, i18n.issuer, "Example");
     await setText(wrapper, i18n.secret, SECRET);
     await setText(wrapper, i18n.accountName, "user");
-    await wrapper.find("button").trigger("click");
+    await wrapper.find("button.add-account").trigger("click");
     await entryAdded;
 
     const stored = await chrome.storage.local.get<{
@@ -95,7 +93,7 @@ describe("AddAccountPage", () => {
 
     it("should add the account with the selected algorithm and digits", async () => {
       const pinia = createTestPinia();
-      const { addCode, entryAdded } = stubStores(pinia);
+      const { addCode, entryAdded, close } = stubStores(pinia);
       clock = sinon.useFakeTimers({
         now: 1700000000 * 1000,
         toFake: ["Date"],
@@ -116,10 +114,11 @@ describe("AddAccountPage", () => {
       await choose("SHA-512", String(OTPAlgorithm.SHA512));
       await choose("8", "8");
 
-      await wrapper.find("button").trigger("click");
+      await wrapper.find("button.add-account").trigger("click");
       await entryAdded;
 
       addCode.should.have.been.calledOnce;
+      close.should.have.been.calledOnce;
       const entry = addCode.lastCall.args[0];
       chai.expect(entry.algorithm).to.equal(OTPAlgorithm.SHA512);
       chai.expect(entry.digits).to.equal(8);

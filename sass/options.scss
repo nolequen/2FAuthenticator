@@ -1,0 +1,93 @@
+@use "ui";
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 800px;
+  padding: 32px;
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+.options-info {
+  margin-top: 6px !important;
+  color: var(--text-2);
+}
+
+.danger-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--danger-border);
+  border-radius: 16px;
+  background: var(--surface);
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  p {
+    color: var(--label);
+  }
+
+  .done {
+    color: var(--ok-text);
+    font-weight: 600;
+  }
+}
+
+.danger-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.danger-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--danger-bg);
+  color: var(--danger-text);
+
+  svg.lucide {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--danger);
+  }
+}
+
+@media (forced-colors: active) {
+  .danger-zone {
+    border-color: CanvasText;
+  }
+}

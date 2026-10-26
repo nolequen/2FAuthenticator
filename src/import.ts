@@ -4,9 +4,15 @@ import CommonComponents from "./components/common/index";
 import { i18n, loadI18nMessages } from "./store/i18n";
 
 import { getSessionEncryption } from "./models/session";
+import { UserSettings } from "./models/settings";
 import { EntryStorage } from "./models/storage";
+import { applyTheme, normalizeTheme, trackInputModality } from "./theme";
 
 async function init() {
+  await UserSettings.updateItems();
+  applyTheme(normalizeTheme(UserSettings.items.theme));
+  trackInputModality();
+
   // i18n
   await loadI18nMessages();
 

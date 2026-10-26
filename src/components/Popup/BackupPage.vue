@@ -1,55 +1,79 @@
 <template>
   <div>
-    <!-- File Backup -->
-    <div v-if="!defaultEncryption" class="text warning">
-      {{ i18n.export_info }}
+    <a-page-header :title="i18n.backup" @back="currentView.back()" />
+    <div class="page-body">
+      <h2 class="section-title">{{ i18n.backup_save_header }}</h2>
+      <div v-if="currentlyEncrypted" class="notice warning">
+        <IconTriangle />
+        <span>{{ i18n.phrase_incorrect_export }}</span>
+      </div>
+      <a
+        v-if="!!defaultEncryption && exportEncryptedFile"
+        class="option primary"
+        download="authenticator.json"
+        :href="exportEncryptedFile"
+        target="_blank"
+      >
+        <span class="option-icon"><IconLock /></span>
+        <span class="row-text">
+          <span class="option-title">{{ i18n.download_enc_backup }}</span>
+          <span class="row-subtitle">{{ i18n.download_enc_backup_info }}</span>
+        </span>
+        <IconDownload class="option-trail" />
+      </a>
+      <a
+        v-if="exportOneLineOtpAuthFile"
+        class="option stacked"
+        download="authenticator.txt"
+        :href="exportOneLineOtpAuthFile"
+        target="_blank"
+      >
+        <span class="option-main">
+          <span class="option-icon neutral"><IconFile /></span>
+          <span class="row-text">
+            <span class="option-title">{{ i18n.download_backup }}</span>
+            <span class="row-subtitle">{{ i18n.download_backup_info }}</span>
+          </span>
+          <IconDownload class="option-trail neutral" />
+        </span>
+        <span class="notice warning">
+          <IconTriangle />
+          <span>{{ i18n.export_info }}</span>
+        </span>
+      </a>
+      <h2 class="section-title">{{ i18n.restore_header }}</h2>
+      <a class="option" href="import.html" target="_blank">
+        <span class="row-text">
+          <span class="row-title">{{ i18n.import_backup }}</span>
+          <span class="row-subtitle">{{ i18n.import_backup_info }}</span>
+        </span>
+        <IconExternalLink class="row-trail" />
+      </a>
     </div>
-    <div class="text">
-      {{ i18n.backup_file_info }}
-    </div>
-    <div v-if="currentlyEncrypted" class="text warning">
-      {{ i18n.phrase_incorrect_export }}
-    </div>
-    <a-button-link
-      v-if="exportOneLineOtpAuthFile"
-      download="authenticator.txt"
-      :href="exportOneLineOtpAuthFile"
-      >{{ i18n.download_backup }}</a-button-link
-    >
-    <a-button-link
-      v-if="!!defaultEncryption && exportEncryptedFile"
-      download="authenticator.json"
-      :href="exportEncryptedFile"
-      >{{ i18n.download_enc_backup }}</a-button-link
-    >
-    <a-button-link href="import.html">{{ i18n.import_backup }}</a-button-link>
   </div>
 </template>
 <script setup lang="ts">
-import { onUnmounted, ref, watch } from "vue";
+import { onUnmounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { BrowserStorage, EntryStorage } from "../../models/storage";
 import { useAccountsStore } from "../../store/Accounts";
-import { useStyleStore } from "../../store/Style";
+import { useCurrentViewStore } from "../../store/CurrentView";
+
+import IconLock from "lucide-static/icons/lock.svg";
+import IconFile from "lucide-static/icons/file-text.svg";
+import IconDownload from "lucide-static/icons/download.svg";
+import IconTriangle from "lucide-static/icons/triangle-alert.svg";
+import IconExternalLink from "lucide-static/icons/external-link.svg";
 
 const accounts = useAccountsStore();
+const currentView = useCurrentViewStore();
 const { defaultEncryption, currentlyEncrypted } = storeToRefs(accounts);
-const { style } = storeToRefs(useStyleStore());
 
 const exportEncryptedFile = ref("");
 const exportOneLineOtpAuthFile = ref("");
 let builds = 0;
 
 buildBackupFiles();
-
-watch(
-  () => style.value.fadein,
-  (shown) => {
-    if (shown) {
-      buildBackupFiles();
-    }
-  },
-);
 
 onUnmounted(() => {
   builds++;

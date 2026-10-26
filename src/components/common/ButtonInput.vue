@@ -1,8 +1,16 @@
 <template>
-  <button :class="{ 'button-small': type === 'small', button: !type }">
+  <button
+    :type="submit ? 'submit' : 'button'"
+    :class="['button', variant ?? 'secondary', { small, block }]"
+  >
     <slot></slot>
   </button>
 </template>
 <script setup lang="ts">
-defineProps<{ type?: string }>();
+defineProps<{
+  variant?: "primary" | "secondary" | "danger" | "danger-soft";
+  small?: boolean;
+  block?: boolean;
+  submit?: boolean;
+}>();
 </script>

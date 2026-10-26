@@ -17,6 +17,18 @@ const BIN = {
   sass: "node_modules/sass/sass.js",
   licenses: "node_modules/npm-license-generator/build/npm-license-generator",
 };
+const FONT_FILES = [
+  "inter-latin-wght-normal.woff2",
+  "inter-cyrillic-wght-normal.woff2",
+];
+const DYNAMIC_MESSAGES = ["updateSuccess", "updateFailure", "clock_too_far_off"];
+const MESSAGE_PATTERNS = [
+  /(?<!\.)\bi18n\.(\w+)/g,
+  /\bt\((["'])(\w+)\1/g,
+  /getMessage\((["'])(\w+)\1/g,
+  /__MSG_(\w+)__/g,
+];
+const LICENSES_PAGE = "./view/licenses.html";
 const LICENSES_TIMEOUT_SECONDS = 60;
 const LICENSES_ATTEMPTS = 4;
 
@@ -63,12 +75,54 @@ function lint() {
   }
   runOrExit("eslint", ["."]);
   runOrExit("vueTsc", ["--noEmit", "-p", "tsconfig.json"]);
+  checkMessages();
+}
+
+function listFiles(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const file = path.join(dir, entry.name);
+    return entry.isDirectory() ? listFiles(file) : [file];
+  });
+}
+
+function checkMessages() {
+  console.log("Checking messages...");
+  const messages = readJson("_locales/en/messages.json");
+  const errors = [];
+  const files = [...listFiles("src"), ...listFiles("manifests")].filter(
+    (file) => /\.(ts|vue|json)$/.test(file)
+  );
+  for (const file of files) {
+    const source = fs.readFileSync(file, "utf8");
+    for (const pattern of MESSAGE_PATTERNS) {
+      for (const match of source.matchAll(pattern)) {
+        const key = match[match.length - 1];
+        if (!messages[key]) {
+          errors.push(`${file}: no message ${key}`);
+        } else if (messages[key].placeholders && !match[0].startsWith("t(")) {
+          errors.push(`${file}: read ${key} with t() to fill its placeholders`);
+        }
+      }
+    }
+  }
+  for (const key of DYNAMIC_MESSAGES) {
+    if (!messages[key]) {
+      errors.push(`no message ${key}`);
+    }
+  }
+  if (errors.length) {
+    fail(errors.join("\n"));
+  }
 }
 
 function copyCssExtras(dir) {
   fs.mkdirSync(dir, { recursive: true });
-  for (const file of ["DroidSansMono.woff2", "mocha.css"]) {
-    fs.copyFileSync(path.join("sass", file), path.join(dir, file));
+  fs.copyFileSync(path.join("sass", "mocha.css"), path.join(dir, "mocha.css"));
+  for (const file of FONT_FILES) {
+    fs.copyFileSync(
+      path.join("node_modules", "@fontsource-variable", "inter", "files", file),
+      path.join(dir, file)
+    );
   }
 }
 
@@ -97,7 +151,7 @@ function generateLicenses() {
   console.log("Generating licenses file...");
   const args = [
     "--out-path",
-    "./view/licenses.html",
+    LICENSES_PAGE,
     "--template",
     "./scripts/licenses-template.html",
     "--error-missing=true",
@@ -113,6 +167,11 @@ function generateLicenses() {
       if (result.status !== 0) {
         process.exit(result.status ?? 1);
       }
+      const page = fs.readFileSync(LICENSES_PAGE, "utf8");
+      fs.writeFileSync(
+        LICENSES_PAGE,
+        page.replace("%VERSION%", readJson("package.json").version)
+      );
       return;
     }
     remove(".license-gen-tmp");
@@ -148,7 +207,7 @@ function assemble(platform, dir, testing) {
 function build(platform) {
   console.log("Removing old build files...");
   const outDir = platform === "prod" ? "release" : platform;
-  for (const target of ["build", "dist", outDir]) {
+  for (const target of ["build", "dist", "css", outDir]) {
     remove(target);
   }
 

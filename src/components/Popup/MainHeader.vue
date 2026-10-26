@@ -1,148 +1,54 @@
 <template>
-  <div class="header">
-    <span @dblclick="popOut()">{{ i18n.extName }}</span>
-    <div v-show="!isPopup()">
-      <div
-        v-show="!style.isEditing"
-        id="i-menu"
-        class="icon"
-        :title="i18n.settings"
-        @click="showMenu()"
-      >
-        <IconCog />
-      </div>
-      <div
-        v-show="style.isEditing"
-        id="i-plus"
-        class="icon"
-        :title="i18n.add_code"
-        @click="showInfo('AddMethodPage')"
-      >
-        <IconPlus />
-      </div>
-      <div
-        v-show="!style.isEditing && !!defaultEncryption"
-        id="i-lock"
-        class="icon"
-        :title="i18n.lock"
-        @click="lock()"
-      >
-        <IconLock />
-      </div>
-      <div
-        v-show="!style.isEditing"
-        id="i-qr"
-        class="icon"
-        :title="i18n.add_qr"
-        @click="beginCapture()"
-      >
-        <IconScan />
-      </div>
-      <div id="i-edit" class="icon" :title="i18n.edit" @click="editEntry()">
-        <IconPencil v-if="!style.isEditing" />
-        <IconCheck v-else />
-      </div>
-    </div>
-  </div>
+  <header class="bar">
+    <button
+      id="i-menu"
+      type="button"
+      class="icon-button"
+      :aria-label="i18n.menu"
+      :title="i18n.menu"
+      @click="currentView.open('Menu')"
+    >
+      <IconMenu />
+    </button>
+    <h1 class="bar-title brand">{{ i18n.extName }}</h1>
+    <button
+      v-if="!!defaultEncryption"
+      id="i-lock"
+      type="button"
+      class="icon-button"
+      :aria-label="i18n.lock"
+      :title="i18n.lock"
+      @click="lock()"
+    >
+      <IconLock />
+    </button>
+    <button
+      id="i-plus"
+      type="button"
+      class="icon-button primary"
+      :aria-label="i18n.add_code"
+      :title="i18n.add_code"
+      @click="currentView.open('AddMethod')"
+    >
+      <IconPlus />
+    </button>
+  </header>
 </template>
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { getCurrentTab, okToInjectContentScript } from "../../utils";
-import { i18n } from "../../store/i18n";
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
-import { useNotificationStore } from "../../store/Notification";
-import { useStyleStore } from "../../store/Style";
 
 // Icons
-import IconCog from "../../../svg/cog.svg";
-import IconLock from "../../../svg/lock.svg";
-import IconScan from "../../../svg/scan.svg";
-import IconPencil from "../../../svg/pencil.svg";
-import IconCheck from "../../../svg/check.svg";
-import IconPlus from "../../../svg/plus.svg";
-import { isFirefox } from "../../browser";
+import IconMenu from "lucide-static/icons/menu.svg";
+import IconLock from "lucide-static/icons/lock.svg";
+import IconPlus from "lucide-static/icons/plus.svg";
 
-const accounts = useAccountsStore();
 const currentView = useCurrentViewStore();
-const notification = useNotificationStore();
-const styleStore = useStyleStore();
-const { style } = storeToRefs(styleStore);
-const { defaultEncryption } = storeToRefs(accounts);
-
-function isPopup() {
-  const params = new URLSearchParams(document.location.search.substring(1));
-  return params.get("popup");
-}
-
-function popOut() {
-  let windowType;
-  if (isFirefox) {
-    windowType = "detached_panel";
-  } else {
-    windowType = "panel";
-  }
-  chrome.windows.create({
-    url: chrome.runtime.getURL("view/popup.html?popup=true"),
-    type: windowType as chrome.windows.CreateType,
-    height: window.innerHeight,
-    width: window.innerWidth,
-  });
-  window.close();
-}
-
-function showMenu() {
-  styleStore.showMenu();
-}
-
-function showInfo(page: string) {
-  styleStore.showInfo();
-  currentView.changeView(page);
-}
-
-function editEntry() {
-  styleStore.toggleEdit();
-  accounts.stopFilter();
-}
+const { defaultEncryption } = storeToRefs(useAccountsStore());
 
 function lock() {
   chrome.runtime.sendMessage({ action: "lock" }, window.close);
   return;
-}
-
-async function beginCapture() {
-  if (accounts.currentlyEncrypted) {
-    notification.alert(i18n.phrase_incorrect);
-    return;
-  }
-
-  const tab = await getCurrentTab();
-  // Insert content script
-  if (okToInjectContentScript(tab)) {
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ["/dist/content.js"],
-    });
-    await chrome.scripting.insertCSS({
-      target: { tabId: tab.id },
-      files: ["/css/content.css"],
-    });
-
-    if (tab.url?.startsWith("file:")) {
-      if (await notification.confirm(i18n.capture_local_file_failed)) {
-        window.open("import.html?QrImport", "_blank");
-        return;
-      }
-    }
-
-    chrome.runtime.sendMessage({ action: "updateContentTab", data: tab });
-    chrome.tabs.sendMessage(tab.id, { action: "capture" }, (result) => {
-      if (result !== "beginCapture") {
-        notification.alert(i18n.capture_failed);
-      } else {
-        window.close();
-      }
-    });
-  }
 }
 </script>

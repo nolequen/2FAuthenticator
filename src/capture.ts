@@ -1,6 +1,10 @@
 import { importUnderSession } from "./models/session";
 import { EntryStorage } from "./models/storage";
-import { getCurrentTab, okToInjectContentScript } from "./utils";
+import {
+  getCurrentTab,
+  injectContentScript,
+  okToInjectContentScript,
+} from "./utils";
 import { getOTPAuthPerLineFromOPTAuthMigration } from "./models/migration";
 import { parseOTPAuthURI } from "./models/otpauth";
 
@@ -54,14 +58,7 @@ export async function startCaptureFromCommand() {
 
   const tab = await getCurrentTab();
   if (okToInjectContentScript(tab)) {
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ["/dist/content.js"],
-    });
-    await chrome.scripting.insertCSS({
-      target: { tabId: tab.id },
-      files: ["/css/content.css"],
-    });
+    await injectContentScript(tab);
 
     await chrome.storage.session.set({ contentTabId: tab.id });
     chrome.tabs.sendMessage(tab.id, { action: "capture" });

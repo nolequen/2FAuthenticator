@@ -1,78 +1,266 @@
 <!DOCTYPE html>
+<html lang="en">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1">
+  <title>2FAuthenticator</title>
+  <style>
+    @font-face {
+      font-family: "Inter";
+      font-style: normal;
+      font-display: block;
+      font-weight: 100 900;
+      src: url("../css/inter-latin-wght-normal.woff2") format("woff2");
+    }
+
+    :root {
+      color-scheme: light;
+      --bg: #f3f4f8;
+      --surface: #ffffff;
+      --border: #e6e8ef;
+      --divider: #eef0f5;
+      --control-border: #d5d9e3;
+      --text: #171923;
+      --text-2: #5e6475;
+      --label: #3b3f4c;
+      --muted: #8a90a0;
+      --accent: #3b4bd8;
+      --accent-hover: #26318f;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --bg: #111318;
+        --surface: #1b1e26;
+        --border: #262a34;
+        --divider: #262a34;
+        --control-border: #2e3340;
+        --text: #e8eaf0;
+        --text-2: #9ea4b3;
+        --label: #c9cdd8;
+        --muted: #7d8394;
+        --accent: #aab4ff;
+        --accent-hover: #d4d9ff;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    a:hover {
+      color: var(--accent-hover);
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 16px;
+    }
+
+    .title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .version {
+      margin-top: 4px;
+      color: var(--text-2);
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .links a {
+      display: inline-flex;
+      align-items: center;
+      height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--control-border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    section {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    section > p {
+      margin: -8px 0 12px;
+      color: var(--text-2);
+      font-size: 13px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--label);
+      line-height: 1.8;
+    }
+
+    details {
+      border-top: 1px solid var(--divider);
+    }
+
+    summary {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 8px 0;
+      font-weight: 500;
+      list-style: none;
+      cursor: pointer;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      flex: none;
+      border-top: 2px solid var(--muted);
+      border-right: 2px solid var(--muted);
+      transform: rotate(45deg);
+    }
+
+    details[open] summary::before {
+      transform: rotate(135deg);
+    }
+
+    .packages {
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    pre {
+      margin: 0 0 16px;
+      padding: 12px;
+      overflow-x: auto;
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--label);
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+
+    @media (forced-colors: active) {
+      .links a,
+      section {
+        border-color: CanvasText;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <h1 id="package-name">
-    <a href="https://github.com/nolequen/Authenticator">
-      2FAuthenticator
-    </a>
-  </h1>
-  <div class="licenses">
-    <h2>Acknowledgements</h2>
-    <p>
-      <a target="_blank" href="https://github.com/FortAwesome/Font-Awesome">
-        Font Awesome Free
-      </a> - Licensed under CC BY 4.0
-    </p>
-    <p>
-      <a target="_blank" href="http://www.droidfonts.com/">
-        Droid Sans Mono
-      </a> - Copyright Steve Matteson. Licensed under the Apache License.
-    </p>
-    <p>
-      <a target="_blank" href="https://github.com/SortableJS/Sortable">
-        SortableJS
-      </a> - Licensed under the MIT License
-    </p>
-    <p>
-      2FAuthenticator is based on
-      <a target="_blank" href="https://github.com/Authenticator-Extension/Authenticator">
-        Authenticator
-      </a>
-      by Authenticator Extension. Thanks to its authors and contributors.
-    </p>
-    {{#renderLicenses}}
-    <h3>
-      {{#pkgs}}
-      {{#homepage}}<a href="{{{homepage}}}">{{/homepage}}{{name}}{{#homepage}}</a>{{/homepage}}{{#comma}}, {{/comma}}
-      {{/pkgs}}
-    </h3>
-    <blockquote>
-      {{text}}
-    </blockquote>
-    {{/renderLicenses}}
-  </div>
-  <style>
-    .licenses blockquote {
-      white-space: pre-wrap;
-      background-color: whitesmoke;
-      padding-left: 1rem;
-      padding-right: 1rem;
-      display: inline-block;
-      width: 50%;
-    }
-
-    @media only screen and (max-width: 768px) {
-      .licenses blockquote {
-        width: 100%;
-        margin: 0px;
-      }
-    }
-
-    @media only screen and (min-width: 768px) {
-      body {
-        margin-left: 10vw;
-      }
-    }
-
-    .licenses h3,
-    #package-name {
-      font-family: sans-serif;
-    }
-  </style>
+  <main>
+    <div class="title">
+      <svg width="64" height="64" viewBox="0 0 128 128" aria-hidden="true">
+        <rect width="128" height="128" rx="30" fill="#3B4BD8" />
+        <circle cx="64" cy="64" r="38" fill="none" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="13" />
+        <circle cx="64" cy="64" r="38" fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round" stroke-dasharray="179 238.8" transform="rotate(-90 64 64)" />
+        <circle cx="64" cy="57" r="9" fill="#FFFFFF" />
+        <path d="M59 61h10l3 18H56Z" fill="#FFFFFF" />
+      </svg>
+      <div>
+        <h1>2FAuthenticator</h1>
+        <div class="version">Version %VERSION%</div>
+      </div>
+    </div>
+    <nav class="links">
+      <a href="https://github.com/nolequen/Authenticator">Source code</a>
+      <a href="https://github.com/nolequen/Authenticator/issues">Report a problem</a>
+      <a href="https://github.com/nolequen/Authenticator/releases">Releases</a>
+    </nav>
+    <section>
+      <h2>Acknowledgements</h2>
+      <ul>
+        <li>
+          Based on
+          <a target="_blank" href="https://github.com/Authenticator-Extension/Authenticator">Authenticator</a>
+          by Authenticator Extension. Thanks to its authors and contributors.
+        </li>
+        <li>
+          <a target="_blank" href="https://rsms.me/inter/">Inter</a> typeface,
+          <a target="_blank" href="https://openfontlicense.org/">SIL Open Font License 1.1</a>
+        </li>
+        <li>
+          <a target="_blank" href="https://lucide.dev/">Lucide</a> icons, ISC License
+        </li>
+        <li>
+          <a target="_blank" href="https://github.com/SortableJS/Sortable">SortableJS</a>, MIT License
+        </li>
+      </ul>
+    </section>
+    <section class="licenses">
+      <h2>Open-source licenses</h2>
+      <p>Packages used to build this extension</p>
+      {{#renderLicenses}}
+      <details>
+        <summary>
+          <span>
+            {{#pkgs}}
+            {{name}}{{#comma}}, {{/comma}}
+            {{/pkgs}}
+          </span>
+        </summary>
+        <ul class="packages">
+          {{#pkgs}}
+          <li>{{#homepage}}<a target="_blank" href="{{{homepage}}}">{{name}}</a>{{/homepage}}{{^homepage}}{{name}}{{/homepage}}</li>
+          {{/pkgs}}
+        </ul>
+        <pre>{{text}}</pre>
+      </details>
+      {{/renderLicenses}}
+    </section>
+  </main>
 </body>
+
+</html>

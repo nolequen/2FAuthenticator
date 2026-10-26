@@ -7,12 +7,9 @@ import { nextTick } from "vue";
 import type { Pinia } from "pinia";
 
 import BackupPage from "../../../components/Popup/BackupPage.vue";
-import PageHandler from "../../../components/Popup/PageHandler.vue";
 import { BrowserStorage } from "../../../models/storage";
 import { loadI18nMessages } from "../../../store/i18n";
 import { useAccountsStore } from "../../../store/Accounts";
-import { useCurrentViewStore } from "../../../store/CurrentView";
-import { useStyleStore } from "../../../store/Style";
 import { resetStorage } from "../../storage-helper";
 import { createTestPinia, mountOptions } from "../../vue-helper";
 
@@ -112,12 +109,9 @@ describe("BackupPage", () => {
     );
     const pinia = await openAccounts();
     const accounts = useAccountsStore(pinia);
-    const currentView = useCurrentViewStore(pinia);
-    const style = useStyleStore(pinia);
-    const wrapper = mount(PageHandler, mountOptions(pinia));
+    let wrapper: VueWrapper | undefined;
     const open = () => {
-      style.showInfo();
-      currentView.changeView("BackupPage");
+      wrapper = mount(BackupPage, mountOptions(pinia));
       return readTextBackup(wrapper);
     };
 
@@ -127,7 +121,7 @@ describe("BackupPage", () => {
         `otpauth://totp/My%20Bank:alice?secret=${SECRET}&issuer=My%20Bank`,
         `otpauth://hotp/Counter:bob?secret=${SECRET}&issuer=Counter&counter=0`,
       ]);
-    await wrapper.find("#infoClose").trigger("click");
+    wrapper?.unmount();
 
     const [alice, bob] = accounts.entries;
     alice.issuer = "New Bank";
@@ -139,30 +133,27 @@ describe("BackupPage", () => {
         `otpauth://totp/New%20Bank:alice?secret=${SECRET}&issuer=New%20Bank`,
         `otpauth://hotp/Counter:bob?secret=${SECRET}&issuer=Counter&counter=1`,
       ]);
-    wrapper.unmount();
+    wrapper?.unmount();
   });
 
   it("should revoke the files of the previous backup when the page is opened again", async () => {
     await storeAccounts({ issuer: "My Bank", account: "alice" });
     const pinia = await openAccounts();
-    const currentView = useCurrentViewStore(pinia);
-    const style = useStyleStore(pinia);
-    const wrapper = mount(PageHandler, mountOptions(pinia));
+    let wrapper: VueWrapper | undefined;
     const open = async () => {
-      style.showInfo();
-      currentView.changeView("BackupPage");
+      wrapper = mount(BackupPage, mountOptions(pinia));
       await readTextBackup(wrapper);
       return [...blobs.keys()];
     };
 
     const first = await open();
     first.should.have.lengthOf(2);
-    await wrapper.find("#infoClose").trigger("click");
     revoked.should.deep.equal([]);
+    wrapper?.unmount();
+    revoked.should.have.members(first);
 
     (await open()).should.have.lengthOf(4);
-    revoked.should.have.members(first);
-    wrapper.unmount();
+    wrapper?.unmount();
   });
 
   it("should revoke the files when the page is closed", async () => {

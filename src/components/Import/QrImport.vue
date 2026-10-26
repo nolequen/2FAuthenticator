@@ -1,13 +1,11 @@
 <template>
   <div>
-    <p style="margin: 10px 20px 20px 20px">
-      {{ i18n.import_backup_qr_in_batches }}
-    </p>
     <a-file-input
-      button-type="file"
       accept="image/*"
       multiple
-      :label="i18n.import_backup_qr"
+      :label="i18n.import_qr_choose"
+      :description="i18n.import_backup_qr_in_batches"
+      :button="i18n.choose_images"
       @change="importQr($event, true)"
     />
   </div>

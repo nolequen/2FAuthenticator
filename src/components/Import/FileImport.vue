@@ -2,20 +2,26 @@
   <div>
     <a-file-input
       v-if="!getFilePassphrase"
-      button-type="file"
       accept="application/json, text/plain"
-      :label="i18n.import_backup_file"
+      :label="i18n.import_file_choose"
+      :description="i18n.import_file_info"
+      :button="i18n.choose_file"
       @change="importFile($event, true)"
     />
     <div v-else class="import_file_passphrase">
-      <p class="error_password">{{ i18n.passphrase_info }}</p>
+      <p>{{ i18n.import_file_password }}</p>
       <a-text-input
         v-model="importFilePassphrase"
         :label="i18n.phrase"
         type="password"
+        :autofocus="true"
         @enter="readFilePassphrase = true"
       />
-      <a-button @click="readFilePassphrase = true">{{ i18n.ok }}</a-button>
+      <div>
+        <a-button variant="primary" @click="readFilePassphrase = true">{{
+          i18n.ok
+        }}</a-button>
+      </div>
     </div>
   </div>
 </template>

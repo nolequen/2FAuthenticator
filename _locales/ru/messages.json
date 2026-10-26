@@ -1,47 +1,263 @@
 {
   "extDesc": {
-    "message": "Аутентификатор генерирует коды двухфакторной аутентификации в вашем браузере.",
+    "message": "2FAuthenticator создаёт коды двухфакторной аутентификации прямо в браузере.",
     "description": "Extension Description."
   },
-  "added": {
-    "message": " Был добавлен.",
-    "description": "Added Account."
+  "menu": {
+    "message": "Меню",
+    "description": "Menu button and page title."
   },
-  "errorqr": {
-    "message": "Нераспознанный QR-код.",
-    "description": "QR Error."
-  },
-  "errorsecret": {
-    "message": "Недопустимое имя учётной записи.",
-    "description": "Secret Error."
+  "lock": {
+    "message": "Заблокировать",
+    "description": "Lock button."
   },
   "add_code": {
-    "message": "Добавить учётную запись",
-    "description": "Add account."
+    "message": "Добавить аккаунт",
+    "description": "Add button and page title."
+  },
+  "search": {
+    "message": "Поиск",
+    "description": "Search field."
+  },
+  "clear_search": {
+    "message": "Очистить поиск",
+    "description": "Clear search button."
+  },
+  "search_found": {
+    "message": "Найдено $FOUND$ из $TOTAL$",
+    "description": "Search result count.",
+    "placeholders": {
+      "found": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "7"
+      }
+    }
+  },
+  "pinned": {
+    "message": "Закреплён",
+    "description": "Pinned account icon."
+  },
+  "next_code": {
+    "message": "Следующий код",
+    "description": "Next code of a counter based account."
+  },
+  "encrypted": {
+    "message": "Зашифрован",
+    "description": "Code of an account that is not decrypted."
+  },
+  "invalid": {
+    "message": "Ошибка",
+    "description": "Code of an account with an invalid secret."
+  },
+  "copied": {
+    "message": "Код скопирован",
+    "description": "Code copied message."
+  },
+  "filter_accounts_for": {
+    "message": "Аккаунты для $HOST$",
+    "description": "Smart filter bar.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "github.com"
+      }
+    }
+  },
+  "show_all": {
+    "message": "Показать все",
+    "description": "Turn off the smart filter."
+  },
+  "remind_backup_title": {
+    "message": "Пора сделать бэкап",
+    "description": "Backup reminder title."
+  },
+  "remind_backup": {
+    "message": "Без копии коды пропадут вместе с профилем браузера.",
+    "description": "Backup reminder text."
+  },
+  "backup_now": {
+    "message": "Сделать бэкап",
+    "description": "Backup reminder button."
+  },
+  "remind_later": {
+    "message": "Позже",
+    "description": "Backup reminder button."
+  },
+  "no_entries_title": {
+    "message": "Пока нет аккаунтов",
+    "description": "Empty list title."
+  },
+  "no_entries_info": {
+    "message": "Отсканируйте QR-код на открытой странице или введите секретный ключ вручную.",
+    "description": "Empty list text."
   },
   "add_qr": {
-    "message": "Отсканировать QR-код",
-    "description": "Scan QR Code."
+    "message": "Сканировать QR-код",
+    "description": "Scan a QR code."
+  },
+  "add_qr_info": {
+    "message": "Выделите QR-код на открытой странице",
+    "description": "Scan a QR code hint."
   },
   "add_secret": {
-    "message": "Ручной ввод",
-    "description": "Manual Entry."
+    "message": "Ввести ключ вручную",
+    "description": "Manual entry."
   },
-  "migration_fail": {
-    "message": "Импорт не удался. Если вы переносите данные из Google Authenticator, пожалуйста, повторно экспортируйте данные из Google Authenticator и повторите попытку.",
-    "description": "Import migration data failed."
+  "add_secret_info": {
+    "message": "Секретный ключ из настроек сервиса",
+    "description": "Manual entry hint."
   },
-  "migration_partly_fail": {
-    "message": "Не удалось импортировать часть данных аккаунта.",
-    "description": "Some migration data is broken."
+  "import_link": {
+    "message": "Импорт из файла или другого приложения",
+    "description": "Import link of the empty list."
+  },
+  "account_actions": {
+    "message": "Действия с аккаунтом",
+    "description": "Context menu of an account card."
+  },
+  "edit_account": {
+    "message": "Изменить",
+    "description": "Context menu item that opens the account page."
+  },
+  "pin_short": {
+    "message": "Закрепить",
+    "description": "Context menu item."
+  },
+  "unpin": {
+    "message": "Открепить",
+    "description": "Context menu item."
+  },
+  "qr_code": {
+    "message": "QR-код",
+    "description": "Context menu item."
+  },
+  "locked_title": {
+    "message": "Аккаунты заблокированы",
+    "description": "Lock screen title."
+  },
+  "passphrase_info": {
+    "message": "Введите пароль, чтобы расшифровать коды.",
+    "description": "Lock screen text."
+  },
+  "phrase": {
+    "message": "Пароль",
+    "description": "Password field."
+  },
+  "phrase_wrong": {
+    "message": "Неверный пароль",
+    "description": "Wrong password."
+  },
+  "unlock": {
+    "message": "Разблокировать",
+    "description": "Unlock button."
+  },
+  "back": {
+    "message": "Назад",
+    "description": "Back button."
+  },
+  "account": {
+    "message": "Аккаунт",
+    "description": "Account page title."
+  },
+  "issuer": {
+    "message": "Сервис",
+    "description": "Issuer field."
+  },
+  "accountName": {
+    "message": "Аккаунт",
+    "description": "Account name field."
+  },
+  "site": {
+    "message": "Сайт",
+    "description": "Website field."
+  },
+  "site_invalid": {
+    "message": "Введите адрес сайта, например github.com",
+    "description": "Invalid website."
+  },
+  "params_digits": {
+    "message": "$DIGITS$ цифр",
+    "description": "Account parameters: digits.",
+    "placeholders": {
+      "digits": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "params_period": {
+    "message": "$PERIOD$ с",
+    "description": "Account parameters: period in seconds.",
+    "placeholders": {
+      "period": {
+        "content": "$1",
+        "example": "30"
+      }
+    }
+  },
+  "pin": {
+    "message": "Закрепить вверху списка",
+    "description": "Pin toggle."
+  },
+  "site_icon": {
+    "message": "Показывать значок сайта",
+    "description": "Website icon toggle of an account."
+  },
+  "show_qr": {
+    "message": "Показать QR-код для переноса",
+    "description": "Show the QR code of an account."
+  },
+  "delete_account": {
+    "message": "Удалить аккаунт",
+    "description": "Delete account button."
+  },
+  "account_locked_hint": {
+    "message": "Чтобы изменить аккаунт, введите пароль. Сейчас его можно только удалить.",
+    "description": "Account page of an account that is not decrypted."
+  },
+  "qr_image": {
+    "message": "QR-код аккаунта",
+    "description": "QR code image."
+  },
+  "qr_hint": {
+    "message": "Отсканируйте камерой в приложении на телефоне. Никому не показывайте этот код.",
+    "description": "QR code dialog."
   },
   "close": {
     "message": "Закрыть",
-    "description": "Close."
+    "description": "Close button."
   },
-  "ok": {
-    "message": "Готово",
-    "description": "OK."
+  "delete_account_title": {
+    "message": "Удалить $ISSUER$?",
+    "description": "Delete confirmation title.",
+    "placeholders": {
+      "issuer": {
+        "content": "$1",
+        "example": "Cloudflare"
+      }
+    }
+  },
+  "confirm_delete": {
+    "message": "Аккаунт $ACCOUNT$ пропадёт из списка, отменить это нельзя. Без бэкапа или другого способа входа доступ к сервису можно потерять.",
+    "description": "Delete confirmation text.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "ivan@example.org"
+      }
+    }
+  },
+  "delete": {
+    "message": "Удалить",
+    "description": "Delete button."
+  },
+  "cancel": {
+    "message": "Отмена",
+    "description": "Cancel button."
   },
   "yes": {
     "message": "Да",
@@ -51,284 +267,430 @@
     "message": "Нет",
     "description": "No."
   },
-  "account": {
-    "message": "Учетная запись",
-    "description": "Account."
+  "ok": {
+    "message": "ОК",
+    "description": "OK."
   },
-  "accountName": {
-    "message": "Имя пользователя",
-    "description": "Account Name."
+  "loading": {
+    "message": "Загрузка…",
+    "description": "Busy indicator."
   },
-  "issuer": {
-    "message": "Издатель",
-    "description": "Issuer."
+  "import_header": {
+    "message": "Импорт, откроется вкладка",
+    "description": "Import section of the add page."
+  },
+  "import_backup_file": {
+    "message": "Файл бэкапа",
+    "description": "Import from a backup file."
+  },
+  "import_backup_file_info": {
+    "message": "JSON или otpauth, в том числе с паролем",
+    "description": "Import from a backup file hint."
+  },
+  "import_qr_images": {
+    "message": "Картинки с QR-кодами",
+    "description": "Import from QR images."
+  },
+  "import_qr_images_info": {
+    "message": "Скриншоты, экспорт Google Authenticator",
+    "description": "Import from QR images hint."
+  },
+  "import_otp_urls": {
+    "message": "Текст otpauth://",
+    "description": "Import from otpauth text."
+  },
+  "import_otp_urls_info": {
+    "message": "По одной ссылке на строку",
+    "description": "Import from otpauth text hint."
   },
   "secret": {
-    "message": "Секрет",
-    "description": "Secret."
+    "message": "Секретный ключ",
+    "description": "Secret field."
   },
-  "updateSuccess": {
-    "message": "Успех.",
-    "description": "Update Success."
+  "optional": {
+    "message": "необязательно",
+    "description": "Optional field mark."
   },
-  "updateFailure": {
-    "message": "Неудача.",
-    "description": "Update Failure."
+  "account_placeholder": {
+    "message": "Логин или почта",
+    "description": "Account field placeholder."
   },
-  "about": {
-    "message": "О расширении",
-    "description": "About."
+  "advanced": {
+    "message": "Дополнительно",
+    "description": "Advanced settings."
   },
-  "settings": {
-    "message": "Настройки",
-    "description": "Settings."
+  "type": {
+    "message": "Код меняется",
+    "description": "Account type."
+  },
+  "based_on_time": {
+    "message": "По времени",
+    "description": "Time based."
+  },
+  "based_on_counter": {
+    "message": "По счётчику",
+    "description": "Counter based."
+  },
+  "digits": {
+    "message": "Цифр",
+    "description": "Digits."
+  },
+  "period": {
+    "message": "Период, с",
+    "description": "Period in seconds."
+  },
+  "algorithm": {
+    "message": "Алгоритм",
+    "description": "Algorithm."
+  },
+  "algorithm_gost256": {
+    "message": "ГОСТ 256",
+    "description": "GOST R 34.11-2012 256."
+  },
+  "algorithm_gost512": {
+    "message": "ГОСТ 512",
+    "description": "GOST R 34.11-2012 512."
+  },
+  "add": {
+    "message": "Добавить",
+    "description": "Add button."
+  },
+  "errorsecret": {
+    "message": "Неверный секретный ключ",
+    "description": "Invalid secret."
+  },
+  "backup": {
+    "message": "Бэкап и импорт",
+    "description": "Backup menu item and page title."
   },
   "security": {
     "message": "Безопасность",
-    "description": "Security."
+    "description": "Security menu item and page title."
   },
-  "current_phrase": {
-    "message": "Текущий пароль",
-    "description": "Current Passphrase."
+  "settings": {
+    "message": "Настройки",
+    "description": "Settings menu item and page title."
   },
-  "phrase": {
-    "message": "Пароль",
-    "description": "Passphrase."
+  "sync_clock": {
+    "message": "Синхронизировать часы",
+    "description": "Sync clock menu item."
   },
-  "confirm_phrase": {
-    "message": "Подтвердить Пароль",
-    "description": "Confirm Passphrase."
+  "sync_clock_info": {
+    "message": "Если коды не подходят: сверить время с Google",
+    "description": "Sync clock hint."
   },
-  "confirm_delete": {
-    "message": "Вы уверены, что хотите удалить эту учетную запись? Это действие нельзя отменить.",
-    "description": "Remove entry confirmation"
-  },
-  "confirm_delete_all": {
-    "message": "Я понимаю, что все мои данные будут безвозвратно удалены.",
-    "description": "Message that user is required to acknowledge before clearing all data."
-  },
-  "delete_all": {
-    "message": "Сбросить ключ идентификации."
-  },
-  "delete_all_warning": {
-    "message": "Это удалит все ваши данные и полностью сбросит Authenticator. Вы не сможете восстановить любые удаленные данные! Вам следует сохранить резервную копию перед сбросом аутентификатора."
-  },
-  "security_warning": {
-    "message": "Этот пароль будет использоваться для шифрования ваших учетных записей. Никто не может помочь вам, если вы забыли пароль.",
-    "description": "Passphrase Warning."
-  },
-  "update": {
-    "message": "Обновить",
-    "description": "Update."
-  },
-  "phrase_incorrect": {
-    "message": "Вы не можете добавить аккаунт, пока все аккаунты не расшифрованы. Введите правильный пароль, чтобы продолжить.",
-    "description": "Passphrase Incorrect."
-  },
-  "phrase_incorrect_export": {
-    "message": "Учетные записи, которые не были расшифрованы, не будут включены в эту резервную копию.",
-    "description": "Skip Unable-decripted Data."
-  },
-  "phrase_not_match": {
-    "message": "Не совпадает парольная фраза.",
-    "description": "Passphrase Not Match."
-  },
-  "encrypted": {
-    "message": "Данные зашифрованы",
-    "description": "Encrypted."
-  },
-  "copied": {
-    "message": "Скопировано",
-    "description": "Copied."
+  "about": {
+    "message": "О программе",
+    "description": "About."
   },
   "feedback": {
-    "message": "Отзыв",
-    "description": "Feedback."
+    "message": "Сообщить о проблеме",
+    "description": "Report a problem."
   },
   "source": {
     "message": "Исходный код",
-    "description": "Source Code."
+    "description": "Source code."
   },
-  "passphrase_info": {
-    "message": "Введите пароль для расшифровки данных учетной записи.",
-    "description": "Passphrase Info"
+  "version": {
+    "message": "2FAuthenticator $VERSION$",
+    "description": "Version at the bottom of the menu.",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "8.3.0"
+      }
+    }
   },
-  "sync_clock": {
-    "message": "Синхронизировать время с Google",
-    "description": "Sync Clock"
-  },
-  "clock_too_far_off": {
-    "message": "Внимание! Ваши данные местного времени не совпадают, пожалуйста синхронизируйте время перед тем как продолжить.",
-    "description": "Local Time is Too Far Off"
-  },
-  "remind_backup": {
-    "message": "У вас есть резервная копия для ваших учетных записей? Создайте резервную копию, пока не поздно!",
-    "description": "Remind Backup"
-  },
-  "capture_failed": {
-    "message": "Захват не выполнен, перезагрузите страницу и повторите попытку.",
-    "description": "Capture Failed"
-  },
-  "capture_local_file_failed": {
-    "message": "Сканируете QR код из файла? Используйте команду Импортировать QR из резервного файла.",
-    "description": "Import QR image backup instead of scan local image"
-  },
-  "based_on_time": {
-    "message": "Время",
-    "description": "Time Based"
-  },
-  "based_on_counter": {
-    "message": "Счетчик",
-    "description": "Counter Based"
-  },
-  "resize_popup_page": {
-    "message": "Настройки",
-    "description": "Popup Page Settings"
-  },
-  "scale": {
-    "message": "Масштаб",
-    "description": "Scale"
-  },
-  "export_info": {
-    "message": "Предупреждение: все резервные копии не зашифрованы. Хотите добавить учетную запись в другое приложение? Наведите курсор на верхнюю правую часть любой учетной записи и нажмите скрытую кнопку с QR кодом",
-    "description": "Export menu info text"
-  },
-  "download_backup": {
-    "message": "Скачать резервную копию",
-    "description": "Download backup file."
-  },
-  "import_backup": {
-    "message": "Восстановить копию.",
-    "description": "Import backup."
-  },
-  "import_backup_file": {
-    "message": "Восстановить из файла",
-    "description": "Import backup file."
-  },
-  "import_backup_qr": {
-    "message": "Импортировать резервную копию QR изображений",
-    "description": "Import qr image backup."
-  },
-  "import_backup_code": {
-    "message": "Восстановить  из текста.",
-    "description": "Import backup code."
-  },
-  "import_backup_qr_partly_failed": {
-    "message": "Импорт успешный, но некоторые QR-коды не могут быть распознаны.",
-    "description": "Import successful, but some QR image cannot be recognized."
-  },
-  "import_backup_qr_in_batches": {
-    "message": "Вы можете выбрать несколько файлов изображения для импорта резервных копий в пакетном режиме.",
-    "description": "You can select multiple image files to import backup in batches."
-  },
-  "show_all_entries": {
-    "message": "Показать все записи",
-    "description": "Show all entries."
-  },
-  "import_error_password": {
-    "message": "Для импорта резервных копий необходимо указать правильный пароль.",
-    "description": "Error password warning when import backups."
-  },
-  "remove": {
-    "message": "Удалить",
-    "description": "Remove password."
-  },
-  "download_enc_backup": {
-    "message": "Сохранить защищенную паролем резервную копию",
-    "description": "Download Encrypted Backup"
-  },
-  "search": {
-    "message": "Поиск",
-    "description": "Search"
-  },
-  "popout": {
-    "message": "Отдельное окно",
-    "description": "Make window turn into persistent popup"
-  },
-  "lock": {
-    "message": "Защищено паролем",
-    "description": "Lock accounts"
-  },
-  "edit": {
-    "message": "Редактировать",
-    "description": "Edit"
-  },
-  "use_autofill": {
-    "message": "Автозаполнение",
-    "description": "Use Autofill"
+  "appearance": {
+    "message": "Оформление",
+    "description": "Settings section."
   },
   "theme": {
     "message": "Тема",
-    "description": "Theme"
+    "description": "Theme."
+  },
+  "theme_auto": {
+    "message": "Как в системе",
+    "description": "Theme of the system."
   },
   "theme_light": {
     "message": "Светлая",
-    "description": "Light theme"
+    "description": "Light theme."
   },
   "theme_dark": {
     "message": "Тёмная",
-    "description": "Dark theme"
+    "description": "Dark theme."
   },
-  "theme_simple": {
-    "message": "Простая",
-    "description": "Simple theme"
+  "codes_section": {
+    "message": "Коды",
+    "description": "Settings section."
   },
-  "theme_compact": {
-    "message": "Компактный",
-    "description": "Compact theme"
+  "use_autofill": {
+    "message": "Вставлять код на страницу",
+    "description": "Autofill setting."
   },
-  "theme_high_contrast": {
-    "message": "Высокая контрастность",
-    "description": "High Contrast theme"
-  },
-  "theme_flat": {
-    "message": "Плоская",
-    "description": "Flat theme"
-  },
-  "otp_backup_inform": {
-    "message": "Вы можете импортировать резервные копии из других приложений.",
-    "description": "Info text on import page"
-  },
-  "loading": {
-    "message": "Загрузка..."
-  },
-  "autolock": {
-    "message": "Заблокировать после"
-  },
-  "minutes": {
-    "message": "минут"
-  },
-  "advanced": {
-    "message": "Дополнительно"
-  },
-  "period": {
-    "message": "Период"
-  },
-  "type": {
-    "message": "Тип\n"
-  },
-  "invalid": {
-    "message": "Больной"
-  },
-  "digits": {
-    "message": "Цифры"
-  },
-  "algorithm": {
-    "message": "Алгоритм"
+  "use_autofill_info": {
+    "message": "При копировании код вводится и в активное поле страницы",
+    "description": "Autofill setting hint."
   },
   "smart_filter": {
-    "message": "\"Умный\" фильтр"
+    "message": "Умный фильтр",
+    "description": "Smart filter setting."
   },
-  "backup": {
-    "message": "Резервная копия"
+  "smart_filter_info": {
+    "message": "Показывать только аккаунты открытого сайта. Сайт аккаунта задаётся на его странице. Перед вводом кода проверяйте адрес сайта",
+    "description": "Smart filter setting hint."
   },
-  "no_entires": {
-    "message": "Нет аккаунтов для отображения. Добавьте свой первый аккаунт сейчас."
+  "site_icons": {
+    "message": "Значки сайтов",
+    "description": "Website icons setting."
   },
-  "phrase_wrong": {
-    "message": "Неверный пароль"
+  "site_icons_info": {
+    "message": "Показывать значок сайта аккаунта вместо буквы. Значки загружаются с самих сайтов",
+    "description": "Website icons setting hint."
   },
-  "activate_auto_filter": {
-    "message": "Внимание: Интеллектуальный фильтр точно сопоставляет доменное имя с учетной записью. Всегда проверяйте, что вы находитесь на правильном веб-сайте, прежде чем вводить код!"
+  "browser_sync": {
+    "message": "Синхронизация через браузер",
+    "description": "Browser sync setting."
+  },
+  "browser_sync_info": {
+    "message": "Аккаунты хранятся в синхронизируемой области браузера и видны на других ваших устройствах",
+    "description": "Browser sync setting hint."
+  },
+  "password_set": {
+    "message": "Пароль задан",
+    "description": "Password status."
+  },
+  "password_set_info": {
+    "message": "Коды зашифрованы, после блокировки нужен пароль",
+    "description": "Password status hint."
+  },
+  "password_not_set": {
+    "message": "Пароль не задан",
+    "description": "Password status."
+  },
+  "password_not_set_info": {
+    "message": "Коды хранятся без шифрования. Задайте пароль, чтобы зашифровать их",
+    "description": "Password status hint."
+  },
+  "autolock": {
+    "message": "Блокировать через",
+    "description": "Autolock."
+  },
+  "autolock_label": {
+    "message": "Минут до блокировки",
+    "description": "Autolock field."
+  },
+  "minutes": {
+    "message": "мин",
+    "description": "Minutes."
+  },
+  "change_password": {
+    "message": "Сменить пароль",
+    "description": "Change password form."
+  },
+  "set_password": {
+    "message": "Задать пароль",
+    "description": "Set password form and button."
+  },
+  "current_phrase": {
+    "message": "Текущий пароль",
+    "description": "Current password field."
+  },
+  "new_phrase": {
+    "message": "Новый пароль",
+    "description": "New password field."
+  },
+  "confirm_phrase": {
+    "message": "Новый пароль ещё раз",
+    "description": "Confirm password field."
+  },
+  "security_warning": {
+    "message": "Забытый пароль не восстановить: без него коды не расшифровать.",
+    "description": "Password warning."
+  },
+  "save": {
+    "message": "Сохранить",
+    "description": "Save button."
+  },
+  "remove": {
+    "message": "Снять пароль",
+    "description": "Remove password button."
+  },
+  "phrase_not_match": {
+    "message": "Пароли не совпадают",
+    "description": "Passwords do not match."
+  },
+  "backup_save_header": {
+    "message": "Сохранить копию",
+    "description": "Backup section."
+  },
+  "download_enc_backup": {
+    "message": "Зашифрованный бэкап",
+    "description": "Encrypted backup."
+  },
+  "download_enc_backup_info": {
+    "message": "Файл .json, откроется только с паролем",
+    "description": "Encrypted backup hint."
+  },
+  "download_backup": {
+    "message": "Бэкап без шифрования",
+    "description": "Unencrypted backup."
+  },
+  "download_backup_info": {
+    "message": "Текст otpauth://, подходит другим приложениям",
+    "description": "Unencrypted backup hint."
+  },
+  "export_info": {
+    "message": "Любой, у кого окажется файл, получит ваши коды.",
+    "description": "Unencrypted backup warning."
+  },
+  "phrase_incorrect_export": {
+    "message": "Аккаунты, которые не удалось расшифровать, не попадут в бэкап.",
+    "description": "Backup of accounts that are not decrypted."
+  },
+  "restore_header": {
+    "message": "Восстановить",
+    "description": "Backup section."
+  },
+  "import_backup": {
+    "message": "Импорт",
+    "description": "Import."
+  },
+  "import_backup_info": {
+    "message": "Из файла бэкапа, картинок с QR или текста",
+    "description": "Import hint."
+  },
+  "import_title": {
+    "message": "Импорт аккаунтов",
+    "description": "Import page title."
+  },
+  "otp_backup_inform": {
+    "message": "Добавьте аккаунты из бэкапа или из другого приложения. Уже добавленные аккаунты не пропадут.",
+    "description": "Import page text."
+  },
+  "import_source": {
+    "message": "Источник",
+    "description": "Import source."
+  },
+  "import_backup_qr": {
+    "message": "Картинки с QR",
+    "description": "Import from QR images tab."
+  },
+  "import_backup_code": {
+    "message": "Текст otpauth",
+    "description": "Import from otpauth text tab."
+  },
+  "import_file_choose": {
+    "message": "Выберите файл или перетащите его сюда",
+    "description": "File drop zone."
+  },
+  "import_file_info": {
+    "message": "Бэкап .json из 2FAuthenticator или Authenticator, в том числе зашифрованный, или текстовый файл со ссылками otpauth://",
+    "description": "File drop zone hint."
+  },
+  "choose_file": {
+    "message": "Выбрать файл",
+    "description": "Choose file button."
+  },
+  "import_qr_choose": {
+    "message": "Выберите картинки или перетащите их сюда",
+    "description": "Image drop zone."
+  },
+  "import_backup_qr_in_batches": {
+    "message": "Можно выбрать сразу несколько картинок.",
+    "description": "Image drop zone hint."
+  },
+  "choose_images": {
+    "message": "Выбрать картинки",
+    "description": "Choose images button."
+  },
+  "import_google_hint": {
+    "message": "Переносите из Google Authenticator? Экспортируйте аккаунты в QR-коды, сделайте скриншоты и откройте вкладку «Картинки с QR».",
+    "description": "Google Authenticator hint."
+  },
+  "import_text_encrypted": {
+    "message": "Бэкап защищён паролем",
+    "description": "Encrypted text backup."
+  },
+  "import_action": {
+    "message": "Импортировать",
+    "description": "Import button."
+  },
+  "import_file_password": {
+    "message": "Бэкап зашифрован. Введите пароль, с которым его сохранили.",
+    "description": "Password of an encrypted backup file."
+  },
+  "import_error_password": {
+    "message": "Аккаунты заблокированы. Откройте расширение, введите пароль и повторите импорт.",
+    "description": "Import while accounts are locked."
+  },
+  "options_info": {
+    "message": "Тема, пароль, бэкап и остальные настройки находятся в окне расширения: значок на панели → меню.",
+    "description": "Options page text."
+  },
+  "delete_all": {
+    "message": "Удалить все данные",
+    "description": "Delete all data."
+  },
+  "delete_all_warning": {
+    "message": "Будут удалены все аккаунты, пароль и настройки, в том числе в синхронизируемой области браузера. Восстановить их можно только из бэкапа, поэтому сначала сохраните копию.",
+    "description": "Delete all data warning."
+  },
+  "confirm_delete_all": {
+    "message": "Я понимаю, что данные будут удалены без возможности восстановления",
+    "description": "Delete all data confirmation."
+  },
+  "delete_all_done": {
+    "message": "Все данные удалены.",
+    "description": "Delete all data done."
+  },
+  "updateSuccess": {
+    "message": "Готово.",
+    "description": "Success."
+  },
+  "updateFailure": {
+    "message": "Что-то пошло не так.",
+    "description": "Failure."
+  },
+  "clock_too_far_off": {
+    "message": "Часы расходятся больше чем на 5 минут. Сначала исправьте время в системе.",
+    "description": "Clock is too far off."
+  },
+  "phrase_incorrect": {
+    "message": "Не все аккаунты расшифрованы. Сначала введите пароль.",
+    "description": "Accounts are not decrypted."
+  },
+  "capture_failed": {
+    "message": "Не удалось начать сканирование. Перезагрузите страницу и попробуйте снова.",
+    "description": "Capture failed."
+  },
+  "capture_unsupported": {
+    "message": "На этой странице нельзя сканировать QR-код. Откройте страницу с QR-кодом и попробуйте снова.",
+    "description": "Capture on a page where scripts cannot run."
+  },
+  "capture_local_file_failed": {
+    "message": "Сканируете QR-код из локального файла? Открыть импорт картинок?",
+    "description": "Capture on a local file."
+  },
+  "added": {
+    "message": " добавлен.",
+    "description": "Added Account, after the account name."
+  },
+  "errorqr": {
+    "message": "QR-код не распознан.",
+    "description": "QR Error."
+  },
+  "migration_fail": {
+    "message": "Импорт не удался. Если вы переносите аккаунты из Google Authenticator, экспортируйте их заново и повторите.",
+    "description": "Import failed."
+  },
+  "migration_partly_fail": {
+    "message": "Часть аккаунтов не импортирована.",
+    "description": "Import partly failed."
+  },
+  "import_backup_qr_partly_failed": {
+    "message": "Импорт выполнен, но часть QR-кодов не распознана.",
+    "description": "QR import partly failed."
   }
 }

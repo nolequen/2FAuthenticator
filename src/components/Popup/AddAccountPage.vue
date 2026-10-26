@@ -1,60 +1,105 @@
 <template>
   <div>
-    <a-text-input
-      v-model="newAccount.issuer"
-      :label="i18n.issuer"
-    ></a-text-input>
-    <a-text-input
-      v-model="newAccount.secret"
-      :label="i18n.secret"
-    ></a-text-input>
-    <details>
-      <summary>{{ i18n.advanced }}</summary>
-      <a-text-input
-        v-model="newAccount.account"
-        :label="i18n.accountName"
-      ></a-text-input>
-      <label>{{ i18n.period }}</label>
-      <input
-        v-model.number="newAccount.period"
-        type="number"
-        min="1"
-        class="input"
-        :disabled="newAccount.type === OTPType.hotp"
-      />
-      <a-select-input v-model.number="newAccount.digits" :label="i18n.digits">
-        <option value="6">6</option>
-        <option value="8">8</option>
-      </a-select-input>
-      <a-select-input
-        v-model.number="newAccount.algorithm"
-        :label="i18n.algorithm"
+    <a-page-header :title="i18n.add_secret" @back="currentView.back()" />
+    <div class="page-body">
+      <div class="panel padded">
+        <a-text-input v-model="newAccount.issuer" :label="i18n.issuer" />
+        <a-text-input
+          v-model="newAccount.secret"
+          class="mono"
+          :label="i18n.secret"
+          :spellcheck="false"
+        />
+        <a-text-input
+          v-model="newAccount.account"
+          :label="i18n.accountName"
+          :optional="i18n.optional"
+          :placeholder="i18n.account_placeholder"
+        />
+      </div>
+      <details class="panel advanced">
+        <summary>
+          <span>{{ i18n.advanced }}</span>
+          <IconChevronDown class="row-trail" />
+        </summary>
+        <div class="advanced-body">
+          <a-segmented-input
+            v-model="newAccount.type"
+            :label="i18n.type"
+            :options="[
+              { value: OTPType.totp, label: i18n.based_on_time },
+              { value: OTPType.hotp, label: i18n.based_on_counter },
+            ]"
+          />
+          <div class="field-row">
+            <a-select-input
+              v-model.number="newAccount.digits"
+              :label="i18n.digits"
+            >
+              <option value="6">6</option>
+              <option value="8">8</option>
+            </a-select-input>
+            <div class="field">
+              <label class="field-label" for="period">{{ i18n.period }}</label>
+              <input
+                id="period"
+                v-model.number="newAccount.period"
+                type="number"
+                min="1"
+                placeholder="30"
+                class="input"
+                :disabled="newAccount.type === OTPType.hotp"
+              />
+            </div>
+            <a-select-input
+              v-model.number="newAccount.algorithm"
+              :label="i18n.algorithm"
+            >
+              <option
+                v-for="algorithm in algorithms"
+                :key="algorithm"
+                :value="algorithm"
+              >
+                {{ algorithmName(algorithm) }}
+              </option>
+            </a-select-input>
+          </div>
+        </div>
+      </details>
+    </div>
+    <div class="page-footer">
+      <a-button
+        class="add-account"
+        variant="primary"
+        block
+        @click="addNewAccount()"
+        >{{ i18n.add }}</a-button
       >
-        <option :value="OTPAlgorithm.SHA1">SHA-1</option>
-        <option :value="OTPAlgorithm.SHA256">SHA-256</option>
-        <option :value="OTPAlgorithm.SHA512">SHA-512</option>
-        <option :value="OTPAlgorithm.GOST3411_2012_256">GOST 34.11 256</option>
-        <option :value="OTPAlgorithm.GOST3411_2012_512">GOST 34.11 512</option>
-      </a-select-input>
-      <a-select-input v-model.number="newAccount.type" :label="i18n.type">
-        <option :value="OTPType.totp">{{ i18n.based_on_time }}</option>
-        <option :value="OTPType.hotp">{{ i18n.based_on_counter }}</option>
-      </a-select-input>
-    </details>
-    <a-button type="small" @click="addNewAccount()">{{ i18n.ok }}</a-button>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import { reactive } from "vue";
 import { OTPType, OTPEntry, OTPAlgorithm } from "../../models/otp";
+import { algorithmName } from "../../display";
 import { i18n } from "../../store/i18n";
 import { useAccountsStore } from "../../store/Accounts";
+import { useCurrentViewStore } from "../../store/CurrentView";
 import { useNotificationStore } from "../../store/Notification";
-import { useStyleStore } from "../../store/Style";
+
+import IconChevronDown from "lucide-static/icons/chevron-down.svg";
 
 const accounts = useAccountsStore();
+const currentView = useCurrentViewStore();
 const notification = useNotificationStore();
-const styleStore = useStyleStore();
+
+const algorithms = [
+  OTPAlgorithm.SHA1,
+  OTPAlgorithm.SHA256,
+  OTPAlgorithm.SHA512,
+  OTPAlgorithm.GOST3411_2012_256,
+  OTPAlgorithm.GOST3411_2012_512,
+];
 
 const newAccount: {
   issuer: string;
@@ -137,8 +182,7 @@ async function addNewAccount() {
     return;
   }
   accounts.addCode(entry);
-  styleStore.hideInfo();
-  styleStore.toggleEdit();
+  currentView.close();
 
   const codes = document.getElementById("codes");
   if (codes) {

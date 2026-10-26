@@ -4,7 +4,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(243, 244, 248, 0.6);
   z-index: 2147483647;
   display: none;
   cursor: crosshair;
@@ -21,6 +21,6 @@
 
 #__ga_captureBox__ {
   position: absolute;
-  border: black 1px dashed;
+  border: #3b4bd8 1px dashed;
   display: none;
 }

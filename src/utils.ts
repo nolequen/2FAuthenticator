@@ -97,20 +97,24 @@ function isMatchedEntry(
 
   const issuerHostMatches = entry.issuer.split("::");
   const issuer = issuerHostMatches[0].replace(/[^0-9a-z]/gi, "").toLowerCase();
-
-  if (!issuer) {
-    return false;
-  }
+  const site = (issuerHostMatches[1] ?? "").trim().toLowerCase();
 
   const siteTitle = siteName[0] || "";
   const siteNameFromHost = siteName[1] || "";
   const siteHost = siteName[2] || "";
 
-  if (issuerHostMatches.length > 1) {
-    if (siteHost && siteHost.indexOf(issuerHostMatches[1]) !== -1) {
-      return true;
-    }
+  if (site.includes(".") || site === "localhost") {
+    return siteHost === site || siteHost.endsWith(`.${site}`);
   }
+
+  if (site && siteHost && siteHost.indexOf(site) !== -1) {
+    return true;
+  }
+
+  if (!issuer) {
+    return false;
+  }
+
   // site title should be more detailed
   // so we use siteTitle.indexOf(issuer)
   if (siteTitle && siteTitle.indexOf(issuer) !== -1) {
@@ -132,9 +136,20 @@ export async function getCurrentTab() {
   return tab;
 }
 
-interface TabWithIdAndURL extends chrome.tabs.Tab {
+export interface TabWithIdAndURL extends chrome.tabs.Tab {
   id: number;
   url: string;
+}
+
+export async function injectContentScript(tab: TabWithIdAndURL) {
+  await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    files: ["/dist/content.js"],
+  });
+  await chrome.scripting.insertCSS({
+    target: { tabId: tab.id },
+    files: ["/css/content.css"],
+  });
 }
 
 export function okToInjectContentScript(

@@ -12,9 +12,10 @@ interface UserSettingsData {
   // syncable settings
   autofill?: boolean;
   autolock?: number;
+  siteIcons?: boolean;
+  siteIconsOff?: string[];
   smartFilter?: boolean;
   theme?: string;
-  zoom?: number;
 }
 
 // Maybe we can have a better way to define this
@@ -41,6 +42,7 @@ const LegacyUserSettingsDataKeys = [
   "oneDriveRevoked",
   "oneDriveRefreshToken",
   "oneDriveToken",
+  "zoom",
 ];
 
 export class UserSettings {

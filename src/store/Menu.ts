@@ -1,32 +1,28 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { UserSettings } from "../models/settings";
+import { applyTheme, normalizeTheme, type Theme } from "../theme";
 
 export const useMenuStore = defineStore("menu", () => {
   const version = ref(chrome.runtime.getManifest()?.version || "0.0.0");
-  const zoom = ref<number | string>(100);
   const useAutofill = ref(false);
   const smartFilter = ref(false);
-  const theme = ref("normal");
+  const siteIcons = ref(true);
+  const siteIconsOff = ref<string[]>([]);
+  const theme = ref<Theme>("auto");
   const autolock = ref(30);
 
   async function init() {
     await UserSettings.updateItems();
 
-    zoom.value = Number(UserSettings.items.zoom) || 100;
     useAutofill.value = UserSettings.items.autofill === true;
     smartFilter.value = UserSettings.items.smartFilter === true;
-    theme.value = UserSettings.items.theme || "normal";
+    siteIcons.value = UserSettings.items.siteIcons !== false;
+    siteIconsOff.value = UserSettings.items.siteIconsOff ?? [];
+    theme.value = normalizeTheme(UserSettings.items.theme);
     autolock.value = Number(UserSettings.items.autolock) || 30;
 
-    resize(zoom.value);
-  }
-
-  function setZoom(value: number | string) {
-    zoom.value = value;
-    UserSettings.items.zoom = Number(value);
-    UserSettings.commitItems();
-    resize(value);
+    applyTheme(theme.value);
   }
 
   function setAutofill(value: boolean) {
@@ -41,10 +37,24 @@ export const useMenuStore = defineStore("menu", () => {
     UserSettings.commitItems();
   }
 
-  function setTheme(value: string) {
+  function setSiteIcons(value: boolean) {
+    siteIcons.value = value;
+    UserSettings.items.siteIcons = value;
+    UserSettings.commitItems();
+  }
+
+  function setSiteIcon(hash: string, value: boolean) {
+    const others = siteIconsOff.value.filter((item) => item !== hash);
+    siteIconsOff.value = value ? others : [...others, hash];
+    UserSettings.items.siteIconsOff = [...siteIconsOff.value];
+    UserSettings.commitItems();
+  }
+
+  function setTheme(value: Theme) {
     theme.value = value;
     UserSettings.items.theme = value;
     UserSettings.commitItems();
+    applyTheme(value);
   }
 
   function setAutolock(value: number) {
@@ -53,26 +63,19 @@ export const useMenuStore = defineStore("menu", () => {
     UserSettings.commitItems();
   }
 
-  function resize(value: number | string) {
-    if (value !== 100) {
-      const scale = Number(value) / 100;
-      document.body.style.marginBottom = 480 * (scale - 1) + "px";
-      document.body.style.marginRight = 320 * (scale - 1) + "px";
-      document.body.style.transform = "scale(" + scale + ")";
-    }
-  }
-
   return {
     version,
-    zoom,
     useAutofill,
     smartFilter,
+    siteIcons,
+    siteIconsOff,
     theme,
     autolock,
     init,
-    setZoom,
     setAutofill,
     setSmartFilter,
+    setSiteIcons,
+    setSiteIcon,
     setTheme,
     setAutolock,
   };

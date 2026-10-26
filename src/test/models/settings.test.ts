@@ -13,6 +13,7 @@ const LEGACY_KEYS = [
   "advisorIgnoreList",
   "enableContextMenu",
   "encodedPhrase",
+  "zoom",
 ];
 
 async function storedSettings(location: StorageLocation) {
@@ -38,6 +39,7 @@ describe("UserSettings", () => {
             advisorIgnoreList: ["password_not_set"],
             enableContextMenu: true,
             encodedPhrase: "encoded-phrase",
+            zoom: 125,
           },
         });
 

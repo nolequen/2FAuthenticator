@@ -1,75 +1,102 @@
 <template>
   <div>
-    <div class="header">
-      <span id="menuName">{{ i18n.settings }}</span>
-      <div id="i-close" class="icon" @click="hideMenu()">
-        <IconArrowLeft />
+    <a-page-header :title="i18n.menu" @back="currentView.back()" />
+    <nav class="page-body">
+      <div class="panel">
+        <button
+          type="button"
+          class="row"
+          :title="i18n.backup"
+          @click="openPage('Backup')"
+        >
+          <span class="row-icon"><IconDownload /></span>
+          <span class="row-text">{{ i18n.backup }}</span>
+          <IconChevronRight class="row-trail" />
+        </button>
+        <button
+          type="button"
+          class="row"
+          :title="i18n.security"
+          @click="openPage('SetPassword')"
+        >
+          <span class="row-icon"><IconShield /></span>
+          <span class="row-text">{{ i18n.security }}</span>
+          <IconChevronRight class="row-trail" />
+        </button>
+        <button
+          type="button"
+          class="row"
+          :title="i18n.settings"
+          @click="openPage('Preferences')"
+        >
+          <span class="row-icon"><IconSliders /></span>
+          <span class="row-text">{{ i18n.settings }}</span>
+          <IconChevronRight class="row-trail" />
+        </button>
       </div>
-    </div>
-    <div id="menuBody">
-      <div class="menuList">
-        <p :title="i18n.backup" @click="showInfo('BackupPage')">
-          <span><IconExchange /></span>{{ i18n.backup }}
-        </p>
-        <p :title="i18n.security" @click="showInfo('SetPasswordPage')">
-          <span><IconLock /></span>{{ i18n.security }}
-        </p>
-        <p :title="i18n.sync_clock" @click="syncClock()">
-          <span><IconSync /></span>{{ i18n.sync_clock }}
-        </p>
-        <p :title="i18n.resize_popup_page" @click="showInfo('PreferencesPage')">
-          <span><IconWrench /></span>{{ i18n.resize_popup_page }}
-        </p>
+      <div class="panel">
+        <button
+          type="button"
+          class="row"
+          :title="i18n.sync_clock"
+          @click="syncClock()"
+        >
+          <span class="row-icon"><IconClock /></span>
+          <span class="row-text">
+            <span class="row-title">{{ i18n.sync_clock }}</span>
+            <span class="row-subtitle">{{ i18n.sync_clock_info }}</span>
+          </span>
+        </button>
       </div>
-      <div class="menuList">
-        <p :title="i18n.feedback" @click="openHelp()">
-          <span><IconComments /></span>{{ i18n.feedback }}
-        </p>
-        <p
+      <div class="panel">
+        <a class="row" href="licenses.html" target="_blank" :title="i18n.about">
+          <span class="row-text">{{ i18n.about }}</span>
+          <IconExternalLink class="row-trail" />
+        </a>
+        <button
+          type="button"
+          class="row"
+          :title="i18n.feedback"
+          @click="openHelp()"
+        >
+          <span class="row-text">{{ i18n.feedback }}</span>
+          <IconExternalLink class="row-trail" />
+        </button>
+        <button
+          type="button"
+          class="row"
           :title="i18n.source"
           @click="openLink('https://github.com/nolequen/Authenticator')"
         >
-          <span><IconCode /></span>{{ i18n.source }}
-        </p>
-        <a href="licenses.html" target="_blank" style="text-decoration: none">
-          <p :title="i18n.about">
-            <span><IconInfo /></span>{{ i18n.about }}
-          </p>
-        </a>
+          <span class="row-text">{{ i18n.source }}</span>
+          <IconExternalLink class="row-trail" />
+        </button>
       </div>
-      <div id="version">Version {{ version }}</div>
-    </div>
+      <div id="version">{{ t("version", version) }}</div>
+    </nav>
   </div>
 </template>
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { syncTimeWithGoogle } from "../../syncTime";
-import { i18n } from "../../store/i18n";
+import { i18n, t } from "../../store/i18n";
 import { useAccountsStore } from "../../store/Accounts";
-import { useCurrentViewStore } from "../../store/CurrentView";
+import { type Page, useCurrentViewStore } from "../../store/CurrentView";
 import { useMenuStore } from "../../store/Menu";
 import { useNotificationStore } from "../../store/Notification";
-import { useStyleStore } from "../../store/Style";
 
-import IconArrowLeft from "../../../svg/arrow-left.svg";
-import IconInfo from "../../../svg/info.svg";
-import IconExchange from "../../../svg/exchange.svg";
-import IconLock from "../../../svg/lock.svg";
-import IconSync from "../../../svg/sync.svg";
-import IconWrench from "../../../svg/wrench.svg";
-import IconComments from "../../../svg/comments.svg";
-import IconCode from "../../../svg/code.svg";
+import IconDownload from "lucide-static/icons/download.svg";
+import IconShield from "lucide-static/icons/shield.svg";
+import IconSliders from "lucide-static/icons/sliders-vertical.svg";
+import IconClock from "lucide-static/icons/clock.svg";
+import IconChevronRight from "lucide-static/icons/chevron-right.svg";
+import IconExternalLink from "lucide-static/icons/external-link.svg";
 import { UserSettings } from "../../models/settings";
 
 const accounts = useAccountsStore();
 const currentView = useCurrentViewStore();
 const notification = useNotificationStore();
-const styleStore = useStyleStore();
 const { version } = storeToRefs(useMenuStore());
-
-function hideMenu() {
-  styleStore.hideMenu();
-}
 
 function openHelp() {
   chrome.tabs.create({
@@ -82,15 +109,14 @@ function openLink(url: string) {
   return;
 }
 
-function showInfo(tab: string) {
+function openPage(page: Page) {
   if (accounts.currentlyEncrypted) {
-    if (tab === "SetPasswordPage") {
+    if (page === "SetPassword") {
       notification.alert(i18n.phrase_incorrect);
       return;
     }
   }
-  styleStore.showInfo();
-  currentView.changeView(tab);
+  currentView.open(page);
   return;
 }
 

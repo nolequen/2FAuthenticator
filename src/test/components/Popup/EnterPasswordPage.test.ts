@@ -69,9 +69,10 @@ describe("EnterPasswordPage", () => {
       attachTo: document.body,
     });
 
-    const errorText = wrapper.find("label.warning");
-
-    errorText.isVisible().should.be.false;
+    wrapper.find(".field-error").exists().should.be.false;
+    chai
+      .expect(wrapper.find("input").attributes("aria-invalid"))
+      .to.equal(undefined);
     wrapper.unmount();
   });
 
@@ -86,9 +87,12 @@ describe("EnterPasswordPage", () => {
         attachTo: document.body,
       });
 
-      const errorText = wrapper.find("label.warning");
+      const errorText = wrapper.find(".field-error");
 
       errorText.isVisible().should.be.true;
+      chai
+        .expect(wrapper.find("input").attributes("aria-invalid"))
+        .to.equal("true");
       wrapper.unmount();
     });
   });

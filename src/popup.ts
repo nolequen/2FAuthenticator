@@ -8,16 +8,20 @@ import CommonComponents from "./components/common/index";
 
 // Other
 import { i18n, loadI18nMessages } from "./store/i18n";
-import { useStyleStore } from "./store/Style";
 import { useAccountsStore } from "./store/Accounts";
 import { useCurrentViewStore } from "./store/CurrentView";
 import { useMenuStore } from "./store/Menu";
 import { useNotificationStore } from "./store/Notification";
 import { syncTimeWithGoogle } from "./syncTime";
 import { UserSettings } from "./models/settings";
+import { applyTheme, normalizeTheme, trackInputModality } from "./theme";
+
+const TEXT_FIELDS = "input, textarea, select, [contenteditable]";
 
 async function init() {
   await UserSettings.updateItems();
+  applyTheme(normalizeTheme(UserSettings.items.theme));
+  trackInputModality();
 
   // Add globals
   await loadI18nMessages();
@@ -40,9 +44,9 @@ async function init() {
   const currentView = useCurrentViewStore(pinia);
   const menu = useMenuStore(pinia);
   const notification = useNotificationStore(pinia);
-  const style = useStyleStore(pinia);
   await accounts.init();
   await menu.init();
+  notification.checkBackupReminder(accounts);
 
   // Render
   app.mount("#authenticator");
@@ -57,11 +61,12 @@ async function init() {
   if (accounts.shouldShowPassphrase) {
     // If we have cached password, use that
     if (accounts.defaultEncryption) {
-      currentView.changeView("LoadingPage");
-      await accounts.updateEntries();
+      await currentView.withBusy(async () => {
+        await accounts.updateEntries();
+        notification.checkBackupReminder(accounts);
+      });
     } else {
-      style.showInfo(true);
-      currentView.changeView("EnterPasswordPage");
+      currentView.lock();
     }
   } else {
     // Set init complete if no encryption is present, otherwise this will be set in updateEntries.
@@ -78,80 +83,24 @@ async function init() {
     console.error(e);
   }
 
-  // Backup reminder / run backup
-  const backupReminder = setInterval(() => {
-    if (accounts.entries.length === 0) {
-      return;
-    }
-
-    if (accounts.currentlyEncrypted) {
-      return;
-    }
-
-    clearInterval(backupReminder);
-
-    const clientTime = Math.floor(new Date().getTime() / 1000 / 3600 / 24);
-    if (!UserSettings.items.lastRemindingBackupTime) {
-      UserSettings.items.lastRemindingBackupTime = clientTime;
-      UserSettings.commitItems();
-    } else if (
-      clientTime - Number(UserSettings.items.lastRemindingBackupTime) >= 30 ||
-      clientTime - Number(UserSettings.items.lastRemindingBackupTime) < 0
-    ) {
-      notification.alert(i18n.remind_backup);
-      UserSettings.items.lastRemindingBackupTime = clientTime;
-      UserSettings.commitItems();
-    }
-    return;
-  }, 5000);
-
   // Open search if '/' is pressed
   document.addEventListener(
     "keyup",
     (e) => {
-      if (e.key === "/") {
-        if (style.isMenuShown) {
-          return;
-        }
-        accounts.stopFilter();
-        // It won't focus the texfield if vue unhides the div
-        accounts.openSearch();
-        const searchDiv = document.getElementById("search");
-        const searchInput = document.getElementById("searchInput");
-        if (!searchInput || !searchDiv) {
-          return;
-        }
-        searchDiv.style.display = "block";
-        searchInput.focus();
+      if (
+        e.key !== "/" ||
+        currentView.current !== null ||
+        currentView.locked ||
+        document.querySelector<HTMLElement>(".base")?.inert ||
+        (e.target instanceof Element && e.target.closest(TEXT_FIELDS))
+      ) {
+        return;
       }
+      accounts.stopFilter();
+      document.getElementById("searchInput")?.focus();
     },
     false,
   );
-
-  // Show search box if more than 10 entries
-  accounts.showSearchIfNeeded();
-
-  const query = new URLSearchParams(document.location.search.substring(1));
-  // Resize window to proper size if popup
-  if (query.get("popup")) {
-    const zoom = Number(UserSettings.items.zoom) / 100 || 1;
-    const correctHeight = 480 * zoom;
-    const correctWidth = 320 * zoom;
-    if (
-      window.innerHeight !== correctHeight ||
-      window.innerWidth !== correctWidth
-    ) {
-      // window update to correct size
-      const adjustedHeight =
-        correctHeight + (window.outerHeight - window.innerHeight);
-      const adjustedWidth =
-        correctWidth + (window.outerWidth - window.innerWidth);
-      chrome.windows.update(chrome.windows.WINDOW_ID_CURRENT, {
-        height: adjustedHeight,
-        width: adjustedWidth,
-      });
-    }
-  }
 
   // TODO: give an option for this
   chrome.permissions.contains(

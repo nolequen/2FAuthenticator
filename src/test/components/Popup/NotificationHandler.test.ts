@@ -63,4 +63,44 @@ describe("NotificationHandler", () => {
     await answer(i18n.yes);
     (await second).should.equal(true);
   });
+
+  it("should name the action of a dangerous question", async () => {
+    const notification = useNotificationStore(pinia);
+    const confirmed = notification.confirm({
+      title: "Delete Cloudflare?",
+      message: "The account will disappear.",
+      confirm: "Delete",
+      danger: true,
+    });
+    await nextTick();
+
+    wrapper.find(".dialog-title").text().should.equal("Delete Cloudflare?");
+    wrapper.find(".button.danger").text().should.equal("Delete");
+    await answer(i18n.cancel);
+
+    (await confirmed).should.equal(false);
+  });
+
+  it("should answer no on Escape", async () => {
+    const confirmed = useNotificationStore(pinia).confirm("Delete?");
+    await nextTick();
+
+    await wrapper.find(".dialog").trigger("keydown", { key: "Escape" });
+
+    (await confirmed).should.equal(false);
+  });
+
+  it("should show the messages one by one", async () => {
+    const notification = useNotificationStore(pinia);
+    notification.alert("First");
+    notification.alert("Second");
+    await nextTick();
+
+    wrapper.find(".message").text().should.equal("Second");
+    await answer(i18n.ok);
+    wrapper.find(".message").text().should.equal("First");
+    await answer(i18n.ok);
+
+    wrapper.find(".dialog").exists().should.equal(false);
+  });
 });

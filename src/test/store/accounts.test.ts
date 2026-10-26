@@ -6,7 +6,7 @@ import { createPinia, setActivePinia } from "pinia";
 
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
-import { useStyleStore } from "../../store/Style";
+import { useNotificationStore } from "../../store/Notification";
 import { Encryption } from "../../models/encryption";
 import { EntryStorage } from "../../models/storage";
 import { OTPEntry, OTPType } from "../../models/otp";
@@ -58,8 +58,6 @@ async function clearSession() {
 async function createStore() {
   const pinia = createPinia();
   setActivePinia(pinia);
-  sinon.stub(useCurrentViewStore(pinia), "changeView");
-  sinon.stub(useStyleStore(pinia), "hideInfo");
   const accounts = useAccountsStore(pinia);
   await accounts.init();
   return accounts;
@@ -119,44 +117,6 @@ describe("Accounts", () => {
         accounts.second.should.equal(expected);
       });
     }
-  });
-
-  describe("search", () => {
-    const KEY_ID = "search-key";
-    const PASSPHRASE = randomPassphrase();
-
-    async function storeEncryptedEntries(count: number) {
-      const data: { [hash: string]: RawOTPStorage } = {};
-      for (let i = 0; i < count; i++) {
-        const hash = crypto.randomUUID();
-        data[hash] = rawEntry(hash, `user${i}`, i);
-      }
-      await chrome.storage.local.set({ [KEY_ID]: key(KEY_ID) });
-      await EntryStorage.import(new Encryption(PASSPHRASE, KEY_ID), data);
-    }
-
-    async function enterPassword(store: ReturnType<typeof useAccountsStore>) {
-      chai.expect(store.entries).to.have.lengthOf(0);
-      store.encryption.set(KEY_ID, new Encryption(PASSPHRASE, KEY_ID));
-      await store.updateEntries();
-      return store;
-    }
-
-    it("should show the search box after the password is entered with 10 accounts", async () => {
-      await storeEncryptedEntries(10);
-      const store = await enterPassword(await createStore());
-
-      chai.expect(store.entries).to.have.lengthOf(10);
-      store.showSearch.should.equal(true);
-    });
-
-    it("should not show the search box after the password is entered with 9 accounts", async () => {
-      await storeEncryptedEntries(9);
-      const store = await enterPassword(await createStore());
-
-      chai.expect(store.entries).to.have.lengthOf(9);
-      store.showSearch.should.equal(false);
-    });
   });
 
   describe("password", function () {
@@ -231,6 +191,33 @@ describe("Accounts", () => {
       const newHash = hashes.filter((hash) => hash !== uuid)[0];
       newHash.should.match(UUID_V4);
       accounts[newHash].should.equal("old");
+    });
+
+    it("should check the backup reminder only after the right password", async () => {
+      const hash = crypto.randomUUID();
+      await chrome.storage.local.set({
+        [hash]: { ...rawEntry(hash, "alice", 0), dataType: "OTPStorage" },
+      });
+      await (await createStore()).changePassphrase("right password");
+      await clearSession();
+
+      const store = await createStore();
+      const checkBackupReminder = sinon
+        .stub(useNotificationStore(), "checkBackupReminder")
+        .resolves();
+      const currentView = useCurrentViewStore();
+      currentView.lock();
+
+      await store.applyPassphrase("wrong password");
+      checkBackupReminder.called.should.equal(false);
+      currentView.locked.should.equal(true);
+      currentView.busy.should.equal(false);
+
+      await store.applyPassphrase("right password");
+      checkBackupReminder.calledOnce.should.equal(true);
+      currentView.locked.should.equal(false);
+      currentView.busy.should.equal(false);
+      store.wrongPassword.should.equal(false);
     });
 
     it("should unlock the accounts only with the right password", async () => {

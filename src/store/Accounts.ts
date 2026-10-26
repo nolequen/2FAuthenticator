@@ -19,13 +19,13 @@ import {
   upgradeLegacyEntries,
 } from "../models/keyring";
 import { useCurrentViewStore } from "./CurrentView";
+import { useMenuStore } from "./Menu";
 import { useNotificationStore } from "./Notification";
-import { useStyleStore } from "./Style";
 
 export const useAccountsStore = defineStore("accounts", () => {
   const currentView = useCurrentViewStore();
+  const menu = useMenuStore();
   const notification = useNotificationStore();
-  const style = useStyleStore();
 
   const entries = ref<OTPEntryInterface[]>([]);
   const encryption: Map<string, EncryptionInterface> = markRaw(new Map());
@@ -36,7 +36,6 @@ export const useAccountsStore = defineStore("accounts", () => {
   const second = ref(0); // Offset in seconds for math
   const filter = ref(true);
   const siteName = ref<(string | null)[]>([]);
-  const showSearch = ref(false);
   const wrongPassword = ref(false);
   const initComplete = ref(false);
 
@@ -64,10 +63,12 @@ export const useAccountsStore = defineStore("accounts", () => {
 
   const shouldFilter = computed(
     () =>
-      UserSettings.items.smartFilter === true &&
+      menu.smartFilter &&
       !!matchedEntries.value &&
       matchedEntries.value.length > 0,
   );
+
+  const filterHost = computed(() => siteName.value[2] ?? "");
 
   const currentlyEncrypted = computed(() => {
     for (const entry of entries.value) {
@@ -86,10 +87,6 @@ export const useAccountsStore = defineStore("accounts", () => {
 
   function stopFilter() {
     filter.value = false;
-  }
-
-  function openSearch() {
-    showSearch.value = true;
   }
 
   function updateCodes() {
@@ -183,53 +180,55 @@ export const useAccountsStore = defineStore("accounts", () => {
       return;
     }
 
-    currentView.changeView("LoadingPage");
-
-    try {
-      // Decrypt entries
-      const unlocked = await unlock(password);
-      if (unlocked) {
-        for (const [keyId, keyEncryption] of unlocked.encryptions) {
-          encryption.set(keyId, markRaw(keyEncryption));
+    await currentView.withBusy(async () => {
+      try {
+        // Decrypt entries
+        const unlocked = await unlock(password);
+        if (unlocked) {
+          for (const [keyId, keyEncryption] of unlocked.encryptions) {
+            encryption.set(keyId, markRaw(keyEncryption));
+          }
+          defaultEncryption.value = unlocked.defaultKeyId;
         }
-        defaultEncryption.value = unlocked.defaultKeyId;
-      }
 
-      await updateEntries();
-
-      if (!unlocked) {
-        markWrongPassword();
-        currentView.changeView("EnterPasswordPage");
-        return;
-      }
-
-      const unlockedEncryption = unlocked.encryptions.get(
-        unlocked.defaultKeyId,
-      );
-      if (!unlockedEncryption) {
-        throw new Error(
-          "defaultEncryption is empty, this should never happen!",
-        );
-      }
-      if (await adoptEntries(entries.value, unlockedEncryption)) {
         await updateEntries();
-      }
 
-      if (!currentlyEncrypted.value) {
-        chrome.runtime.sendMessage({
-          action: "cachePassphrase",
-          value: unlocked.passphrase,
-          keyId: unlocked.defaultKeyId,
+        if (!unlocked) {
+          markWrongPassword();
+          return;
+        }
+
+        const unlockedEncryption = unlocked.encryptions.get(
+          unlocked.defaultKeyId,
+        );
+        if (!unlockedEncryption) {
+          throw new Error(
+            "defaultEncryption is empty, this should never happen!",
+          );
+        }
+        if (await adoptEntries(entries.value, unlockedEncryption)) {
+          await updateEntries();
+        }
+
+        if (!currentlyEncrypted.value) {
+          chrome.runtime.sendMessage({
+            action: "cachePassphrase",
+            value: unlocked.passphrase,
+            keyId: unlocked.defaultKeyId,
+          });
+        }
+
+        wrongPassword.value = false;
+        notification.checkBackupReminder({
+          entries: entries.value,
+          currentlyEncrypted: currentlyEncrypted.value,
         });
+        currentView.unlock();
+      } catch (error) {
+        console.error(error);
+        notification.alert(chrome.i18n.getMessage("updateFailure"));
       }
-
-      style.hideInfo(true);
-    } catch (error) {
-      console.error(error);
-      notification.alert(chrome.i18n.getMessage("updateFailure"));
-      currentView.changeView("EnterPasswordPage");
-    }
-    return;
+    });
   }
 
   async function changePassphrase(password: string) {
@@ -286,7 +285,6 @@ export const useAccountsStore = defineStore("accounts", () => {
     loadCodes(loadedEntries);
     updateCodes();
     completeInit();
-    showSearchIfNeeded();
     return;
   }
 
@@ -294,19 +292,6 @@ export const useAccountsStore = defineStore("accounts", () => {
     console.error(error);
     notification.alert(chrome.i18n.getMessage("updateFailure"));
     await updateEntries();
-  }
-
-  function showSearchIfNeeded() {
-    if (entries.value.length >= 10 && !(shouldFilter.value && filter.value)) {
-      openSearch();
-    }
-  }
-
-  function clearFilter() {
-    stopFilter();
-    if (entries.value.length >= 10) {
-      openSearch();
-    }
   }
 
   function migrateStorage(newStorageLocation: string) {
@@ -379,16 +364,15 @@ export const useAccountsStore = defineStore("accounts", () => {
     second,
     filter,
     siteName,
-    showSearch,
     wrongPassword,
     initComplete,
     matchedEntries,
     shouldFilter,
+    filterHost,
     currentlyEncrypted,
     orderedEntries,
     init,
     stopFilter,
-    openSearch,
     updateCodes,
     loadCodes,
     reorderEntries,
@@ -401,8 +385,6 @@ export const useAccountsStore = defineStore("accounts", () => {
     changePassphrase,
     updateEntries,
     showWriteFailure,
-    showSearchIfNeeded,
-    clearFilter,
     migrateStorage,
   };
 });

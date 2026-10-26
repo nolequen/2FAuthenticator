@@ -8,48 +8,264 @@
     "description": "Extension Short Name."
   },
   "extDesc": {
-    "message": "Authenticator generates two-factor authentication codes in your browser.",
+    "message": "2FAuthenticator generates two-factor authentication codes right in your browser.",
     "description": "Extension Description."
   },
-  "added": {
-    "message": " has been added.",
-    "description": "Added Account."
+  "menu": {
+    "message": "Menu",
+    "description": "Menu button and page title."
   },
-  "errorqr": {
-    "message": "Unrecognized QR code.",
-    "description": "QR Error."
-  },
-  "errorsecret": {
-    "message": "Invalid account secret",
-    "description": "Secret Error."
+  "lock": {
+    "message": "Lock",
+    "description": "Lock button."
   },
   "add_code": {
     "message": "Add account",
-    "description": "Add account."
+    "description": "Add button and page title."
+  },
+  "search": {
+    "message": "Search",
+    "description": "Search field."
+  },
+  "clear_search": {
+    "message": "Clear search",
+    "description": "Clear search button."
+  },
+  "search_found": {
+    "message": "Found $FOUND$ of $TOTAL$",
+    "description": "Search result count.",
+    "placeholders": {
+      "found": {
+        "content": "$1",
+        "example": "3"
+      },
+      "total": {
+        "content": "$2",
+        "example": "7"
+      }
+    }
+  },
+  "pinned": {
+    "message": "Pinned",
+    "description": "Pinned account icon."
+  },
+  "next_code": {
+    "message": "Next code",
+    "description": "Next code of a counter based account."
+  },
+  "encrypted": {
+    "message": "Encrypted",
+    "description": "Code of an account that is not decrypted."
+  },
+  "invalid": {
+    "message": "Invalid",
+    "description": "Code of an account with an invalid secret."
+  },
+  "copied": {
+    "message": "Code copied",
+    "description": "Code copied message."
+  },
+  "filter_accounts_for": {
+    "message": "Accounts for $HOST$",
+    "description": "Smart filter bar.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "github.com"
+      }
+    }
+  },
+  "show_all": {
+    "message": "Show all",
+    "description": "Turn off the smart filter."
+  },
+  "remind_backup_title": {
+    "message": "Time to back up",
+    "description": "Backup reminder title."
+  },
+  "remind_backup": {
+    "message": "Without a copy, your codes are lost together with the browser profile.",
+    "description": "Backup reminder text."
+  },
+  "backup_now": {
+    "message": "Back up now",
+    "description": "Backup reminder button."
+  },
+  "remind_later": {
+    "message": "Later",
+    "description": "Backup reminder button."
+  },
+  "no_entries_title": {
+    "message": "No accounts yet",
+    "description": "Empty list title."
+  },
+  "no_entries_info": {
+    "message": "Scan a QR code on the open page or enter the secret key manually.",
+    "description": "Empty list text."
   },
   "add_qr": {
-    "message": "Scan QR Code",
-    "description": "Scan QR Code."
+    "message": "Scan QR code",
+    "description": "Scan a QR code."
+  },
+  "add_qr_info": {
+    "message": "Select the QR code on the open page",
+    "description": "Scan a QR code hint."
   },
   "add_secret": {
-    "message": "Manual Entry",
-    "description": "Manual Entry."
+    "message": "Enter key manually",
+    "description": "Manual entry."
   },
-  "migration_fail": {
-    "message": "Import failed. If you are migrating data from Google Authenticator, please re-export your data from Google Authenticator and try again.",
-    "description": "Import migration data failed."
+  "add_secret_info": {
+    "message": "Secret key from the service settings",
+    "description": "Manual entry hint."
   },
-  "migration_partly_fail": {
-    "message": "Some account data was not imported successfully.",
-    "description": "Some migration data is broken."
+  "import_link": {
+    "message": "Import from a file or another app",
+    "description": "Import link of the empty list."
+  },
+  "account_actions": {
+    "message": "Account actions",
+    "description": "Context menu of an account card."
+  },
+  "edit_account": {
+    "message": "Edit",
+    "description": "Context menu item that opens the account page."
+  },
+  "pin_short": {
+    "message": "Pin",
+    "description": "Context menu item."
+  },
+  "unpin": {
+    "message": "Unpin",
+    "description": "Context menu item."
+  },
+  "qr_code": {
+    "message": "QR code",
+    "description": "Context menu item."
+  },
+  "locked_title": {
+    "message": "Accounts are locked",
+    "description": "Lock screen title."
+  },
+  "passphrase_info": {
+    "message": "Enter your password to decrypt the codes.",
+    "description": "Lock screen text."
+  },
+  "phrase": {
+    "message": "Password",
+    "description": "Password field."
+  },
+  "phrase_wrong": {
+    "message": "Wrong password",
+    "description": "Wrong password."
+  },
+  "unlock": {
+    "message": "Unlock",
+    "description": "Unlock button."
+  },
+  "back": {
+    "message": "Back",
+    "description": "Back button."
+  },
+  "account": {
+    "message": "Account",
+    "description": "Account page title."
+  },
+  "issuer": {
+    "message": "Service",
+    "description": "Issuer field."
+  },
+  "accountName": {
+    "message": "Account",
+    "description": "Account name field."
+  },
+  "site": {
+    "message": "Website",
+    "description": "Website field."
+  },
+  "site_invalid": {
+    "message": "Enter a website address, for example github.com",
+    "description": "Invalid website."
+  },
+  "params_digits": {
+    "message": "$DIGITS$ digits",
+    "description": "Account parameters: digits.",
+    "placeholders": {
+      "digits": {
+        "content": "$1",
+        "example": "6"
+      }
+    }
+  },
+  "params_period": {
+    "message": "$PERIOD$ s",
+    "description": "Account parameters: period in seconds.",
+    "placeholders": {
+      "period": {
+        "content": "$1",
+        "example": "30"
+      }
+    }
+  },
+  "pin": {
+    "message": "Pin to top",
+    "description": "Pin toggle."
+  },
+  "site_icon": {
+    "message": "Show website icon",
+    "description": "Website icon toggle of an account."
+  },
+  "show_qr": {
+    "message": "Show QR code for transfer",
+    "description": "Show the QR code of an account."
+  },
+  "delete_account": {
+    "message": "Delete account",
+    "description": "Delete account button."
+  },
+  "account_locked_hint": {
+    "message": "Enter your password to edit this account. Only deletion is available now.",
+    "description": "Account page of an account that is not decrypted."
+  },
+  "qr_image": {
+    "message": "Account QR code",
+    "description": "QR code image."
+  },
+  "qr_hint": {
+    "message": "Scan it with the app on your phone. Do not show this code to anyone.",
+    "description": "QR code dialog."
   },
   "close": {
     "message": "Close",
-    "description": "Close."
+    "description": "Close button."
   },
-  "ok": {
-    "message": "Ok",
-    "description": "OK."
+  "delete_account_title": {
+    "message": "Delete $ISSUER$?",
+    "description": "Delete confirmation title.",
+    "placeholders": {
+      "issuer": {
+        "content": "$1",
+        "example": "Cloudflare"
+      }
+    }
+  },
+  "confirm_delete": {
+    "message": "The account $ACCOUNT$ will disappear from the list. This cannot be undone. Without a backup or another way to sign in, you may lose access to the service.",
+    "description": "Delete confirmation text.",
+    "placeholders": {
+      "account": {
+        "content": "$1",
+        "example": "ivan@example.org"
+      }
+    }
+  },
+  "delete": {
+    "message": "Delete",
+    "description": "Delete button."
+  },
+  "cancel": {
+    "message": "Cancel",
+    "description": "Cancel button."
   },
   "yes": {
     "message": "Yes",
@@ -59,299 +275,430 @@
     "message": "No",
     "description": "No."
   },
-  "account": {
-    "message": "Account",
-    "description": "Account."
+  "ok": {
+    "message": "OK",
+    "description": "OK."
   },
-  "accountName": {
-    "message": "Username",
-    "description": "Account Name."
+  "loading": {
+    "message": "Loading…",
+    "description": "Busy indicator."
   },
-  "issuer": {
-    "message": "Issuer",
-    "description": "Issuer."
+  "import_header": {
+    "message": "Import, opens in a new tab",
+    "description": "Import section of the add page."
+  },
+  "import_backup_file": {
+    "message": "Backup file",
+    "description": "Import from a backup file."
+  },
+  "import_backup_file_info": {
+    "message": "JSON or otpauth, including password-protected",
+    "description": "Import from a backup file hint."
+  },
+  "import_qr_images": {
+    "message": "Images with QR codes",
+    "description": "Import from QR images."
+  },
+  "import_qr_images_info": {
+    "message": "Screenshots, Google Authenticator export",
+    "description": "Import from QR images hint."
+  },
+  "import_otp_urls": {
+    "message": "otpauth:// text",
+    "description": "Import from otpauth text."
+  },
+  "import_otp_urls_info": {
+    "message": "One link per line",
+    "description": "Import from otpauth text hint."
   },
   "secret": {
-    "message": "Secret",
-    "description": "Secret."
+    "message": "Secret key",
+    "description": "Secret field."
   },
-  "updateSuccess": {
-    "message": "Success.",
-    "description": "Update Success."
+  "optional": {
+    "message": "optional",
+    "description": "Optional field mark."
   },
-  "updateFailure": {
-    "message": "Failure.",
-    "description": "Update Failure."
+  "account_placeholder": {
+    "message": "Login or email",
+    "description": "Account field placeholder."
+  },
+  "advanced": {
+    "message": "Advanced",
+    "description": "Advanced settings."
+  },
+  "type": {
+    "message": "Code changes",
+    "description": "Account type."
+  },
+  "based_on_time": {
+    "message": "By time",
+    "description": "Time based."
+  },
+  "based_on_counter": {
+    "message": "By counter",
+    "description": "Counter based."
+  },
+  "digits": {
+    "message": "Digits",
+    "description": "Digits."
+  },
+  "period": {
+    "message": "Period, s",
+    "description": "Period in seconds."
+  },
+  "algorithm": {
+    "message": "Algorithm",
+    "description": "Algorithm."
+  },
+  "algorithm_gost256": {
+    "message": "GOST 256",
+    "description": "GOST R 34.11-2012 256."
+  },
+  "algorithm_gost512": {
+    "message": "GOST 512",
+    "description": "GOST R 34.11-2012 512."
+  },
+  "add": {
+    "message": "Add",
+    "description": "Add button."
+  },
+  "errorsecret": {
+    "message": "Invalid secret key",
+    "description": "Invalid secret."
+  },
+  "backup": {
+    "message": "Backup and import",
+    "description": "Backup menu item and page title."
+  },
+  "security": {
+    "message": "Security",
+    "description": "Security menu item and page title."
+  },
+  "settings": {
+    "message": "Settings",
+    "description": "Settings menu item and page title."
+  },
+  "sync_clock": {
+    "message": "Sync clock",
+    "description": "Sync clock menu item."
+  },
+  "sync_clock_info": {
+    "message": "If codes don't work: check the time against Google",
+    "description": "Sync clock hint."
   },
   "about": {
     "message": "About",
     "description": "About."
   },
-  "settings": {
-    "message": "Settings",
-    "description": "Settings."
-  },
-  "security": {
-    "message": "Security",
-    "description": "Security."
-  },
-  "current_phrase": {
-    "message": "Current Password",
-    "description": "Current Passphrase."
-  },
-  "phrase": {
-    "message": "Password",
-    "description": "Passphrase."
-  },
-  "confirm_phrase": {
-    "message": "Confirm Password",
-    "description": "Confirm Passphrase."
-  },
-  "confirm_delete": {
-    "message": "Are you sure you want to delete this account? This action cannot be undone.",
-    "description": "Remove entry confirmation"
-  },
-  "confirm_delete_all": {
-    "message": "I understand that all of my data will be irrecoverably deleted.",
-    "description": "Message that user is required to acknowledge before clearing all data."
-  },
-  "delete_all": {
-    "message": "Reset Authenticator"
-  },
-  "delete_all_warning": {
-    "message": "This will delete all of your data and completely reset Authenticator. You will not be able to recover any deleted data! You should consider saving a backup before resetting Authenticator."
-  },
-  "security_warning": {
-    "message": "This password will be used to encrypt your accounts. No one can help you if you forget the password.",
-    "description": "Passphrase Warning."
-  },
-  "update": {
-    "message": "Update",
-    "description": "Update."
-  },
-  "phrase_incorrect": {
-    "message": "You cannot add a new account until all accounts are decrypted. Please enter the correct password before continuing.",
-    "description": "Passphrase Incorrect."
-  },
-  "phrase_incorrect_export": {
-    "message": "Accounts that were not able to be decrypted will not be included in this backup.",
-    "description": "Skip Unable-decripted Data."
-  },
-  "phrase_not_match": {
-    "message": "Password does not match.",
-    "description": "Passphrase Not Match."
-  },
-  "encrypted": {
-    "message": "Encrypted",
-    "description": "Encrypted."
-  },
-  "copied": {
-    "message": "Copied",
-    "description": "Copied."
-  },
   "feedback": {
-    "message": "Feedback",
-    "description": "Feedback."
+    "message": "Report a problem",
+    "description": "Report a problem."
   },
   "source": {
-    "message": "Source Code",
-    "description": "Source Code."
+    "message": "Source code",
+    "description": "Source code."
   },
-  "passphrase_info": {
-    "message": "Enter password to decrypt account data.",
-    "description": "Passphrase Info"
+  "version": {
+    "message": "2FAuthenticator $VERSION$",
+    "description": "Version at the bottom of the menu.",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "8.3.0"
+      }
+    }
   },
-  "sync_clock": {
-    "message": "Sync Clock with Google",
-    "description": "Sync Clock"
-  },
-  "clock_too_far_off": {
-    "message": "Caution! Your local clock is too far off, please fix it before continuing.",
-    "description": "Local Time is Too Far Off"
-  },
-  "remind_backup": {
-    "message": "Do you have a backup for your accounts? Don't wait until it's too late!",
-    "description": "Remind Backup"
-  },
-  "capture_failed": {
-    "message": "Capture failed, please reload the page and try again.",
-    "description": "Capture Failed"
-  },
-  "capture_local_file_failed": {
-    "message": "Are you trying to scan QR code from a local file? Use Import QR Image Backup instead.",
-    "description": "Import QR image backup instead of scan local image"
-  },
-  "based_on_time": {
-    "message": "Time Based",
-    "description": "Time Based"
-  },
-  "based_on_counter": {
-    "message": "Counter Based",
-    "description": "Counter Based"
-  },
-  "resize_popup_page": {
-    "message": "Preferences",
-    "description": "Popup Page Settings"
-  },
-  "scale": {
-    "message": "Scale",
-    "description": "Scale"
-  },
-  "export_info": {
-    "message": "Warning: all backups are unencrypted. Want to add an account to another app? Hover over the top right part of any account and hit the hidden button.",
-    "description": "Export menu info text"
-  },
-  "download_backup": {
-    "message": "Download Backup File",
-    "description": "Download backup file."
-  },
-  "import_backup": {
-    "message": "Import Backup",
-    "description": "Import backup."
-  },
-  "import_backup_file": {
-    "message": "Import Backup File",
-    "description": "Import backup file."
-  },
-  "import_backup_qr": {
-    "message": "Import QR Image Backup",
-    "description": "Import qr image backup."
-  },
-  "import_qr_images": {
-    "message": "Import QR Images",
-    "description": "Import qr images. Shown as add account method."
-  },
-  "import_backup_code": {
-    "message": "Import Text Backup",
-    "description": "Import backup code."
-  },
-  "import_otp_urls": {
-    "message": "Import OTP URLs",
-    "description": "Import OTP URLs. Shown as add account method."
-  },
-  "import_backup_qr_partly_failed": {
-    "message": "Import successful, but some QR codes could not be recognized.",
-    "description": "Import successful, but some QR image cannot be recognized."
-  },
-  "import_backup_qr_in_batches": {
-    "message": "You can select multiple files to import backup in batches.",
-    "description": "You can select multiple image files to import backup in batches."
-  },
-  "show_all_entries": {
-    "message": "Show all entries",
-    "description": "Show all entries."
-  },
-  "import_error_password": {
-    "message": "You must provide correct password to import backups.",
-    "description": "Error password warning when import backups."
-  },
-  "remove": {
-    "message": "Remove",
-    "description": "Remove password."
-  },
-  "download_enc_backup": {
-    "message": "Download Password-Protected Backup",
-    "description": "Download Encrypted Backup"
-  },
-  "search": {
-    "message": "Search",
-    "description": "Search"
-  },
-  "popout": {
-    "message": "Popup mode",
-    "description": "Make window turn into persistent popup"
-  },
-  "lock": {
-    "message": "Lock",
-    "description": "Lock accounts"
-  },
-  "edit": {
-    "message": "Edit",
-    "description": "Edit"
-  },
-  "use_autofill": {
-    "message": "Use Autofill",
-    "description": "Use Autofill"
+  "appearance": {
+    "message": "Appearance",
+    "description": "Settings section."
   },
   "theme": {
     "message": "Theme",
-    "description": "Theme"
+    "description": "Theme."
+  },
+  "theme_auto": {
+    "message": "System",
+    "description": "Theme of the system."
   },
   "theme_light": {
     "message": "Light",
-    "description": "Light theme"
+    "description": "Light theme."
   },
   "theme_dark": {
     "message": "Dark",
-    "description": "Dark theme"
+    "description": "Dark theme."
   },
-  "theme_simple": {
-    "message": "Simple",
-    "description": "Simple theme"
+  "codes_section": {
+    "message": "Codes",
+    "description": "Settings section."
   },
-  "theme_compact": {
-    "message": "Compact",
-    "description": "Compact theme"
+  "use_autofill": {
+    "message": "Paste code into the page",
+    "description": "Autofill setting."
   },
-  "theme_high_contrast": {
-    "message": "High Contrast",
-    "description": "High Contrast theme"
-  },
-  "theme_flat": {
-    "message": "Flat",
-    "description": "Flat theme"
-  },
-  "browser_sync": {
-    "message": "Browser Sync",
-    "description": "Storage location"
-  },
-  "otp_backup_inform": {
-    "message": "You can import backups from some other applications.",
-    "description": "Info text on import page"
-  },
-  "loading": {
-    "message": "Loading..."
-  },
-  "autolock": {
-    "message": "Lock after"
-  },
-  "minutes": {
-    "message": "minutes"
-  },
-  "advanced": {
-    "message": "Advanced"
-  },
-  "period": {
-    "message": "Period"
-  },
-  "type": {
-    "message": "Type"
-  },
-  "invalid": {
-    "message": "Invalid"
-  },
-  "digits": {
-    "message": "Digits"
-  },
-  "algorithm": {
-    "message": "Algorithm"
+  "use_autofill_info": {
+    "message": "When you copy a code, it is also typed into the active field of the page",
+    "description": "Autofill setting hint."
   },
   "smart_filter": {
-    "message": "Smart Filter"
+    "message": "Smart filter",
+    "description": "Smart filter setting."
   },
-  "backup": {
-    "message": "Backup"
+  "smart_filter_info": {
+    "message": "Show only the accounts of the open site. Set an account's website on its page. Check the site address before entering a code",
+    "description": "Smart filter setting hint."
   },
-  "backup_file_info": {
-    "message": "Backup your data to a file."
+  "site_icons": {
+    "message": "Website icons",
+    "description": "Website icons setting."
   },
-  "no_entires": {
-    "message": "No accounts to display. Add your first account now."
+  "site_icons_info": {
+    "message": "Show the icon of the account's website instead of the letter. Icons are loaded from the websites themselves",
+    "description": "Website icons setting hint."
   },
-  "phrase_wrong": {
-    "message": "Password incorrect"
+  "browser_sync": {
+    "message": "Sync via browser",
+    "description": "Browser sync setting."
   },
-  "activate_auto_filter": {
-    "message": "Warning: Smart filter loosely matches the domain name to an account. Always verify that you are on the correct website before entering a code!"
+  "browser_sync_info": {
+    "message": "Accounts are kept in the browser's sync storage and appear on your other devices",
+    "description": "Browser sync setting hint."
+  },
+  "password_set": {
+    "message": "Password is set",
+    "description": "Password status."
+  },
+  "password_set_info": {
+    "message": "Codes are encrypted; after locking, the password is required",
+    "description": "Password status hint."
+  },
+  "password_not_set": {
+    "message": "No password",
+    "description": "Password status."
+  },
+  "password_not_set_info": {
+    "message": "Codes are stored unencrypted. Set a password to encrypt them",
+    "description": "Password status hint."
+  },
+  "autolock": {
+    "message": "Lock after",
+    "description": "Autolock."
+  },
+  "autolock_label": {
+    "message": "Minutes before locking",
+    "description": "Autolock field."
+  },
+  "minutes": {
+    "message": "min",
+    "description": "Minutes."
+  },
+  "change_password": {
+    "message": "Change password",
+    "description": "Change password form."
+  },
+  "set_password": {
+    "message": "Set password",
+    "description": "Set password form and button."
+  },
+  "current_phrase": {
+    "message": "Current password",
+    "description": "Current password field."
+  },
+  "new_phrase": {
+    "message": "New password",
+    "description": "New password field."
+  },
+  "confirm_phrase": {
+    "message": "New password again",
+    "description": "Confirm password field."
+  },
+  "security_warning": {
+    "message": "A forgotten password cannot be recovered: without it, the codes cannot be decrypted.",
+    "description": "Password warning."
+  },
+  "save": {
+    "message": "Save",
+    "description": "Save button."
+  },
+  "remove": {
+    "message": "Remove password",
+    "description": "Remove password button."
+  },
+  "phrase_not_match": {
+    "message": "Passwords do not match",
+    "description": "Passwords do not match."
+  },
+  "backup_save_header": {
+    "message": "Save a copy",
+    "description": "Backup section."
+  },
+  "download_enc_backup": {
+    "message": "Encrypted backup",
+    "description": "Encrypted backup."
+  },
+  "download_enc_backup_info": {
+    "message": ".json file, opens only with the password",
+    "description": "Encrypted backup hint."
+  },
+  "download_backup": {
+    "message": "Unencrypted backup",
+    "description": "Unencrypted backup."
+  },
+  "download_backup_info": {
+    "message": "otpauth:// text, works with other apps",
+    "description": "Unencrypted backup hint."
+  },
+  "export_info": {
+    "message": "Anyone who gets this file gets your codes.",
+    "description": "Unencrypted backup warning."
+  },
+  "phrase_incorrect_export": {
+    "message": "Accounts that could not be decrypted are not included in the backup.",
+    "description": "Backup of accounts that are not decrypted."
+  },
+  "restore_header": {
+    "message": "Restore",
+    "description": "Backup section."
+  },
+  "import_backup": {
+    "message": "Import",
+    "description": "Import."
+  },
+  "import_backup_info": {
+    "message": "From a backup file, QR images or text",
+    "description": "Import hint."
+  },
+  "import_title": {
+    "message": "Import accounts",
+    "description": "Import page title."
+  },
+  "otp_backup_inform": {
+    "message": "Add accounts from a backup or another app. Accounts you already have will stay.",
+    "description": "Import page text."
+  },
+  "import_source": {
+    "message": "Source",
+    "description": "Import source."
+  },
+  "import_backup_qr": {
+    "message": "QR images",
+    "description": "Import from QR images tab."
+  },
+  "import_backup_code": {
+    "message": "otpauth text",
+    "description": "Import from otpauth text tab."
+  },
+  "import_file_choose": {
+    "message": "Choose a file or drop it here",
+    "description": "File drop zone."
+  },
+  "import_file_info": {
+    "message": "A .json backup from 2FAuthenticator or Authenticator, including an encrypted one, or a text file with otpauth:// links",
+    "description": "File drop zone hint."
+  },
+  "choose_file": {
+    "message": "Choose file",
+    "description": "Choose file button."
+  },
+  "import_qr_choose": {
+    "message": "Choose images or drop them here",
+    "description": "Image drop zone."
+  },
+  "import_backup_qr_in_batches": {
+    "message": "You can select several images at once.",
+    "description": "Image drop zone hint."
+  },
+  "choose_images": {
+    "message": "Choose images",
+    "description": "Choose images button."
+  },
+  "import_google_hint": {
+    "message": "Moving from Google Authenticator? Export your accounts as QR codes, take screenshots and open the “QR images” tab.",
+    "description": "Google Authenticator hint."
+  },
+  "import_text_encrypted": {
+    "message": "The backup is password-protected",
+    "description": "Encrypted text backup."
+  },
+  "import_action": {
+    "message": "Import",
+    "description": "Import button."
+  },
+  "import_file_password": {
+    "message": "This backup is encrypted. Enter the password it was saved with.",
+    "description": "Password of an encrypted backup file."
+  },
+  "import_error_password": {
+    "message": "Accounts are locked. Open the extension, enter your password and try again.",
+    "description": "Import while accounts are locked."
+  },
+  "options_info": {
+    "message": "Theme, password, backup and other settings are in the extension popup: toolbar icon → menu.",
+    "description": "Options page text."
+  },
+  "delete_all": {
+    "message": "Delete all data",
+    "description": "Delete all data."
+  },
+  "delete_all_warning": {
+    "message": "All accounts, the password and settings will be deleted, including the browser's sync storage. They can be restored only from a backup, so save a copy first.",
+    "description": "Delete all data warning."
+  },
+  "confirm_delete_all": {
+    "message": "I understand that the data will be deleted irrecoverably",
+    "description": "Delete all data confirmation."
+  },
+  "delete_all_done": {
+    "message": "All data deleted.",
+    "description": "Delete all data done."
+  },
+  "updateSuccess": {
+    "message": "Done.",
+    "description": "Success."
+  },
+  "updateFailure": {
+    "message": "Something went wrong.",
+    "description": "Failure."
+  },
+  "clock_too_far_off": {
+    "message": "Your clock is more than 5 minutes off. Fix the system time first.",
+    "description": "Clock is too far off."
+  },
+  "phrase_incorrect": {
+    "message": "Not all accounts are decrypted. Enter the password first.",
+    "description": "Accounts are not decrypted."
+  },
+  "capture_failed": {
+    "message": "Could not start scanning. Reload the page and try again.",
+    "description": "Capture failed."
+  },
+  "capture_unsupported": {
+    "message": "QR codes cannot be scanned on this page. Open the page with the QR code and try again.",
+    "description": "Capture on a page where scripts cannot run."
+  },
+  "capture_local_file_failed": {
+    "message": "Scanning a QR code from a local file? Open image import instead?",
+    "description": "Capture on a local file."
+  },
+  "added": {
+    "message": " added.",
+    "description": "Added Account, after the account name."
+  },
+  "errorqr": {
+    "message": "QR code not recognized.",
+    "description": "QR Error."
+  },
+  "migration_fail": {
+    "message": "Import failed. If you are moving from Google Authenticator, export the accounts again and retry.",
+    "description": "Import failed."
+  },
+  "migration_partly_fail": {
+    "message": "Some accounts were not imported.",
+    "description": "Import partly failed."
+  },
+  "import_backup_qr_partly_failed": {
+    "message": "Import done, but some QR codes were not recognized.",
+    "description": "QR import partly failed."
   }
 }

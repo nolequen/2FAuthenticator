@@ -34,6 +34,8 @@ const colors = {
   red: "\x1b[31m",
 }
 
+const MIN_TESTS = 395;
+
 async function runTests() {
   const extensionDir = path.resolve(__dirname, "../test/chrome");
   const puppeteerArgs: string[] = [
@@ -118,6 +120,19 @@ async function runTests() {
     console.groupEnd();
   }
   printDisplayTests(display);
+
+  const tests = results?.testResults.tests ?? [];
+  const count = (status: StrippedTestResults["status"]) =>
+    tests.filter((test) => test.status === status).length;
+  console.log(
+    `passed ${count("passed")}, failed ${count("failed")}, pending ${count("pending")}, total ${tests.length}`
+  );
+  if (tests.length < MIN_TESTS) {
+    console.log(
+      `${colors.red}Expected at least ${MIN_TESTS} tests, ran ${tests.length}${colors.reset}`
+    );
+    process.exit(1);
+  }
   process.exit(failedTest ? 1 : 0);
 }
 

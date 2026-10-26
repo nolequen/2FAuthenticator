@@ -16,14 +16,12 @@
   },
   "icons": {
     "16": "images/icon16.png",
+    "32": "images/icon32.png",
     "48": "images/icon48.png",
     "128": "images/icon128.png"
   },
   "action": {
-    "default_icon": {
-      "19": "images/icon19.png",
-      "38": "images/icon38.png"
-    },
+    "default_icon": "images/icon-small.svg",
     "default_title": "__MSG_extShortName__",
     "default_popup": "view/popup.html"
   },
@@ -49,9 +47,8 @@
     "alarms",
     "scripting"
   ],
-  "optional_permissions": ["clipboardWrite"],
   "host_permissions": ["https://www.google.com/"],
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; font-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src https://www.google.com/; default-src 'none'"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; font-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; connect-src https://www.google.com/; default-src 'none'"
   }
 }
