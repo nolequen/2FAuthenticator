@@ -118,6 +118,7 @@ export class OTPEntry implements OTPEntryInterface {
   digits: number;
   algorithm: OTPAlgorithm;
   pinned: boolean;
+  group: string;
   encryption?: EncryptionInterface;
   encData?: string;
   legacyData?: string;
@@ -139,6 +140,7 @@ export class OTPEntry implements OTPEntryInterface {
           digits?: number;
           algorithm?: OTPAlgorithm;
           pinned?: boolean;
+          group?: string;
         }
       | {
           encrypted: true;
@@ -167,6 +169,7 @@ export class OTPEntry implements OTPEntryInterface {
       this.digits = 6;
       this.algorithm = OTPAlgorithm.SHA1;
       this.pinned = false;
+      this.group = "";
       return;
     }
 
@@ -207,6 +210,7 @@ export class OTPEntry implements OTPEntryInterface {
     } else {
       this.pinned = false;
     }
+    this.group = typeof entry.group === "string" ? entry.group : "";
     if (
       (this.type === OTPType.totp || this.type === OTPType.hex) &&
       entry.period
@@ -282,6 +286,8 @@ export class OTPEntry implements OTPEntryInterface {
     this.issuer = decryptedData.issuer || "";
     this.period = decryptedData.period || 30;
     this.pinned = decryptedData.pinned || false;
+    this.group =
+      typeof decryptedData.group === "string" ? decryptedData.group : "";
     this.secret = decryptedData.secret;
     this.type = type;
 

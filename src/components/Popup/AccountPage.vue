@@ -35,6 +35,11 @@
           :spellcheck="false"
           @change="save()"
         />
+        <GroupInput
+          v-model="group"
+          :readonly="!decrypted"
+          @change="saveGroup()"
+        />
       </div>
       <div v-if="decrypted" class="panel">
         <a-toggle-input
@@ -94,6 +99,7 @@ import { useCurrentViewStore } from "../../store/CurrentView";
 import { useMenuStore } from "../../store/Menu";
 import { useEntryActions } from "./entryActions";
 import EntryAvatar from "./EntryAvatar.vue";
+import GroupInput from "./GroupInput.vue";
 
 import IconPin from "lucide-static/icons/pin.svg";
 import IconGlobe from "lucide-static/icons/globe.svg";
@@ -116,6 +122,7 @@ const title = computed(() =>
 );
 const name = ref("");
 const site = ref("");
+const group = ref("");
 const siteError = ref("");
 
 const params = computed(() => {
@@ -140,6 +147,7 @@ watch(
     const issuer = current?.issuer ?? "";
     name.value = issuerName(issuer);
     site.value = issuerSite(issuer);
+    group.value = current?.group ?? "";
     siteError.value = "";
   },
   { immediate: true },
@@ -171,6 +179,17 @@ async function save() {
     await target.update();
   } catch (error) {
     await accounts.showWriteFailure(error);
+  }
+}
+
+async function saveGroup() {
+  const target = entry.value;
+  if (!target) {
+    return;
+  }
+  await accounts.setEntryGroup(target, group.value);
+  if (entry.value === target) {
+    group.value = target.group;
   }
 }
 

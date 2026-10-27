@@ -6,7 +6,29 @@
     @contextmenu.self.prevent="entryMenu.close()"
   >
     <div
-      v-if="entry"
+      v-if="section"
+      ref="menuElement"
+      class="context-menu"
+      role="menu"
+      :aria-label="i18n.group_actions"
+      :style="{ left: `${left}px`, top: `${top}px` }"
+      @contextmenu.prevent
+      @keydown="onKeydown"
+    >
+      <button type="button" role="menuitem" class="menu-item" @click="rename()">
+        <IconPencil />{{ i18n.rename_group }}
+      </button>
+      <button
+        type="button"
+        role="menuitem"
+        class="menu-item"
+        @click="ungroup()"
+      >
+        <IconUngroup />{{ i18n.ungroup }}
+      </button>
+    </div>
+    <div
+      v-else-if="entry"
       ref="menuElement"
       class="context-menu"
       role="menu"
@@ -41,9 +63,17 @@
 </template>
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
+import {
+  GROUP_MAX_LENGTH,
+  groupKey,
+  mergeTarget,
+  normalizeGroup,
+} from "../../groups";
+import { i18n, t } from "../../store/i18n";
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
 import { useEntryMenuStore } from "../../store/EntryMenu";
+import { useNotificationStore } from "../../store/Notification";
 import { useEntryActions } from "./entryActions";
 import { focusFirstCard } from "./focus";
 
@@ -52,12 +82,14 @@ import IconPin from "lucide-static/icons/pin.svg";
 import IconPinOff from "lucide-static/icons/pin-off.svg";
 import IconQr from "lucide-static/icons/qr-code.svg";
 import IconTrash from "lucide-static/icons/trash.svg";
+import IconUngroup from "lucide-static/icons/ungroup.svg";
 
 const MARGIN = 8;
 
 const accounts = useAccountsStore();
 const currentView = useCurrentViewStore();
 const entryMenu = useEntryMenuStore();
+const notification = useNotificationStore();
 const actions = useEntryActions();
 const menuElement = useTemplateRef<HTMLDivElement>("menuElement");
 const left = ref(0);
@@ -65,6 +97,11 @@ const top = ref(0);
 
 const entry = computed(() =>
   accounts.entries.find((item) => item.hash === entryMenu.menu?.hash),
+);
+const section = computed(() =>
+  accounts.sections.find(
+    (item) => item.kind === "group" && item.key === entryMenu.menu?.group,
+  ),
 );
 const decrypted = computed(() => entry.value?.secret !== null);
 
@@ -81,11 +118,14 @@ watch(
   { immediate: true },
 );
 
-watch(entry, (current) => {
-  if (!current) {
-    entryMenu.close();
-  }
-});
+watch(
+  () => entry.value ?? section.value,
+  (current) => {
+    if (!current) {
+      entryMenu.close();
+    }
+  },
+);
 
 function place() {
   const element = menuElement.value;
@@ -162,6 +202,69 @@ function qr() {
   entryMenu.close();
   if (target) {
     actions.showQr(target);
+  }
+}
+
+async function rename() {
+  const target = section.value;
+  entryMenu.close();
+  if (!target) {
+    return;
+  }
+  const answer = await notification.prompt({
+    title: i18n.rename_group_title,
+    label: i18n.group_name,
+    value: target.name,
+    confirm: i18n.save,
+    maxlength: GROUP_MAX_LENGTH,
+  });
+  const name = normalizeGroup(answer);
+  if (!name || name === target.name) {
+    return;
+  }
+  const existing = mergeTarget(accounts.entries, target.key, name);
+  if (
+    existing &&
+    !(await notification.confirm({
+      title: i18n.merge_groups_title,
+      message: t("merge_groups_text", existing),
+      confirm: i18n.merge,
+    }))
+  ) {
+    return;
+  }
+  await accounts.renameGroup(target.key, name);
+  await focusHeader(groupKey(existing ?? name));
+}
+
+async function ungroup() {
+  const target = section.value;
+  entryMenu.close();
+  if (
+    !target ||
+    !(await notification.confirm({
+      title: t("ungroup_title", target.name),
+      message: i18n.ungroup_text,
+      confirm: i18n.ungroup,
+    }))
+  ) {
+    return;
+  }
+  await accounts.ungroup(target.key);
+  await nextTick();
+  if (document.activeElement === document.body) {
+    focusFirstCard();
+  }
+}
+
+async function focusHeader(key: string) {
+  await nextTick();
+  if (document.activeElement === document.body) {
+    document
+      .querySelector<HTMLElement>(
+        `.section-group[data-key="${CSS.escape(key)}"] .section-header`,
+      )
+      ?.focus();
   }
 }
 

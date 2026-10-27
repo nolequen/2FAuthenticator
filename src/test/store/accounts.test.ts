@@ -6,6 +6,7 @@ import { createPinia, setActivePinia } from "pinia";
 
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
+import { useMenuStore } from "../../store/Menu";
 import { useNotificationStore } from "../../store/Notification";
 import { Encryption } from "../../models/encryption";
 import { EntryStorage } from "../../models/storage";
@@ -315,24 +316,11 @@ describe("Accounts", () => {
       return entries.map((entry) => entry.account);
     }
 
-    it("should store the order of the screen when an account is moved past a pinned one", async () => {
-      await storeAccounts(["alice", false], ["bob", false], ["carol", true]);
-      const store = await createStore();
-      accountNames(store.orderedEntries).should.deep.equal([
-        "carol",
-        "alice",
-        "bob",
-      ]);
+    function names(entries: OTPEntryInterface[]) {
+      return entries.map((entry) => entry.account);
+    }
 
-      const list = [...store.orderedEntries];
-      list.splice(1, 0, list.splice(2, 1)[0]);
-      await store.reorderEntries(list);
-
-      accountNames(store.orderedEntries).should.deep.equal([
-        "carol",
-        "bob",
-        "alice",
-      ]);
+    async function storedIndexes(store: { entries: OTPEntryInterface[] }) {
       const stored = await chrome.storage.local.get<{
         [hash: string]: OTPStorage;
       }>();
@@ -340,7 +328,35 @@ describe("Accounts", () => {
       for (const entry of store.entries) {
         indexes[entry.account] = stored[entry.hash].index;
       }
-      indexes.should.deep.equal({ carol: 0, bob: 1, alice: 2 });
+      return indexes;
+    }
+
+    it("should store the order of the screen when an account is moved past a pinned one", async () => {
+      await storeAccounts(["alice", false], ["bob", false], ["carol", true]);
+      const store = await createStore();
+      names(store.sections[0].entries).should.deep.equal([
+        "carol",
+        "alice",
+        "bob",
+      ]);
+      const bob = store.entries.find((entry) => entry.account === "bob");
+
+      await store.moveEntry(
+        (bob as OTPEntryInterface).hash,
+        { kind: "all", key: "" },
+        0,
+      );
+
+      names(store.sections[0].entries).should.deep.equal([
+        "carol",
+        "bob",
+        "alice",
+      ]);
+      (await storedIndexes(store)).should.deep.equal({
+        carol: 0,
+        bob: 1,
+        alice: 2,
+      });
       accountNames(await EntryStorage.get()).should.deep.equal([
         "carol",
         "bob",
@@ -351,7 +367,7 @@ describe("Accounts", () => {
     it("should pin the clicked account after an account was added", async () => {
       await storeAccounts(["alice", false], ["bob", false]);
       const store = await createStore();
-      store.addCode(
+      await store.addEntry(
         new OTPEntry({
           type: OTPType.totp,
           index: 0,
@@ -362,13 +378,272 @@ describe("Accounts", () => {
       );
 
       const bob = store.entries.find((entry) => entry.account === "bob");
-      store.pinEntry(bob as OTPEntryInterface);
+      await store.togglePin(bob as OTPEntryInterface);
 
       const pinned: { [account: string]: boolean } = {};
-      for (const entry of store.entries) {
+      for (const entry of await EntryStorage.get()) {
         pinned[entry.account] = !!entry.pinned;
       }
       pinned.should.deep.equal({ new: false, alice: false, bob: true });
+      names(store.sections[0].entries).should.deep.equal([
+        "bob",
+        "new",
+        "alice",
+      ]);
+    });
+
+    describe("with groups", () => {
+      async function storeGroups(
+        ...accounts: Array<[string, string, boolean?]>
+      ) {
+        const items: { [hash: string]: RawOTPStorage } = {};
+        accounts.forEach(([account, group, pinned], index) => {
+          const hash = crypto.randomUUID();
+          items[hash] = {
+            ...rawEntry(hash, account, index),
+            dataType: "OTPStorage",
+            group,
+            pinned,
+          };
+        });
+        await chrome.storage.local.set(items);
+        const store = await createStore();
+        const menu = useMenuStore();
+        await menu.init();
+        const find = (name: string) =>
+          store.entries.find(
+            (entry) => entry.account === name,
+          ) as OTPEntryInterface;
+        return { store, menu, find };
+      }
+
+      function sections(store: {
+        sections: {
+          name: string;
+          kind: string;
+          entries: OTPEntryInterface[];
+        }[];
+      }) {
+        return store.sections.map((section) => [
+          section.kind === "group" ? section.name : section.kind,
+          ...accountNames(section.entries),
+        ]);
+      }
+
+      async function storedGroups() {
+        return (await EntryStorage.get()).map(
+          (entry) =>
+            `${entry.account}:${entry.group}${entry.pinned ? "*" : ""}`,
+        );
+      }
+
+      it("should write every account once when an account moves to another group", async () => {
+        const { store, find } = await storeGroups(
+          ["p", "", true],
+          ["w1", "Work"],
+          ["w2", "Work"],
+          ["h1", "Home"],
+          ["n1", ""],
+        );
+        const set = sinon.spy(EntryStorage, "set");
+
+        (
+          await store.moveEntry(
+            find("w2").hash,
+            { kind: "group", key: "home" },
+            0,
+          )
+        ).should.equal(true);
+
+        set.should.have.been.calledOnce;
+        set.firstCall.args[0].should.have.lengthOf(5);
+        (await storedGroups()).should.deep.equal([
+          "p:*",
+          "w1:Work",
+          "w2:Home",
+          "h1:Home",
+          "n1:",
+        ]);
+        (await storedIndexes(store)).should.deep.equal({
+          p: 0,
+          w1: 1,
+          w2: 2,
+          h1: 3,
+          n1: 4,
+        });
+      });
+
+      it("should keep a section collapsed when its first account moves away", async () => {
+        const { store, menu, find } = await storeGroups(
+          ["w1", "Work"],
+          ["w2", "Work"],
+          ["n1", ""],
+        );
+        await menu.setCollapsed([find("w1").hash]);
+
+        await store.moveEntry(find("w1").hash, { kind: "none", key: "" }, 1);
+
+        [...menu.collapsed].should.deep.equal([find("w2").hash]);
+        chai
+          .expect(UserSettings.items.collapsed)
+          .to.deep.equal([find("w2").hash]);
+      });
+
+      it("should open the section that an account gets into by its group field", async () => {
+        const { store, menu, find } = await storeGroups(
+          ["w1", "Work"],
+          ["h1", "Home"],
+          ["n1", ""],
+        );
+        await menu.setCollapsed([find("w1").hash, find("h1").hash]);
+
+        await store.setEntryGroup(find("n1"), " home");
+
+        sections(store).should.deep.equal([
+          ["pinned"],
+          ["Work", "w1"],
+          ["Home", "h1", "n1"],
+          ["none"],
+        ]);
+        find("n1").group.should.equal("Home");
+        [...menu.collapsed].should.deep.equal([find("w1").hash]);
+      });
+
+      it("should add an account first into its group with one write and no repeated numbers", async () => {
+        const { store, menu, find } = await storeGroups(
+          ["w1", "Work"],
+          ["n1", ""],
+        );
+        await menu.setCollapsed([find("w1").hash]);
+        const set = sinon.spy(EntryStorage, "set");
+
+        await store.addEntry(
+          new OTPEntry({
+            type: OTPType.totp,
+            index: 0,
+            account: "new",
+            encrypted: false,
+            secret: SECRET,
+            group: "work",
+          }),
+        );
+
+        set.should.have.been.calledOnce;
+        (await storedGroups()).should.deep.equal([
+          "new:Work",
+          "w1:Work",
+          "n1:",
+        ]);
+        Object.values(await storedIndexes(store))
+          .sort()
+          .should.deep.equal([0, 1, 2]);
+        chai.expect(menu.collapsed).to.have.lengthOf(0);
+      });
+
+      it("should keep the state of a renamed group and take the state of the group it merges into", async () => {
+        const { store, menu, find } = await storeGroups(
+          ["w1", "Work"],
+          ["h1", "Home"],
+        );
+        await menu.setCollapsed([find("w1").hash]);
+
+        await store.renameGroup("work", "Job");
+        [...menu.collapsed].should.deep.equal([find("w1").hash]);
+        sections(store)[1][0].should.equal("Job");
+
+        await store.renameGroup("job", "home");
+        sections(store).should.deep.equal([
+          ["pinned"],
+          ["Home", "h1", "w1"],
+          ["none"],
+        ]);
+        chai.expect(menu.collapsed).to.have.lengthOf(0);
+      });
+
+      it("should keep the spelling of the header when its first account moves away and change only the case on rename", async () => {
+        const { store, find } = await storeGroups(
+          ["w1", "Work"],
+          ["w2", "work"],
+          ["n1", ""],
+        );
+
+        await store.moveEntry(find("w1").hash, { kind: "none", key: "" }, 1);
+        (await storedGroups()).should.deep.equal(["w2:Work", "n1:", "w1:"]);
+
+        await store.renameGroup("work", "WORK");
+        (await storedGroups()).should.deep.equal(["w2:WORK", "n1:", "w1:"]);
+      });
+
+      it("should keep the state of a collapsed group that another group merges into", async () => {
+        const { store, menu, find } = await storeGroups(
+          ["w1", "Work"],
+          ["h1", "Home"],
+        );
+        menu.setCollapsed([find("w1").hash, find("h1").hash]);
+
+        await store.renameGroup("work", "home");
+
+        [...menu.collapsed].should.deep.equal([find("h1").hash]);
+      });
+
+      it("should keep the state of a group that merges into a group of pinned accounts only", async () => {
+        const { store, menu, find } = await storeGroups(
+          ["p", "Home", true],
+          ["w1", "Work"],
+          ["n1", ""],
+        );
+        menu.setCollapsed([find("w1").hash]);
+
+        await store.renameGroup("work", "home");
+
+        sections(store).should.deep.equal([
+          ["pinned", "p"],
+          ["Home", "w1"],
+          ["none", "n1"],
+        ]);
+        [...menu.collapsed].should.deep.equal([find("w1").hash]);
+      });
+
+      it("should move the collapsed state to the next account when the first one is deleted", async () => {
+        const { store, menu, find } = await storeGroups(
+          ["w1", "Work"],
+          ["n1", ""],
+          ["n2", ""],
+        );
+        const second = find("n2").hash;
+        await menu.setCollapsed([find("n1").hash]);
+
+        await store.deleteCode(find("n1").hash);
+
+        [...menu.collapsed].should.deep.equal([second]);
+      });
+
+      it("should show a failed write and load the stored order again", async () => {
+        const { store, menu, find } = await storeGroups(
+          ["w1", "Work"],
+          ["n1", ""],
+        );
+        await menu.setCollapsed([find("w1").hash]);
+        sinon.replace(
+          EntryStorage,
+          "set",
+          sinon.fake.rejects(new Error("quota")),
+        );
+        const alert = sinon.stub(useNotificationStore(), "alert");
+        sinon.stub(console, "error");
+
+        (
+          await store.moveEntry(find("w1").hash, { kind: "none", key: "" }, 0)
+        ).should.equal(false);
+
+        alert.should.have.been.calledOnce;
+        sections(store).should.deep.equal([
+          ["pinned"],
+          ["Work", "w1"],
+          ["none", "n1"],
+        ]);
+        [...menu.collapsed].should.deep.equal([find("w1").hash]);
+      });
     });
   });
 });

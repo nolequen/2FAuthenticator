@@ -25,6 +25,27 @@ async function storedSettings(location: StorageLocation) {
 describe("UserSettings", () => {
   afterEach(() => resetStorage());
 
+  it("should sync the collapsed sections with the other syncable settings", async () => {
+    await resetStorage();
+    await chrome.storage.local.set({
+      UserSettings: { storageLocation: StorageLocation.Sync },
+    });
+    await UserSettings.updateItems();
+
+    UserSettings.items.collapsed = ["first-hash"];
+    UserSettings.items.siteIconsOff = ["other-hash"];
+    await UserSettings.commitItems();
+
+    const sync = await storedSettings(StorageLocation.Sync);
+    sync.should.deep.include({
+      collapsed: ["first-hash"],
+      siteIconsOff: ["other-hash"],
+    });
+    (await storedSettings(StorageLocation.Local)).should.not.have.property(
+      "collapsed",
+    );
+  });
+
   describe("legacy keys", () => {
     for (const location of [StorageLocation.Local, StorageLocation.Sync]) {
       it(`should be dropped on commit with storage location ${location}`, async () => {

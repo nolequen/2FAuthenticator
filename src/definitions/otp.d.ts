@@ -11,6 +11,7 @@ interface OTPEntryInterface {
   digits: number;
   algorithm: number; // OTPAlgorithm
   pinned: boolean;
+  group: string;
   encData?: string;
   legacyData?: string;
   keyId?: string;
@@ -49,6 +50,7 @@ interface RawOTPStorage {
   digits?: number;
   algorithm?: string;
   pinned?: boolean;
+  group?: string;
 }
 
 interface EncOTPStorage {

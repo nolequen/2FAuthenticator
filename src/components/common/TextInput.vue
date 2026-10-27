@@ -16,6 +16,7 @@
       :aria-invalid="error ? 'true' : undefined"
       :aria-describedby="error ? `${id}-error` : undefined"
       :spellcheck="spellcheck"
+      :maxlength="maxlength"
       @input="model = ($event.target as HTMLInputElement).value"
       @change="emit('change')"
       @keyup.enter="emit('enter')"
@@ -38,6 +39,7 @@ const props = defineProps<{
   readonly?: boolean;
   error?: string;
   spellcheck?: boolean;
+  maxlength?: number;
 }>();
 const model = defineModel<string>();
 const emit = defineEmits<{ enter: []; change: [] }>();

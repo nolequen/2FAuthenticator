@@ -490,6 +490,39 @@ describe("keyring", function () {
       );
     });
 
+    it("should keep the groups when the password is set and removed", async () => {
+      const hash = crypto.randomUUID();
+      await chrome.storage.local.set({
+        [hash]: {
+          dataType: "OTPStorage",
+          encrypted: false,
+          hash,
+          index: 0,
+          type: "totp",
+          secret: "JBSWY3DPEHPK3PXP",
+          account: "user",
+          group: "Работа",
+        },
+      });
+      const store = await createStore();
+
+      await store.changePassphrase("new password");
+
+      JSON.stringify(await storedItems()).should.not.contain("Работа");
+      const unlocked = await unlock("new password");
+      const [entry] = await decryptedEntries(
+        unlocked?.passphrase ?? "",
+        store.defaultEncryption,
+      );
+      entry.group.should.equal("Работа");
+
+      await store.changePassphrase("");
+
+      chai
+        .expect(((await storedItems())[hash] as RawOTPStorage).group)
+        .to.equal("Работа");
+    });
+
     it("should store the new key only after the storage lock is released", async () => {
       const release = await holdStorageLock();
       const changing = setPassword("new password", new Map(), undefined);

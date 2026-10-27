@@ -1,4 +1,3 @@
-import { EntryStorage, withStorageLock } from "../../models/storage";
 import { getQrUrl } from "../../models/qr";
 import { issuerName } from "../../display";
 import { i18n, t } from "../../store/i18n";
@@ -14,11 +13,7 @@ export function useEntryActions() {
   const qrStore = useQrStore();
 
   async function togglePin(entry: OTPEntryInterface) {
-    accounts.pinEntry(entry);
-    try {
-      await withStorageLock(() => EntryStorage.set(accounts.entries));
-    } catch (error) {
-      await accounts.showWriteFailure(error);
+    if (!(await accounts.togglePin(entry))) {
       return;
     }
     if (entry.pinned) {

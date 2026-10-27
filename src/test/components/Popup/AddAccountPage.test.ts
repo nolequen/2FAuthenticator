@@ -14,7 +14,8 @@ import { useAccountsStore } from "../../../store/Accounts";
 import { useCurrentViewStore } from "../../../store/CurrentView";
 import { useNotificationStore } from "../../../store/Notification";
 import { Encryption } from "../../../models/encryption";
-import { OTPAlgorithm } from "../../../models/otp";
+import { OTPAlgorithm, OTPEntry, OTPType } from "../../../models/otp";
+import { EntryStorage } from "../../../models/storage";
 import { randomPassphrase, resetStorage, storeKey } from "../../storage-helper";
 import { createTestPinia, mountOptions } from "../../vue-helper";
 
@@ -26,14 +27,16 @@ const SHA512_SECRET = "blxnmpn2m2ebd4glchipydbbsclfvh553vnjqlmuqlzyxlbjsgga";
 
 function stubStores(pinia: Pinia) {
   const accounts = useAccountsStore(pinia);
-  let added: (entry: OTPEntryInterface) => void = () => undefined;
-  const entryAdded = new Promise<OTPEntryInterface>((resolve) => {
-    added = resolve;
+  let closed: () => void = () => undefined;
+  const entryAdded = new Promise<void>((resolve) => {
+    closed = resolve;
   });
-  const addCode = sinon.stub(accounts, "addCode").callsFake(added);
+  const addEntry = sinon.spy(accounts, "addEntry");
   sinon.stub(useNotificationStore(pinia), "alert");
-  const close = sinon.stub(useCurrentViewStore(pinia), "close");
-  return { accounts, addCode, entryAdded, close };
+  const close = sinon
+    .stub(useCurrentViewStore(pinia), "close")
+    .callsFake(() => closed());
+  return { accounts, addEntry, entryAdded, close };
 }
 
 async function setText(wrapper: VueWrapper, label: string, value: string) {
@@ -93,7 +96,7 @@ describe("AddAccountPage", () => {
 
     it("should add the account with the selected algorithm and digits", async () => {
       const pinia = createTestPinia();
-      const { addCode, entryAdded, close } = stubStores(pinia);
+      const { addEntry, entryAdded, close } = stubStores(pinia);
       clock = sinon.useFakeTimers({
         now: 1700000000 * 1000,
         toFake: ["Date"],
@@ -117,12 +120,53 @@ describe("AddAccountPage", () => {
       await wrapper.find("button.add-account").trigger("click");
       await entryAdded;
 
-      addCode.should.have.been.calledOnce;
+      addEntry.should.have.been.calledOnce;
       close.should.have.been.calledOnce;
-      const entry = addCode.lastCall.args[0];
+      const entry = addEntry.lastCall.args[0];
       chai.expect(entry.algorithm).to.equal(OTPAlgorithm.SHA512);
       chai.expect(entry.digits).to.equal(8);
       chai.expect(entry.code).to.equal("79500213");
     });
+  });
+
+  it("should add the account first into the chosen group", async () => {
+    const pinia = createTestPinia();
+    const { accounts, entryAdded } = stubStores(pinia);
+    const work = new OTPEntry({
+      type: OTPType.totp,
+      index: 0,
+      account: "w1",
+      encrypted: false,
+      secret: SECRET,
+      group: "Work",
+    });
+    accounts.entries = [
+      work,
+      new OTPEntry({
+        type: OTPType.totp,
+        index: 1,
+        account: "n1",
+        encrypted: false,
+        secret: SECRET,
+      }),
+    ];
+    const wrapper = mount(AddAccountPage, mountOptions(pinia));
+    const group = wrapper.find<HTMLInputElement>(".group-field input");
+    group.attributes("maxlength")?.should.equal("32");
+
+    await setText(wrapper, i18n.issuer, "Example");
+    await setText(wrapper, i18n.secret, SECRET);
+    await wrapper.find(".group-chips button").trigger("click");
+    group.element.value.should.equal("Work");
+    await wrapper.find("button.add-account").trigger("click");
+    await entryAdded;
+
+    accounts.entries
+      .map((item) => `${item.index}:${item.issuer}:${item.group}`)
+      .should.deep.equal(["0:Example:Work", "1::Work", "2::"]);
+    const stored = (await EntryStorage.get()).map(
+      (item) => `${item.index}:${item.issuer}:${item.group}`,
+    );
+    stored.should.deep.equal(["0:Example:Work", "1::Work", "2::"]);
   });
 });

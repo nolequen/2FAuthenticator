@@ -241,6 +241,94 @@ describe("EntryStorage", () => {
     });
   });
 
+  describe("group", () => {
+    function groupedEntry(group: string, encryption?: Encryption) {
+      return new OTPEntry(
+        {
+          type: OTPType.totp,
+          index: 0,
+          account: "user",
+          encrypted: false,
+          secret: BASE32_SECRET,
+          group,
+        },
+        encryption,
+      );
+    }
+
+    it("should keep the group of an open account and leave an empty one out", async () => {
+      const work = groupedEntry("Работа");
+      const other = groupedEntry("");
+
+      await EntryStorage.set([work, other]);
+
+      const stored = await chrome.storage.local.get<{
+        [hash: string]: RawOTPStorage;
+      }>();
+      chai.expect(stored[work.hash].group).to.equal("Работа");
+      stored[other.hash].should.not.have.property("group");
+      const groups: { [hash: string]: string } = {};
+      for (const entry of await EntryStorage.get()) {
+        groups[entry.hash] = entry.group;
+      }
+      groups.should.deep.equal({ [work.hash]: "Работа", [other.hash]: "" });
+    });
+
+    it("should keep the group inside the encrypted data", async () => {
+      await storeKey("test-key");
+      const encryption = new Encryption(randomPassphrase(), "test-key");
+      const work = groupedEntry("Секретная группа", encryption);
+
+      await EntryStorage.set([work]);
+
+      const stored = await chrome.storage.local.get<{
+        [hash: string]: EncOTPStorage;
+      }>();
+      stored[work.hash].dataType.should.equal("EncOTPStorage");
+      JSON.stringify(stored).should.not.contain("Секретная группа");
+      const entry = await getOnlyEntry();
+      entry.group.should.equal("");
+      await entry.applyEncryption(encryption);
+      entry.group.should.equal("Секретная группа");
+    });
+
+    it("should read a group that is not a string as no group", async () => {
+      const raw = { ...rawEntry(), group: 42 as unknown as string };
+      await chrome.storage.local.set({ [raw.hash]: raw });
+
+      (await getOnlyEntry()).group.should.equal("");
+    });
+
+    it("should import the group trimmed and in NFC", async () => {
+      (await importAndGet({ group: "  Cafe\u0301 " })).group.should.equal(
+        "Caf\u00e9",
+      );
+    });
+
+    it("should import a group that is not a string as no group", async () => {
+      (
+        await importAndGet({ group: ["Work"] as unknown as string })
+      ).group.should.equal("");
+    });
+
+    it("should keep the group in the backup with and without a password", async () => {
+      await storeKey("test-key");
+      const encryption = new Encryption(randomPassphrase(), "test-key");
+      const work = groupedEntry("Работа", encryption);
+
+      const open = (await EntryStorage.getExport([work])) as {
+        [hash: string]: RawOTPStorage;
+      };
+      const encrypted = (await EntryStorage.getExport([work], true)) as {
+        [hash: string]: EncOTPStorage;
+      };
+
+      chai.expect(open[work.hash].group).to.equal("Работа");
+      const decrypted = await encryption.decrypt(encrypted[work.hash].data);
+      chai.expect(decrypted?.data.group).to.equal("Работа");
+    });
+  });
+
   describe("writing", () => {
     async function expectRejected(write: () => Promise<void>) {
       const before = await chrome.storage.local.get();

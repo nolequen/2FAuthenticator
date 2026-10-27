@@ -9,6 +9,14 @@ export interface ConfirmOptions {
   danger?: boolean;
 }
 
+export interface PromptOptions {
+  title: string;
+  label: string;
+  value: string;
+  confirm: string;
+  maxlength?: number;
+}
+
 const TOAST_DURATION = 1500;
 const BACKUP_REMINDER_DAYS = 30;
 
@@ -19,14 +27,19 @@ function today() {
 export const useNotificationStore = defineStore("notification", () => {
   const message = ref<string[]>([]); // Message content for alert with ok button
   const confirmation = ref<ConfirmOptions | null>(null); // Message content for alert with yes / no
+  const promptOptions = ref<PromptOptions | null>(null);
   const toast = ref(""); // Ephermal message text
   const backupReminder = ref(false);
   let answer: ((value: boolean) => void) | undefined;
+  let reply: ((value: string | null) => void) | undefined;
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
 
   const confirmMessage = computed(() => confirmation.value?.message ?? "");
   const dialogOpen = computed(
-    () => message.value.length > 0 || confirmation.value !== null,
+    () =>
+      message.value.length > 0 ||
+      confirmation.value !== null ||
+      promptOptions.value !== null,
   );
 
   function alert(text: string) {
@@ -50,6 +63,21 @@ export const useNotificationStore = defineStore("notification", () => {
     const resolve = answer;
     answer = undefined;
     confirmation.value = null;
+    resolve?.(value);
+  }
+
+  function prompt(options: PromptOptions) {
+    answerPrompt(null);
+    return new Promise((resolve: (value: string | null) => void) => {
+      reply = resolve;
+      promptOptions.value = options;
+    });
+  }
+
+  function answerPrompt(value: string | null) {
+    const resolve = reply;
+    reply = undefined;
+    promptOptions.value = null;
     resolve?.(value);
   }
 
@@ -91,6 +119,7 @@ export const useNotificationStore = defineStore("notification", () => {
   return {
     message,
     confirmation,
+    promptOptions,
     confirmMessage,
     dialogOpen,
     toast,
@@ -99,6 +128,8 @@ export const useNotificationStore = defineStore("notification", () => {
     closeAlert,
     confirm,
     answerConfirm,
+    prompt,
+    answerPrompt,
     ephermalMessage,
     checkBackupReminder,
     dismissBackupReminder,

@@ -9,6 +9,7 @@ export const useMenuStore = defineStore("menu", () => {
   const smartFilter = ref(false);
   const siteIcons = ref(true);
   const siteIconsOff = ref<string[]>([]);
+  const collapsed = ref<string[]>([]);
   const theme = ref<Theme>("auto");
   const autolock = ref(30);
 
@@ -19,6 +20,7 @@ export const useMenuStore = defineStore("menu", () => {
     smartFilter.value = UserSettings.items.smartFilter === true;
     siteIcons.value = UserSettings.items.siteIcons !== false;
     siteIconsOff.value = UserSettings.items.siteIconsOff ?? [];
+    collapsed.value = UserSettings.items.collapsed ?? [];
     theme.value = normalizeTheme(UserSettings.items.theme);
     autolock.value = Number(UserSettings.items.autolock) || 30;
 
@@ -50,6 +52,18 @@ export const useMenuStore = defineStore("menu", () => {
     UserSettings.commitItems();
   }
 
+  function setCollapsed(hashes: string[]) {
+    if (
+      hashes.length === collapsed.value.length &&
+      hashes.every((hash) => collapsed.value.includes(hash))
+    ) {
+      return;
+    }
+    collapsed.value = hashes;
+    UserSettings.items.collapsed = [...hashes];
+    UserSettings.commitItems();
+  }
+
   function setTheme(value: Theme) {
     theme.value = value;
     UserSettings.items.theme = value;
@@ -69,6 +83,7 @@ export const useMenuStore = defineStore("menu", () => {
     smartFilter,
     siteIcons,
     siteIconsOff,
+    collapsed,
     theme,
     autolock,
     init,
@@ -76,6 +91,7 @@ export const useMenuStore = defineStore("menu", () => {
     setSmartFilter,
     setSiteIcons,
     setSiteIcon,
+    setCollapsed,
     setTheme,
     setAutolock,
   };

@@ -91,6 +91,17 @@ describe("AccountPage", () => {
     (result.entry.account as string).should.equal("alice");
   });
 
+  it("should leave the group out of the QR code", async () => {
+    const google = createEntry("Google", "alice");
+    google.group = "Работа";
+
+    const text = await decodeQr(getQrUrl(google));
+
+    chai.expect(text).to.be.a("string");
+    (text as string).should.not.contain("group");
+    decodeURIComponent(text as string).should.not.contain("Работа");
+  });
+
   it("should show the QR code with the issuer without its site", async () => {
     openPage(createEntry("Google::google.com", "alice"));
 
@@ -292,6 +303,123 @@ describe("AccountPage", () => {
     entry.account.should.equal("bob");
     update.should.have.been.calledTwice;
     wrapper.find(".site-field .field-error").exists().should.equal(false);
+  });
+
+  describe("group", () => {
+    let set: sinon.SinonSpy;
+
+    function openWithGroups(change?: (target: OTPEntryInterface) => void) {
+      const target = createEntry("Cloudflare", "ivan");
+      change?.(target);
+      const work = createEntry("GitLab", "w1");
+      work.group = "Работа";
+      const home = createEntry("Google", "h1");
+      home.group = "Личное";
+      entry = target;
+      pinia = createTestPinia();
+      useAccountsStore(pinia).entries = [work, home, target];
+      useCurrentViewStore(pinia).open("Account", target.hash);
+      set = sinon.fake.resolves(undefined);
+      sinon.replace(EntryStorage, "set", set);
+      sinon.stub(useMenuStore(pinia), "setCollapsed").resolves();
+      wrapper = mount(AccountPage, {
+        ...mountOptions(pinia),
+        attachTo: document.body,
+      });
+    }
+
+    function groupInput() {
+      return wrapper.find<HTMLInputElement>(".group-field input");
+    }
+
+    function chips() {
+      return wrapper.findAll<HTMLButtonElement>(".group-chips button");
+    }
+
+    async function settle() {
+      for (let i = 0; i < 5; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+    }
+
+    it("should show the field with the existing groups as suggestions", () => {
+      openWithGroups();
+
+      wrapper.find(".group-field label").text().should.equal(i18n.group);
+      wrapper
+        .find(".group-field .optional")
+        .text()
+        .should.equal(`· ${i18n.optional}`);
+      groupInput().element.value.should.equal("");
+      groupInput().attributes("maxlength")?.should.equal("32");
+      wrapper
+        .find(".group-chips")
+        .attributes("aria-label")
+        ?.should.equal(i18n.group_suggestions);
+      chips()
+        .map((chip) => chip.text())
+        .should.deep.equal(["Работа", "Личное"]);
+      chips()
+        .map((chip) => chip.attributes("aria-pressed"))
+        .should.deep.equal(["false", "false"]);
+    });
+
+    it("should save a typed group with the spelling of the existing group", async () => {
+      openWithGroups();
+
+      await groupInput().setValue(" работа ");
+      await groupInput().trigger("change");
+      await settle();
+
+      entry.group.should.equal("Работа");
+      groupInput().element.value.should.equal("Работа");
+      set.should.have.been.calledOnce;
+      chips()[0].attributes("aria-pressed")?.should.equal("true");
+    });
+
+    it("should keep the focus on a mouse press on a suggestion and save only the chosen group", async () => {
+      openWithGroups();
+      groupInput().element.focus();
+      groupInput().element.value = "Ли";
+      await groupInput().trigger("input");
+
+      const press = new MouseEvent("mousedown", {
+        bubbles: true,
+        cancelable: true,
+      });
+      chips()[1].element.dispatchEvent(press);
+      press.defaultPrevented.should.equal(true);
+      chai.expect(document.activeElement).to.equal(groupInput().element);
+      await chips()[1].trigger("click");
+      await settle();
+
+      entry.group.should.equal("Личное");
+      groupInput().element.value.should.equal("Личное");
+      set.should.have.been.calledOnce;
+    });
+
+    it("should take the account out of its group with an empty field", async () => {
+      openWithGroups((target) => {
+        target.group = "Работа";
+      });
+      groupInput().element.value.should.equal("Работа");
+
+      await groupInput().setValue("");
+      await groupInput().trigger("change");
+      await settle();
+
+      entry.group.should.equal("");
+      set.should.have.been.calledOnce;
+    });
+
+    it("should be read-only without suggestions for an account that is not decrypted", () => {
+      openWithGroups((target) => {
+        target.secret = null;
+      });
+
+      groupInput().attributes().should.have.property("readonly");
+      chips().should.have.lengthOf(0);
+    });
   });
 
   it("should pin the account and save the list", async () => {

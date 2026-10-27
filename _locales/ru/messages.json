@@ -119,6 +119,74 @@
     "message": "Действия с аккаунтом",
     "description": "Context menu of an account card."
   },
+  "group": {
+    "message": "Группа",
+    "description": "Group field and its label."
+  },
+  "group_none": {
+    "message": "Без группы",
+    "description": "Section of the accounts without a group."
+  },
+  "group_pinned": {
+    "message": "Закреплённые",
+    "description": "Section of the pinned accounts."
+  },
+  "group_suggestions": {
+    "message": "Группы",
+    "description": "Existing groups under the group field."
+  },
+  "group_actions": {
+    "message": "Действия с группой",
+    "description": "Context menu of a group header."
+  },
+  "rename_group": {
+    "message": "Переименовать",
+    "description": "Rename a group menu item."
+  },
+  "rename_group_title": {
+    "message": "Переименовать группу",
+    "description": "Rename group dialog title."
+  },
+  "group_name": {
+    "message": "Название",
+    "description": "Group name field in the rename dialog."
+  },
+  "ungroup": {
+    "message": "Разгруппировать",
+    "description": "Ungroup menu item and button."
+  },
+  "ungroup_title": {
+    "message": "Разгруппировать «$GROUP$»?",
+    "description": "Ungroup confirmation title.",
+    "placeholders": {
+      "group": {
+        "content": "$1",
+        "example": "Work"
+      }
+    }
+  },
+  "ungroup_text": {
+    "message": "Аккаунты группы перейдут в «Без группы». Сами аккаунты не удаляются.",
+    "description": "Ungroup confirmation text."
+  },
+  "merge_groups_title": {
+    "message": "Объединить группы?",
+    "description": "Merge groups confirmation title."
+  },
+  "merge_groups_text": {
+    "message": "Группа «$GROUP$» уже есть. Аккаунты обеих групп окажутся в ней.",
+    "description": "Merge groups confirmation text.",
+    "placeholders": {
+      "group": {
+        "content": "$1",
+        "example": "Personal"
+      }
+    }
+  },
+  "merge": {
+    "message": "Объединить",
+    "description": "Merge groups button."
+  },
   "edit_account": {
     "message": "Изменить",
     "description": "Context menu item that opens the account page."

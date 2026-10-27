@@ -18,6 +18,8 @@ import {
   unlock,
   upgradeLegacyEntries,
 } from "../models/keyring";
+import * as groups from "../groups";
+import type { SectionRef } from "../groups";
 import { useCurrentViewStore } from "./CurrentView";
 import { useMenuStore } from "./Menu";
 import { useNotificationStore } from "./Notification";
@@ -79,11 +81,11 @@ export const useAccountsStore = defineStore("accounts", () => {
     return false;
   });
 
-  const orderedEntries = computed(() => {
-    const pinnedEntries = entries.value.filter((entry) => entry.pinned);
-    const unpinnedEntries = entries.value.filter((entry) => !entry.pinned);
-    return [...pinnedEntries, ...unpinnedEntries];
-  });
+  const sections = computed(() => groups.buildSections(entries.value));
+
+  const groupNames = computed(() => [
+    ...groups.groupLabels(entries.value).values(),
+  ]);
 
   function stopFilter() {
     filter.value = false;
@@ -133,27 +135,109 @@ export const useAccountsStore = defineStore("accounts", () => {
     entries.value = newCodes;
   }
 
-  async function reorderEntries(list: OTPEntryInterface[]) {
-    entries.value = list;
-
-    for (let i = 0; i < list.length; i++) {
-      if (list[i].index !== i) {
-        list[i].index = i;
-      }
+  async function arrange(
+    change: (list: OTPEntryInterface[]) => OTPEntryInterface[] | null,
+    options: {
+      follow?: OTPEntryInterface;
+      collapsed?: (refs: SectionRef[]) => SectionRef[];
+      labels?: Map<string, string>;
+    } = {},
+  ) {
+    const previous = [...menu.collapsed];
+    let collapsed = groups.collapsedSections(sections.value, menu.collapsed);
+    const labels = new Map([
+      ...groups.groupLabels(entries.value),
+      ...(options.labels ?? []),
+    ]);
+    const before =
+      options.follow && groups.sectionOf(sections.value, options.follow);
+    const list = change(entries.value);
+    if (!list) {
+      return false;
     }
+    const ordered = groups.arrangeEntries(list, labels);
+    ordered.forEach((entry, index) => {
+      if (entry.index !== index) {
+        entry.index = index;
+      }
+    });
+    entries.value = ordered;
+
+    if (options.collapsed) {
+      collapsed = options.collapsed(collapsed);
+    }
+    const after =
+      options.follow && groups.sectionOf(sections.value, options.follow);
+    if (after && !(before && groups.sameSection(before, after))) {
+      collapsed = collapsed.filter((ref) => !groups.sameSection(ref, after));
+    }
+    menu.setCollapsed(groups.collapsedHashes(sections.value, collapsed));
 
     try {
-      await withStorageLock(() => EntryStorage.set(entries.value));
+      await withStorageLock(() => EntryStorage.set(ordered));
     } catch (error) {
-      await showWriteFailure(error);
+      try {
+        await showWriteFailure(error);
+      } finally {
+        menu.setCollapsed(previous);
+      }
+      return false;
     }
+    return true;
   }
 
-  function pinEntry(entry: OTPEntryInterface) {
-    const target = entries.value.find((item) => item.hash === entry.hash);
-    if (target) {
-      target.pinned = !target.pinned;
-    }
+  function moveEntry(hash: string, to: SectionRef, newIndex: number) {
+    return arrange((list) => {
+      const entry = list.find((item) => item.hash === hash);
+      return entry ? groups.moveEntry(list, entry, to, newIndex) : null;
+    });
+  }
+
+  function moveGroup(key: string, newIndex: number) {
+    return arrange((list) => groups.moveGroup(list, key, newIndex));
+  }
+
+  function addEntry(entry: OTPEntryInterface) {
+    return arrange((list) => groups.insertEntry(list, entry), {
+      follow: entry,
+    });
+  }
+
+  function setEntryGroup(entry: OTPEntryInterface, name: string) {
+    return arrange((list) => groups.setEntryGroup(list, entry, name), {
+      follow: entry,
+    });
+  }
+
+  function togglePin(entry: OTPEntryInterface) {
+    return arrange((list) => groups.togglePin(list, entry), { follow: entry });
+  }
+
+  function renameGroup(key: string, name: string) {
+    const merged = !!groups.mergeTarget(entries.value, key, name);
+    const newKey = groups.groupKey(name);
+    const joined =
+      merged &&
+      sections.value.some(
+        (section) => section.kind === "group" && section.key === newKey,
+      );
+    return arrange((list) => groups.renameGroup(list, key, name), {
+      labels: new Map<string, string>(
+        merged ? [] : [[newKey, groups.normalizeGroup(name)]],
+      ),
+      collapsed: (refs) =>
+        refs.flatMap((ref) =>
+          ref.kind !== "group" || ref.key !== key
+            ? [ref]
+            : joined
+              ? []
+              : [{ kind: ref.kind, key: newKey }],
+        ),
+    });
+  }
+
+  function ungroup(key: string) {
+    return arrange((list) => groups.ungroup(list, key));
   }
 
   function markWrongPassword() {
@@ -165,14 +249,12 @@ export const useAccountsStore = defineStore("accounts", () => {
   }
 
   function deleteCode(hash: string) {
+    const collapsed = groups.collapsedSections(sections.value, menu.collapsed);
     const index = entries.value.findIndex((entry) => entry.hash === hash);
     if (index > -1) {
       entries.value.splice(index, 1);
     }
-  }
-
-  function addCode(entry: OTPEntryInterface) {
-    entries.value.unshift(entry);
+    menu.setCollapsed(groups.collapsedHashes(sections.value, collapsed));
   }
 
   async function applyPassphrase(password: string) {
@@ -370,17 +452,22 @@ export const useAccountsStore = defineStore("accounts", () => {
     shouldFilter,
     filterHost,
     currentlyEncrypted,
-    orderedEntries,
+    sections,
+    groupNames,
     init,
     stopFilter,
     updateCodes,
     loadCodes,
-    reorderEntries,
-    pinEntry,
+    moveEntry,
+    moveGroup,
+    addEntry,
+    setEntryGroup,
+    togglePin,
+    renameGroup,
+    ungroup,
     markWrongPassword,
     completeInit,
     deleteCode,
-    addCode,
     applyPassphrase,
     changePassphrase,
     updateEntries,

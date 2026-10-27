@@ -102,6 +102,15 @@ describe("BackupPage", () => {
     );
   });
 
+  it("should leave the group out of the text backup", async () => {
+    await storeAccounts({ issuer: "My Bank", account: "alice", group: "Work" });
+    const pinia = await openAccounts();
+
+    (await textBackup(pinia)).should.equal(
+      `otpauth://totp/My%20Bank:alice?secret=${SECRET}&issuer=My%20Bank`,
+    );
+  });
+
   it("should back up the accounts as they are when the page is opened again", async () => {
     await storeAccounts(
       { issuer: "My Bank", account: "alice" },

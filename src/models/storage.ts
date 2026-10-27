@@ -10,6 +10,7 @@ import {
 } from "./otp";
 import { StorageLocation, UserSettings } from "./settings";
 import { DataType } from "./otp";
+import { normalizeGroup } from "../groups";
 
 export const STORAGE_LOCK = "storage";
 const CLEAR_LOGS_RETRY_DELAYS = [100, 500, 1000];
@@ -235,6 +236,10 @@ export class EntryStorage {
       storageItem.pinned = true;
     }
 
+    if (entry.group) {
+      storageItem.group = entry.group;
+    }
+
     if (entry.type === OTPType.hotp || entry.type === OTPType.hhex) {
       storageItem.counter = entry.counter;
     }
@@ -403,6 +408,7 @@ export class EntryStorage {
         digits: number;
         algorithm: OTPAlgorithm;
         pinned: boolean;
+        group: string;
       } = {
         type,
         index: data[hash].index || 0,
@@ -415,6 +421,7 @@ export class EntryStorage {
         digits: digits || 6,
         algorithm: parseOTPAlgorithm(data[hash].algorithm) ?? OTPAlgorithm.SHA1,
         pinned: data[hash].pinned || false,
+        group: normalizeGroup(data[hash].group),
         hash: data[hash].hash || hash,
       };
 
@@ -599,6 +606,7 @@ export class EntryStorage {
         digits,
         algorithm: parseOTPAlgorithm(entryData.algorithm),
         pinned: entryData.pinned,
+        group: entryData.group,
       });
 
       data.push(entry);

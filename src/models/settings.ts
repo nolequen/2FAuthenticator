@@ -12,6 +12,7 @@ interface UserSettingsData {
   // syncable settings
   autofill?: boolean;
   autolock?: number;
+  collapsed?: string[];
   siteIcons?: boolean;
   siteIconsOff?: string[];
   smartFilter?: boolean;

@@ -16,6 +16,7 @@
           :optional="i18n.optional"
           :placeholder="i18n.account_placeholder"
         />
+        <GroupInput v-model="newAccount.group" />
       </div>
       <details class="panel advanced">
         <summary>
@@ -86,6 +87,7 @@ import { i18n } from "../../store/i18n";
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
 import { useNotificationStore } from "../../store/Notification";
+import GroupInput from "./GroupInput.vue";
 
 import IconChevronDown from "lucide-static/icons/chevron-down.svg";
 
@@ -104,6 +106,7 @@ const algorithms = [
 const newAccount: {
   issuer: string;
   account: string;
+  group: string;
   secret: string;
   type: OTPType;
   period: number | undefined;
@@ -112,6 +115,7 @@ const newAccount: {
 } = reactive({
   issuer: "",
   account: "",
+  group: "",
   secret: "",
   type: OTPType.totp,
   period: undefined,
@@ -171,26 +175,21 @@ async function addNewAccount() {
       period: newAccount.period,
       digits: newAccount.digits,
       algorithm: newAccount.algorithm,
+      group: newAccount.group,
     },
     encryption,
   );
 
-  try {
-    await entry.create();
-  } catch (error) {
-    await accounts.showWriteFailure(error);
+  if (!(await accounts.addEntry(entry))) {
     return;
   }
-  accounts.addCode(entry);
   currentView.close();
 
-  const codes = document.getElementById("codes");
-  if (codes) {
-    // wait vue apply changes to dom
-    setTimeout(() => {
-      codes.scrollTop = 0;
-    }, 0);
-  }
-  return;
+  // wait vue apply changes to dom
+  setTimeout(() => {
+    document
+      .querySelector(`.entry[data-hash="${entry.hash}"]`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, 0);
 }
 </script>

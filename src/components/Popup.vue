@@ -180,8 +180,11 @@ watch(topLayer, (layer) => {
       return;
     }
     const element = lastFocus[layer];
+    const card = moved(element);
     if (focusable(element)) {
       element.focus();
+    } else if (focusable(card)) {
+      card.focus();
     } else if (layer === "base") {
       focusFirstCard();
     } else {
@@ -189,6 +192,17 @@ watch(topLayer, (layer) => {
     }
   });
 });
+
+function moved(element: Element | undefined) {
+  const hash =
+    element instanceof HTMLElement && element.classList.contains("entry")
+      ? element.dataset.hash
+      : undefined;
+  return hash
+    ? (document.querySelector(`.entry[data-hash="${CSS.escape(hash)}"]`) ??
+        undefined)
+    : undefined;
+}
 
 function hideQr() {
   qrStore.hideQr();

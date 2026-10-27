@@ -127,6 +127,74 @@
     "message": "Account actions",
     "description": "Context menu of an account card."
   },
+  "group": {
+    "message": "Group",
+    "description": "Group field and its label."
+  },
+  "group_none": {
+    "message": "No group",
+    "description": "Section of the accounts without a group."
+  },
+  "group_pinned": {
+    "message": "Pinned",
+    "description": "Section of the pinned accounts."
+  },
+  "group_suggestions": {
+    "message": "Groups",
+    "description": "Existing groups under the group field."
+  },
+  "group_actions": {
+    "message": "Group actions",
+    "description": "Context menu of a group header."
+  },
+  "rename_group": {
+    "message": "Rename",
+    "description": "Rename a group menu item."
+  },
+  "rename_group_title": {
+    "message": "Rename group",
+    "description": "Rename group dialog title."
+  },
+  "group_name": {
+    "message": "Name",
+    "description": "Group name field in the rename dialog."
+  },
+  "ungroup": {
+    "message": "Ungroup",
+    "description": "Ungroup menu item and button."
+  },
+  "ungroup_title": {
+    "message": "Ungroup “$GROUP$”?",
+    "description": "Ungroup confirmation title.",
+    "placeholders": {
+      "group": {
+        "content": "$1",
+        "example": "Work"
+      }
+    }
+  },
+  "ungroup_text": {
+    "message": "Its accounts move to “No group”. The accounts themselves are not deleted.",
+    "description": "Ungroup confirmation text."
+  },
+  "merge_groups_title": {
+    "message": "Merge groups?",
+    "description": "Merge groups confirmation title."
+  },
+  "merge_groups_text": {
+    "message": "Group “$GROUP$” already exists. Accounts of both groups will be in it.",
+    "description": "Merge groups confirmation text.",
+    "placeholders": {
+      "group": {
+        "content": "$1",
+        "example": "Personal"
+      }
+    }
+  },
+  "merge": {
+    "message": "Merge",
+    "description": "Merge groups button."
+  },
   "edit_account": {
     "message": "Edit",
     "description": "Context menu item that opens the account page."

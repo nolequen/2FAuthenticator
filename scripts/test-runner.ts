@@ -34,7 +34,7 @@ const colors = {
   red: "\x1b[31m",
 }
 
-const MIN_TESTS = 395;
+const MIN_TESTS = 486;
 
 async function runTests() {
   const extensionDir = path.resolve(__dirname, "../test/chrome");

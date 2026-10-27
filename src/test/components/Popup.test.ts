@@ -11,7 +11,9 @@ import Popup from "../../components/Popup.vue";
 import { OTPEntry, OTPType } from "../../models/otp";
 import { loadI18nMessages } from "../../store/i18n";
 import { useAccountsStore } from "../../store/Accounts";
+import { EntryStorage } from "../../models/storage";
 import { useCurrentViewStore } from "../../store/CurrentView";
+import { useMenuStore } from "../../store/Menu";
 import { useNotificationStore } from "../../store/Notification";
 import { useQrStore } from "../../store/Qr";
 import { createTestPinia, mountOptions } from "../vue-helper";
@@ -205,6 +207,65 @@ describe("Popup", () => {
     wrapper.find(".menu-backdrop").exists().should.equal(false);
     isInert(".base").should.equal(false);
     chai.expect(document.activeElement).to.equal(card);
+  });
+
+  it("should keep the focus on a card that the menu pins into another section", async () => {
+    const accounts = useAccountsStore(pinia);
+    const first = new OTPEntry({
+      type: OTPType.totp,
+      index: 0,
+      issuer: "Work",
+      account: "w1",
+      encrypted: false,
+      secret: "JBSWY3DPEHPK3PXP",
+      group: "Work",
+    });
+    const second = new OTPEntry({
+      type: OTPType.totp,
+      index: 1,
+      issuer: "Second",
+      account: "w2",
+      encrypted: false,
+      secret: "JBSWY3DPEHPK3PXP",
+      group: "Work",
+    });
+    const pinned = new OTPEntry({
+      type: OTPType.totp,
+      index: 2,
+      issuer: "Pinned",
+      account: "p",
+      encrypted: false,
+      secret: "JBSWY3DPEHPK3PXP",
+      pinned: true,
+    });
+    accounts.entries = [pinned, first, second];
+    sinon.replace(EntryStorage, "set", sinon.fake.resolves(undefined));
+    sinon.stub(useMenuStore(pinia), "setCollapsed");
+    await nextTick();
+    const card = wrapper.find<HTMLElement>(
+      `a.entry[data-hash="${second.hash}"]`,
+    ).element;
+    card.focus();
+    card.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "F10",
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    await settle();
+
+    await wrapper.findAll("[role='menuitem']")[1].trigger("click");
+    await settle();
+    await settle();
+
+    const moved = wrapper.findAll<HTMLElement>(".section-pinned a.entry");
+    moved
+      .map((item) => item.attributes("data-hash"))
+      .should.deep.equal([pinned.hash, second.hash]);
+    moved[1].element.should.not.equal(card);
+    chai.expect(document.activeElement).to.equal(moved[1].element);
   });
 
   it("should focus the next card after the menu deletes a card", async () => {
