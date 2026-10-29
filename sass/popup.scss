@@ -1164,6 +1164,138 @@ body {
   }
 }
 
+.drive-note {
+  margin: 0 4px;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.drive-lead {
+  margin: 0 4px;
+  color: var(--label);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.drive-panel {
+  gap: 10px;
+}
+
+.drive-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.drive-state {
+  &.ok {
+    background: var(--ok-bg);
+    color: var(--ok-text);
+  }
+
+  &.warn {
+    background: var(--warn-bg);
+    color: var(--warn-text);
+  }
+}
+
+.drive-email {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.drive-status {
+  &.ok {
+    color: var(--ok-text);
+  }
+
+  &.warn {
+    color: var(--warn-text);
+  }
+}
+
+.drive-actions .button {
+  flex: 1;
+}
+
+.drive-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--divider);
+
+  .button {
+    margin-left: auto;
+  }
+}
+
+.drive-link {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--label);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--hover);
+  }
+
+  svg.lucide {
+    width: 14px;
+    height: 14px;
+    flex: none;
+  }
+}
+
+.drive-copy {
+  flex: none;
+  min-height: 52px;
+  padding: 8px 12px;
+}
+
+.drive-copy-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 8px;
+  background: var(--segment-bg);
+  color: var(--icon);
+
+  &.latest {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  svg.lucide {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.drive-loading {
+  display: grid;
+  place-items: center;
+  padding: 24px 0;
+}
+
+.backup-password-form .notice {
+  margin: 0;
+}
+
 @media (forced-colors: active) {
   .entry,
   .search-field,
@@ -1173,6 +1305,7 @@ body {
   .context-menu,
   .toast,
   .status,
+  .drive-copy-icon,
   .counter,
   .letter {
     border: 1px solid CanvasText;

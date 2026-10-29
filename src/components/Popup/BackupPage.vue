@@ -41,6 +41,7 @@
           <span>{{ i18n.export_info }}</span>
         </span>
       </a>
+      <DriveSection />
       <h2 class="section-title">{{ i18n.restore_header }}</h2>
       <a class="option" href="import.html" target="_blank">
         <span class="row-text">
@@ -58,6 +59,7 @@ import { storeToRefs } from "pinia";
 import { BrowserStorage, EntryStorage } from "../../models/storage";
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
+import DriveSection from "./DriveSection.vue";
 
 import IconLock from "lucide-static/icons/lock.svg";
 import IconFile from "lucide-static/icons/file-text.svg";

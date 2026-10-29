@@ -15,3 +15,4 @@ scripts/test-runner.js
 *.pem
 /artifacts
 /web-ext-artifacts
+/secrets

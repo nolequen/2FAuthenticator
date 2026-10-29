@@ -1,6 +1,22 @@
+const fs = require("fs");
 const path = require("path");
 const { DefinePlugin } = require("webpack");
 const { VueLoaderPlugin } = require("vue-loader");
+
+const DRIVE_SECRET_FILE = path.resolve(__dirname, "secrets/google-oauth.json");
+
+function driveDesktopSecret() {
+  if (process.env.DRIVE_DESKTOP_SECRET !== undefined) {
+    return process.env.DRIVE_DESKTOP_SECRET;
+  }
+  if (!fs.existsSync(DRIVE_SECRET_FILE)) {
+    return "";
+  }
+  const { desktopClientSecret } = JSON.parse(
+    fs.readFileSync(DRIVE_SECRET_FILE, "utf8").replace(/^﻿/, "")
+  );
+  return typeof desktopClientSecret === "string" ? desktopClientSecret : "";
+}
 
 module.exports = {
   mode: "development",
@@ -10,6 +26,7 @@ module.exports = {
     content: "./src/content.ts",
     popup: "./src/popup.ts",
     import: "./src/import.ts",
+    drive: "./src/drive.ts",
     options: "./src/options.ts",
   },
   module: {
@@ -59,7 +76,8 @@ module.exports = {
     new DefinePlugin({
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: false,
-      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
+      __DRIVE_DESKTOP_SECRET__: JSON.stringify(driveDesktopSecret())
     })
   ],
   resolve: {

@@ -9,7 +9,9 @@ export type Page =
   | "Account"
   | "Preferences"
   | "SetPassword"
-  | "Backup";
+  | "Backup"
+  | "DriveCopies"
+  | "BackupPassword";
 
 export const useCurrentViewStore = defineStore("currentView", () => {
   const stack = ref<Page[]>([]);

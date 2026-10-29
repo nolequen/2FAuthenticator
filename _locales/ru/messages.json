@@ -760,5 +760,451 @@
   "import_backup_qr_partly_failed": {
     "message": "Импорт выполнен, но часть QR-кодов не распознана.",
     "description": "QR import partly failed."
+  },
+  "drive_header": {
+    "message": "Google Drive",
+    "description": "Backup page section."
+  },
+  "drive_connect": {
+    "message": "Подключить Google Drive",
+    "description": "Backup page: connect Drive."
+  },
+  "drive_connect_info": {
+    "message": "Зашифрованная копия обновляется сама после каждого изменения",
+    "description": "Backup page: connect Drive subtitle."
+  },
+  "drive_about": {
+    "message": "Расширение видит в Drive только свою папку «2FAuthenticator». Копия всегда зашифрована: паролем расширения, а без него – отдельным паролем бэкапа.",
+    "description": "Backup page: what Drive backups are."
+  },
+  "drive_unavailable": {
+    "message": "Google Drive недоступен в этой сборке.",
+    "description": "Drive: the build has no OAuth client."
+  },
+  "drive_status_last": {
+    "message": "Последняя копия: $WHEN$",
+    "description": "Drive status.",
+    "placeholders": {
+      "when": {
+        "content": "$1",
+        "example": "today, 14:05"
+      }
+    }
+  },
+  "drive_today_at": {
+    "message": "сегодня, $TIME$",
+    "description": "Drive status time of today.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "14:05"
+      }
+    }
+  },
+  "drive_today_date": {
+    "message": "Сегодня, $DATE$",
+    "description": "Drive copy of today.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 27"
+      }
+    }
+  },
+  "drive_status_none": {
+    "message": "Копий ещё нет",
+    "description": "Drive status."
+  },
+  "drive_status_pending": {
+    "message": "Ожидает загрузки",
+    "description": "Drive status."
+  },
+  "drive_status_network": {
+    "message": "Ожидает загрузки: нет связи с Google Drive",
+    "description": "Drive status."
+  },
+  "drive_status_quota": {
+    "message": "Ожидает загрузки: в Google Drive нет места",
+    "description": "Drive status."
+  },
+  "drive_status_signin": {
+    "message": "Нужно снова войти в Google",
+    "description": "Drive status."
+  },
+  "drive_status_consent": {
+    "message": "Firefox ждёт разрешения на передачу данных",
+    "description": "Drive status."
+  },
+  "drive_status_backup_password": {
+    "message": "Задайте пароль бэкапа",
+    "description": "Drive status."
+  },
+  "drive_status_unlock": {
+    "message": "Введите пароль расширения, чтобы сохранить копию",
+    "description": "Drive status."
+  },
+  "drive_status_shrink": {
+    "message": "Ожидает вашего ответа",
+    "description": "Drive status."
+  },
+  "drive_save_now": {
+    "message": "Сохранить сейчас",
+    "description": "Drive button."
+  },
+  "drive_restore": {
+    "message": "Восстановить",
+    "description": "Drive button."
+  },
+  "drive_change_backup_password": {
+    "message": "Сменить пароль бэкапа",
+    "description": "Drive button and form title."
+  },
+  "drive_set_backup_password": {
+    "message": "Задать пароль бэкапа",
+    "description": "Drive form title."
+  },
+  "drive_disconnect": {
+    "message": "Отключить",
+    "description": "Drive button."
+  },
+  "drive_disconnect_title": {
+    "message": "Отключить Google Drive?",
+    "description": "Drive disconnect dialog."
+  },
+  "drive_disconnect_text": {
+    "message": "Расширение перестанет сохранять копии и откажется от доступа к Drive. Копии в Drive останутся.",
+    "description": "Drive disconnect dialog."
+  },
+  "drive_footer_password": {
+    "message": "Копия обновляется через минуту после изменений, хранятся 30 последних дней. Шифруется паролем расширения.",
+    "description": "Backup page: Drive footnote."
+  },
+  "drive_footer_backup": {
+    "message": "Копия обновляется через минуту после изменений, хранятся 30 последних дней. Шифруется паролем бэкапа.",
+    "description": "Backup page: Drive footnote."
+  },
+  "drive_retired": {
+    "message": "Копии до $DATE$ открываются паролем бэкапа",
+    "description": "Drive: the backup password was replaced by the extension password.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 27"
+      }
+    }
+  },
+  "drive_skipped": {
+    "message": "Не попали в копию, нет ключа: $COUNT$",
+    "description": "Drive: entries without a key.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "drive_saved": {
+    "message": "Копия сохранена",
+    "description": "Drive toast."
+  },
+  "drive_up_to_date": {
+    "message": "Копия уже актуальна",
+    "description": "Drive toast."
+  },
+  "drive_nothing_to_save": {
+    "message": "Нет аккаунтов для копии",
+    "description": "Drive toast."
+  },
+  "drive_error_network": {
+    "message": "Нет связи с Google Drive.",
+    "description": "Drive error."
+  },
+  "drive_error_quota": {
+    "message": "В Google Drive нет места.",
+    "description": "Drive error."
+  },
+  "drive_error_signin": {
+    "message": "Google больше не принимает вход расширения. Войдите снова.",
+    "description": "Drive error."
+  },
+  "drive_banner_signin_title": {
+    "message": "Google Drive: войдите снова",
+    "description": "Drive banner."
+  },
+  "drive_banner_signin_text": {
+    "message": "Изменения не сохраняются в Drive: Google больше не принимает вход расширения.",
+    "description": "Drive banner."
+  },
+  "drive_signin": {
+    "message": "Войти",
+    "description": "Drive banner button."
+  },
+  "drive_banner_consent_title": {
+    "message": "Google Drive: разрешите передачу данных",
+    "description": "Drive banner."
+  },
+  "drive_banner_consent_text": {
+    "message": "Firefox просит разрешения отправлять зашифрованную копию в Google Drive.",
+    "description": "Drive banner."
+  },
+  "drive_allow": {
+    "message": "Разрешить",
+    "description": "Drive banner button."
+  },
+  "drive_banner_password_title": {
+    "message": "Google Drive: задайте пароль бэкапа",
+    "description": "Drive banner."
+  },
+  "drive_banner_password_text": {
+    "message": "Без пароля расширения копии шифруются паролем бэкапа.",
+    "description": "Drive banner."
+  },
+  "drive_set": {
+    "message": "Задать",
+    "description": "Drive banner button."
+  },
+  "drive_banner_unlock_title": {
+    "message": "Google Drive: введите пароль расширения, чтобы сохранить копию",
+    "description": "Drive banner."
+  },
+  "drive_banner_unlock_text": {
+    "message": "Часть аккаунтов пришла без шифрования, например через синхронизацию. Копия ждёт, пока расширение разблокируют.",
+    "description": "Drive banner."
+  },
+  "drive_banner_shrink_title": {
+    "message": "Google Drive: в копии стало меньше аккаунтов",
+    "description": "Drive banner."
+  },
+  "drive_banner_shrink_text": {
+    "message": "Было $FROM$, сейчас $TO$. Сохранить такую копию?",
+    "description": "Drive banner.",
+    "placeholders": {
+      "from": {
+        "content": "$1",
+        "example": "12"
+      },
+      "to": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "drive_dont_save": {
+    "message": "Не сохранять",
+    "description": "Drive banner button."
+  },
+  "drive_copies": {
+    "message": "Копии в Google Drive",
+    "description": "Drive copies page title."
+  },
+  "drive_copies_folder": {
+    "message": "Папка «2FAuthenticator»",
+    "description": "Drive copies page."
+  },
+  "drive_copies_merge": {
+    "message": "Аккаунты из копии добавятся к текущим, совпадающие заменятся.",
+    "description": "Drive copies page."
+  },
+  "drive_copies_kept": {
+    "message": "У каждого браузера свои 30 последних копий.",
+    "description": "Drive copies page."
+  },
+  "drive_copies_empty": {
+    "message": "В папке пока нет копий.",
+    "description": "Drive copies page."
+  },
+  "drive_accounts_one": {
+    "message": "$COUNT$ аккаунт",
+    "description": "Number of accounts.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "drive_accounts_few": {
+    "message": "$COUNT$ аккаунта",
+    "description": "Number of accounts.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "drive_accounts_many": {
+    "message": "$COUNT$ аккаунтов",
+    "description": "Number of accounts.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "drive_accounts_other": {
+    "message": "$COUNT$ аккаунта",
+    "description": "Number of accounts.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1.5"
+      }
+    }
+  },
+  "drive_restore_title": {
+    "message": "Восстановить копию от $DATE$",
+    "description": "Drive restore dialog.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 21"
+      }
+    }
+  },
+  "drive_restore_info": {
+    "message": "Введите пароль, которым была зашифрована копия: пароль расширения или пароль бэкапа на тот день.",
+    "description": "Drive restore dialog."
+  },
+  "drive_copy_password": {
+    "message": "Пароль копии",
+    "description": "Drive restore dialog."
+  },
+  "drive_wrong_password": {
+    "message": "Пароль не подходит к этой копии.",
+    "description": "Drive restore dialog."
+  },
+  "drive_restore_partial": {
+    "message": "Восстановлено. Не удалось расшифровать: $COUNT$",
+    "description": "Drive restore result.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "drive_missing_key": {
+    "message": "В копии нет ключа к её аккаунтам.",
+    "description": "Drive restore result."
+  },
+  "drive_unlock_first": {
+    "message": "Разблокируйте расширение и повторите.",
+    "description": "Drive restore result."
+  },
+  "drive_backup_password": {
+    "message": "Пароль бэкапа",
+    "description": "Drive backup password page title."
+  },
+  "drive_backup_password_info": {
+    "message": "Копии в Google Drive шифруются этим паролем, потому что пароль расширения не задан. Следующая копия зашифруется новым паролем, а прежние копии по-прежнему открываются старым.",
+    "description": "Drive backup password page."
+  },
+  "drive_new_password": {
+    "message": "Новый пароль, не короче 8 символов",
+    "description": "Drive backup password field."
+  },
+  "drive_repeat_password": {
+    "message": "Новый пароль ещё раз",
+    "description": "Drive backup password field."
+  },
+  "drive_password_warning": {
+    "message": "Без этого пароля копии не восстановить, сбросить его нельзя. Запомните и прежний: он нужен для старых копий.",
+    "description": "Drive backup password warning."
+  },
+  "drive_password_short": {
+    "message": "Не короче 8 символов",
+    "description": "Drive backup password error."
+  },
+  "drive_tab_title": {
+    "message": "Подключение Google Drive",
+    "description": "Drive tab title."
+  },
+  "drive_tab_lead": {
+    "message": "Расширение будет само сохранять зашифрованную копию аккаунтов в папку «2FAuthenticator» в вашем Drive. Другие файлы в Drive ему не видны.",
+    "description": "Drive tab lead."
+  },
+  "drive_step_signin": {
+    "message": "Вход в Google",
+    "description": "Drive tab step."
+  },
+  "drive_signin_google": {
+    "message": "Войти через Google",
+    "description": "Drive tab button."
+  },
+  "drive_signin_info": {
+    "message": "Google попросит выбрать аккаунт и даст расширению доступ только к созданным им файлам.",
+    "description": "Drive tab step."
+  },
+  "drive_copies_found": {
+    "message": "копий в папке: $COUNT$",
+    "description": "Drive tab step.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "4"
+      }
+    }
+  },
+  "drive_step_password": {
+    "message": "Пароль бэкапа",
+    "description": "Drive tab step."
+  },
+  "drive_step_password_info": {
+    "message": "Пароль расширения не задан, поэтому копии шифруются отдельным паролем.",
+    "description": "Drive tab step."
+  },
+  "drive_step_password_set": {
+    "message": "Копии шифруются паролем расширения.",
+    "description": "Drive tab step."
+  },
+  "drive_password_label": {
+    "message": "Пароль бэкапа, не короче 8 символов",
+    "description": "Drive tab field."
+  },
+  "drive_password_again": {
+    "message": "Ещё раз",
+    "description": "Drive tab field."
+  },
+  "drive_password_strength": {
+    "message": "Без этого пароля копии не восстановить, сбросить его нельзя. Тот, кто получит доступ к вашему Google-аккаунту, сможет подбирать его, поэтому выберите длинный.",
+    "description": "Drive tab warning."
+  },
+  "drive_save_and_upload": {
+    "message": "Сохранить и загрузить копию",
+    "description": "Drive tab button."
+  },
+  "drive_step_upload": {
+    "message": "Первая копия",
+    "description": "Drive tab step."
+  },
+  "drive_done": {
+    "message": "Готово, вкладку можно закрыть.",
+    "description": "Drive tab result."
+  },
+  "drive_retry": {
+    "message": "Повторить",
+    "description": "Drive tab button."
+  },
+  "drive_restore_hint": {
+    "message": "Переносите аккаунты в этот браузер? Восстановите их из копии: попап → «Бэкап и импорт» → «Восстановить». Пароль бэкапа можно задать и после.",
+    "description": "Drive tab hint."
+  },
+  "drive_consent_info": {
+    "message": "Firefox спросит разрешение на передачу данных: зашифрованная копия уходит в Google Drive.",
+    "description": "Drive tab consent step."
+  },
+  "drive_consent_denied": {
+    "message": "Без разрешения на передачу данных Firefox не даст расширению загружать копии.",
+    "description": "Drive tab consent refused."
+  },
+  "drive_signin_failed": {
+    "message": "Не удалось войти в Google. Попробуйте ещё раз.",
+    "description": "Drive tab sign-in error."
+  },
+  "drive_signin_again": {
+    "message": "Повторный вход в Google",
+    "description": "Drive tab title for sign-in only."
   }
 }

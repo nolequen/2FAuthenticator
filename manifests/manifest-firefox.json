@@ -10,7 +10,8 @@
       "strict_min_version": "140.0",
       "update_url": "https://github.com/nolequen/2FAuthenticator/releases/latest/download/updates.json",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": ["none"],
+        "optional": ["authenticationInfo"]
       }
     }
   },
@@ -45,10 +46,11 @@
     "activeTab",
     "storage",
     "alarms",
-    "scripting"
+    "scripting",
+    "identity"
   ],
   "host_permissions": ["https://www.google.com/"],
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; font-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; connect-src https://www.google.com/; default-src 'none'"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; font-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; connect-src https://www.google.com/ https://www.googleapis.com https://oauth2.googleapis.com; default-src 'none'"
   }
 }

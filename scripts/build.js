@@ -54,8 +54,8 @@ function run(bin, args, options = {}) {
   });
 }
 
-function runOrExit(bin, args) {
-  const result = run(bin, args);
+function runOrExit(bin, args, options = {}) {
+  const result = run(bin, args, options);
   if (result.error) {
     throw result.error;
   }
@@ -131,7 +131,9 @@ function compile(platform) {
   if (platform === "prod") {
     runOrExit("webpack", ["--config", "webpack.prod.js"]);
   } else if (platform === "test") {
-    runOrExit("webpack", ["--config", "webpack.dev.js"]);
+    runOrExit("webpack", ["--config", "webpack.dev.js"], {
+      env: { ...process.env, DRIVE_DESKTOP_SECRET: "test-secret" },
+    });
     runOrExit("tsc", [
       "--target",
       "ES2015",

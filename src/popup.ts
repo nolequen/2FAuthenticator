@@ -12,6 +12,7 @@ import { useAccountsStore } from "./store/Accounts";
 import { useCurrentViewStore } from "./store/CurrentView";
 import { useMenuStore } from "./store/Menu";
 import { useNotificationStore } from "./store/Notification";
+import { useDriveStore } from "./store/Drive";
 import { syncTimeWithGoogle } from "./syncTime";
 import { UserSettings } from "./models/settings";
 import { applyTheme, normalizeTheme, trackInputModality } from "./theme";
@@ -44,8 +45,10 @@ async function init() {
   const currentView = useCurrentViewStore(pinia);
   const menu = useMenuStore(pinia);
   const notification = useNotificationStore(pinia);
+  const drive = useDriveStore(pinia);
   await accounts.init();
   await menu.init();
+  await drive.init();
   notification.checkBackupReminder(accounts);
 
   // Render

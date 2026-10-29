@@ -2,7 +2,11 @@ import "mocha";
 import * as chai from "chai";
 import "chai/register-should";
 
-import { decryptBackupData } from "../../models/backup";
+import {
+  decryptBackup,
+  decryptBackupData,
+  unknownKeyIds,
+} from "../../models/backup";
 import { Encryption } from "../../models/encryption";
 import { createKey } from "../../models/password";
 import { EntryStorage } from "../../models/storage";
@@ -28,7 +32,7 @@ async function createV4Backup() {
     [key.id]: key,
   };
   await resetStorage();
-  return backup;
+  return { backup, key, encryption };
 }
 
 async function importBackup(
@@ -75,7 +79,7 @@ describe("decryptBackupData", function () {
   });
 
   it("should import a v4 backup without a password", async () => {
-    const backup = await createV4Backup();
+    const { backup } = await createV4Backup();
     for (const hash of Object.keys(V3_FIXTURE_ENTRIES)) {
       (backup[hash] as EncOTPStorage).data.should.match(/^v4:/);
     }
@@ -93,7 +97,7 @@ describe("decryptBackupData", function () {
   });
 
   it("should import a v4 backup under the key of the session", async () => {
-    const backup = await createV4Backup();
+    const { backup } = await createV4Backup();
     const encryption = new Encryption(randomPassphrase(), "session-key");
 
     await importBackup(backup, encryption);
@@ -114,8 +118,83 @@ describe("decryptBackupData", function () {
   });
 
   it("should decrypt nothing from a v4 backup with a wrong password", async () => {
-    const backup = await createV4Backup();
+    const { backup } = await createV4Backup();
 
     (await decryptBackupData(backup, "wrong password")).should.deep.equal({});
+  });
+});
+
+describe("decryptBackup", function () {
+  this.timeout(20000);
+
+  beforeEach(() => resetStorage());
+  afterEach(() => resetStorage());
+
+  it("should decrypt with a known key and no password", async () => {
+    const { backup, key, encryption } = await createV4Backup();
+    const known = new Map([[key.id, encryption]]);
+
+    unknownKeyIds(backup, known).should.deep.equal([]);
+    const result = await decryptBackup(backup, null, known);
+
+    Object.keys(result.data).should.have.members(
+      Object.keys(V3_FIXTURE_ENTRIES),
+    );
+    result.failed.should.equal(0);
+    result.wrongPassword.should.equal(false);
+    result.missingKey.should.equal(false);
+  });
+
+  it("should name the key it needs a password for", async () => {
+    const { backup, key } = await createV4Backup();
+
+    unknownKeyIds(backup, new Map()).should.deep.equal([key.id]);
+  });
+
+  it("should decrypt with the password of the backup", async () => {
+    const { backup } = await createV4Backup();
+
+    const result = await decryptBackup(backup, BACKUP_PASSWORD);
+
+    Object.keys(result.data).should.have.members(
+      Object.keys(V3_FIXTURE_ENTRIES),
+    );
+    result.failed.should.equal(0);
+    result.wrongPassword.should.equal(false);
+  });
+
+  it("should tell a wrong password", async () => {
+    const { backup } = await createV4Backup();
+
+    const result = await decryptBackup(backup, "wrong password");
+
+    result.data.should.deep.equal({});
+    result.wrongPassword.should.equal(true);
+    result.missingKey.should.equal(false);
+    result.failed.should.equal(Object.keys(V3_FIXTURE_ENTRIES).length);
+  });
+
+  it("should tell a key missing from the backup", async () => {
+    const { backup, key } = await createV4Backup();
+    delete backup[key.id];
+
+    const result = await decryptBackup(backup, BACKUP_PASSWORD);
+
+    result.data.should.deep.equal({});
+    result.missingKey.should.equal(true);
+    result.wrongPassword.should.equal(false);
+    result.failed.should.equal(Object.keys(V3_FIXTURE_ENTRIES).length);
+  });
+
+  it("should restore the rest when an account does not decrypt", async () => {
+    const { backup } = await createV4Backup();
+    const [broken, ...rest] = Object.keys(V3_FIXTURE_ENTRIES);
+    (backup[broken] as EncOTPStorage).data = "v4:AAAA";
+
+    const result = await decryptBackup(backup, BACKUP_PASSWORD);
+
+    Object.keys(result.data).should.have.members(rest);
+    result.failed.should.equal(1);
+    result.wrongPassword.should.equal(false);
   });
 });

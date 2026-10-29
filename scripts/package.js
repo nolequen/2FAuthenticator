@@ -13,6 +13,7 @@ const UPDATE_URL = `${REPO_URL}/releases/latest/download/updates.json`;
 const KEY_VARS = ["WEB_EXT_API_KEY", "WEB_EXT_API_SECRET"];
 const WEB_EXT = "node_modules/web-ext/bin/web-ext.js";
 const FIREFOX_DIR = path.join("release", "firefox");
+const DRIVE_SECRET_FILE = path.join("secrets", "google-oauth.json");
 
 const color = (code, text) => `\x1b[${code}m${text}\x1b[0m`;
 
@@ -166,6 +167,14 @@ function buildPackages() {
   fs.rmSync(buildInfoFile, { force: true });
   fs.rmSync(outDir, { recursive: true, force: true });
 
+  if (!fs.existsSync(DRIVE_SECRET_FILE)) {
+    console.log(
+      color(
+        "7;33",
+        `${DRIVE_SECRET_FILE} is missing: Google Drive backups will not work in the Firefox package.`
+      )
+    );
+  }
   check(runNode("scripts/build.js", ["prod"]));
   check(
     runNode(WEB_EXT, ["lint", "--source-dir", FIREFOX_DIR, "--self-hosted"])

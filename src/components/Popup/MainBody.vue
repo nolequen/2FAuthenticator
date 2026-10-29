@@ -41,7 +41,8 @@
         {{ i18n.show_all }}
       </button>
     </div>
-    <div v-if="backupReminder" class="reminder" role="status">
+    <DriveBanner v-if="driveAttention" :attention="driveAttention" />
+    <div v-else-if="backupReminder" class="reminder" role="status">
       <div class="reminder-body">
         <IconDownload />
         <div>
@@ -128,9 +129,11 @@ import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
 import { useMenuStore } from "../../store/Menu";
 import { useNotificationStore } from "../../store/Notification";
+import { useDriveStore } from "../../store/Drive";
 import { useSortable } from "./drag";
 import { startCapture } from "./startCapture";
 
+import DriveBanner from "./DriveBanner.vue";
 import EntryComponent from "./EntryComponent.vue";
 import EntrySection from "./EntrySection.vue";
 
@@ -149,6 +152,7 @@ const notification = useNotificationStore();
 const { entries, sections, filter, initComplete, shouldFilter, filterHost } =
   storeToRefs(accounts);
 const { backupReminder } = storeToRefs(notification);
+const { attention: driveAttention } = storeToRefs(useDriveStore());
 
 const searchText = ref("");
 const searchInput = useTemplateRef<HTMLInputElement>("searchInput");

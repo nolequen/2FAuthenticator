@@ -10,6 +10,7 @@ import { OTPType } from "../models/otp";
 import { getSiteName, getMatchedEntriesHash } from "../utils";
 import { isChromium } from "../browser";
 import { StorageLocation, UserSettings } from "../models/settings";
+import { DRIVE_RECORD } from "../drive/config";
 import {
   adoptEntries,
   loadEntries,
@@ -410,6 +411,8 @@ export const useAccountsStore = defineStore("accounts", () => {
         newStorageLocation === StorageLocation.Sync
       ) {
         const localData = await chrome.storage.local.get();
+        const drive = localData[DRIVE_RECORD];
+        delete localData[DRIVE_RECORD];
         if (localData?.UserSettings) {
           delete localData.UserSettings;
           await chrome.storage.sync.set(localData);
@@ -424,6 +427,9 @@ export const useAccountsStore = defineStore("accounts", () => {
         ) {
           UserSettings.items.storageLocation = StorageLocation.Sync;
           await chrome.storage.local.clear();
+          if (drive) {
+            await chrome.storage.local.set({ [DRIVE_RECORD]: drive });
+          }
           await UserSettings.commitItems();
           return "updateSuccess";
         } else {

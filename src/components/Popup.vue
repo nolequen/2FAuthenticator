@@ -80,6 +80,8 @@ import AccountPage from "./Popup/AccountPage.vue";
 import PreferencesPage from "./Popup/PreferencesPage.vue";
 import SetPasswordPage from "./Popup/SetPasswordPage.vue";
 import BackupPage from "./Popup/BackupPage.vue";
+import DriveCopiesPage from "./Popup/DriveCopiesPage.vue";
+import BackupPasswordPage from "./Popup/BackupPasswordPage.vue";
 import EntryMenu from "./Popup/EntryMenu.vue";
 import EnterPasswordPage from "./Popup/EnterPasswordPage.vue";
 import LoadingPage from "./Popup/LoadingPage.vue";
@@ -100,6 +102,8 @@ const pages: { [page in Page]: Component } = {
   Preferences: PreferencesPage,
   SetPassword: SetPasswordPage,
   Backup: BackupPage,
+  DriveCopies: DriveCopiesPage,
+  BackupPassword: BackupPasswordPage,
 };
 
 const qrStore = useQrStore();

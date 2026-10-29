@@ -3,6 +3,10 @@ export enum StorageLocation {
   Local = "local",
 }
 
+export function today() {
+  return Math.floor(new Date().getTime() / 1000 / 3600 / 24);
+}
+
 interface UserSettingsData {
   // local settings
   lastRemindingBackupTime?: number;

@@ -768,5 +768,451 @@
   "import_backup_qr_partly_failed": {
     "message": "Import done, but some QR codes were not recognized.",
     "description": "QR import partly failed."
+  },
+  "drive_header": {
+    "message": "Google Drive",
+    "description": "Backup page section."
+  },
+  "drive_connect": {
+    "message": "Connect Google Drive",
+    "description": "Backup page: connect Drive."
+  },
+  "drive_connect_info": {
+    "message": "The encrypted copy updates itself after every change",
+    "description": "Backup page: connect Drive subtitle."
+  },
+  "drive_about": {
+    "message": "The extension sees only its own folder “2FAuthenticator” in Drive. The copy is always encrypted: with the extension password, or with a separate backup password when there is none.",
+    "description": "Backup page: what Drive backups are."
+  },
+  "drive_unavailable": {
+    "message": "Google Drive is not available in this build.",
+    "description": "Drive: the build has no OAuth client."
+  },
+  "drive_status_last": {
+    "message": "Last copy: $WHEN$",
+    "description": "Drive status.",
+    "placeholders": {
+      "when": {
+        "content": "$1",
+        "example": "today, 14:05"
+      }
+    }
+  },
+  "drive_today_at": {
+    "message": "today, $TIME$",
+    "description": "Drive status time of today.",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "14:05"
+      }
+    }
+  },
+  "drive_today_date": {
+    "message": "Today, $DATE$",
+    "description": "Drive copy of today.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 27"
+      }
+    }
+  },
+  "drive_status_none": {
+    "message": "No copies yet",
+    "description": "Drive status."
+  },
+  "drive_status_pending": {
+    "message": "Waiting to upload",
+    "description": "Drive status."
+  },
+  "drive_status_network": {
+    "message": "Waiting to upload: no connection to Google Drive",
+    "description": "Drive status."
+  },
+  "drive_status_quota": {
+    "message": "Waiting to upload: Google Drive is full",
+    "description": "Drive status."
+  },
+  "drive_status_signin": {
+    "message": "Sign in to Google again",
+    "description": "Drive status."
+  },
+  "drive_status_consent": {
+    "message": "Firefox needs a permission to transfer data",
+    "description": "Drive status."
+  },
+  "drive_status_backup_password": {
+    "message": "Set a backup password",
+    "description": "Drive status."
+  },
+  "drive_status_unlock": {
+    "message": "Enter the extension password to save a copy",
+    "description": "Drive status."
+  },
+  "drive_status_shrink": {
+    "message": "Waiting for your answer",
+    "description": "Drive status."
+  },
+  "drive_save_now": {
+    "message": "Save now",
+    "description": "Drive button."
+  },
+  "drive_restore": {
+    "message": "Restore",
+    "description": "Drive button."
+  },
+  "drive_change_backup_password": {
+    "message": "Change backup password",
+    "description": "Drive button and form title."
+  },
+  "drive_set_backup_password": {
+    "message": "Set a backup password",
+    "description": "Drive form title."
+  },
+  "drive_disconnect": {
+    "message": "Disconnect",
+    "description": "Drive button."
+  },
+  "drive_disconnect_title": {
+    "message": "Disconnect Google Drive?",
+    "description": "Drive disconnect dialog."
+  },
+  "drive_disconnect_text": {
+    "message": "The extension stops saving copies and gives up its access to Drive. The copies stay in Drive.",
+    "description": "Drive disconnect dialog."
+  },
+  "drive_footer_password": {
+    "message": "The copy updates a minute after changes, the last 30 days are kept. It is encrypted with the extension password.",
+    "description": "Backup page: Drive footnote."
+  },
+  "drive_footer_backup": {
+    "message": "The copy updates a minute after changes, the last 30 days are kept. It is encrypted with the backup password.",
+    "description": "Backup page: Drive footnote."
+  },
+  "drive_retired": {
+    "message": "Copies up to $DATE$ open with the backup password",
+    "description": "Drive: the backup password was replaced by the extension password.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 27"
+      }
+    }
+  },
+  "drive_skipped": {
+    "message": "Not in the copy, no key: $COUNT$",
+    "description": "Drive: entries without a key.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "drive_saved": {
+    "message": "Copy saved",
+    "description": "Drive toast."
+  },
+  "drive_up_to_date": {
+    "message": "The copy is up to date",
+    "description": "Drive toast."
+  },
+  "drive_nothing_to_save": {
+    "message": "There are no accounts to save",
+    "description": "Drive toast."
+  },
+  "drive_error_network": {
+    "message": "No connection to Google Drive.",
+    "description": "Drive error."
+  },
+  "drive_error_quota": {
+    "message": "Google Drive is full.",
+    "description": "Drive error."
+  },
+  "drive_error_signin": {
+    "message": "Google no longer accepts the sign-in of the extension. Sign in again.",
+    "description": "Drive error."
+  },
+  "drive_banner_signin_title": {
+    "message": "Google Drive: sign in again",
+    "description": "Drive banner."
+  },
+  "drive_banner_signin_text": {
+    "message": "Changes are not saved to Drive: Google no longer accepts the sign-in of the extension.",
+    "description": "Drive banner."
+  },
+  "drive_signin": {
+    "message": "Sign in",
+    "description": "Drive banner button."
+  },
+  "drive_banner_consent_title": {
+    "message": "Google Drive: allow data transfer",
+    "description": "Drive banner."
+  },
+  "drive_banner_consent_text": {
+    "message": "Firefox asks for your permission to send the encrypted copy to Google Drive.",
+    "description": "Drive banner."
+  },
+  "drive_allow": {
+    "message": "Allow",
+    "description": "Drive banner button."
+  },
+  "drive_banner_password_title": {
+    "message": "Google Drive: set a backup password",
+    "description": "Drive banner."
+  },
+  "drive_banner_password_text": {
+    "message": "Without the extension password, copies are encrypted with a backup password.",
+    "description": "Drive banner."
+  },
+  "drive_set": {
+    "message": "Set",
+    "description": "Drive banner button."
+  },
+  "drive_banner_unlock_title": {
+    "message": "Google Drive: enter the extension password to save a copy",
+    "description": "Drive banner."
+  },
+  "drive_banner_unlock_text": {
+    "message": "Some accounts came without encryption, for example through sync. The copy waits until the extension is unlocked.",
+    "description": "Drive banner."
+  },
+  "drive_banner_shrink_title": {
+    "message": "Google Drive: fewer accounts in the copy",
+    "description": "Drive banner."
+  },
+  "drive_banner_shrink_text": {
+    "message": "There were $FROM$, now $TO$. Save this copy?",
+    "description": "Drive banner.",
+    "placeholders": {
+      "from": {
+        "content": "$1",
+        "example": "12"
+      },
+      "to": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "drive_dont_save": {
+    "message": "Don't save",
+    "description": "Drive banner button."
+  },
+  "drive_copies": {
+    "message": "Copies in Google Drive",
+    "description": "Drive copies page title."
+  },
+  "drive_copies_folder": {
+    "message": "Folder “2FAuthenticator”",
+    "description": "Drive copies page."
+  },
+  "drive_copies_merge": {
+    "message": "Accounts from the copy are added to the current ones, matching ones are replaced.",
+    "description": "Drive copies page."
+  },
+  "drive_copies_kept": {
+    "message": "Each browser keeps its last 30 copies.",
+    "description": "Drive copies page."
+  },
+  "drive_copies_empty": {
+    "message": "There are no copies in the folder yet.",
+    "description": "Drive copies page."
+  },
+  "drive_accounts_one": {
+    "message": "$COUNT$ account",
+    "description": "Number of accounts.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "drive_accounts_few": {
+    "message": "$COUNT$ accounts",
+    "description": "Number of accounts.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "drive_accounts_many": {
+    "message": "$COUNT$ accounts",
+    "description": "Number of accounts.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "drive_accounts_other": {
+    "message": "$COUNT$ accounts",
+    "description": "Number of accounts.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1.5"
+      }
+    }
+  },
+  "drive_restore_title": {
+    "message": "Restore the copy of $DATE$",
+    "description": "Drive restore dialog.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "October 21"
+      }
+    }
+  },
+  "drive_restore_info": {
+    "message": "Enter the password the copy was encrypted with: the extension password or the backup password of that day.",
+    "description": "Drive restore dialog."
+  },
+  "drive_copy_password": {
+    "message": "Copy password",
+    "description": "Drive restore dialog."
+  },
+  "drive_wrong_password": {
+    "message": "The password does not fit this copy.",
+    "description": "Drive restore dialog."
+  },
+  "drive_restore_partial": {
+    "message": "Restored. Could not decrypt: $COUNT$",
+    "description": "Drive restore result.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "drive_missing_key": {
+    "message": "The copy has no key to its accounts.",
+    "description": "Drive restore result."
+  },
+  "drive_unlock_first": {
+    "message": "Unlock the extension and try again.",
+    "description": "Drive restore result."
+  },
+  "drive_backup_password": {
+    "message": "Backup password",
+    "description": "Drive backup password page title."
+  },
+  "drive_backup_password_info": {
+    "message": "Copies in Google Drive are encrypted with this password because the extension password is not set. The next copy is encrypted with the new password, earlier copies still open with the old one.",
+    "description": "Drive backup password page."
+  },
+  "drive_new_password": {
+    "message": "New password, at least 8 characters",
+    "description": "Drive backup password field."
+  },
+  "drive_repeat_password": {
+    "message": "New password again",
+    "description": "Drive backup password field."
+  },
+  "drive_password_warning": {
+    "message": "Copies cannot be restored without this password, and it cannot be reset. Remember the old one too: older copies need it.",
+    "description": "Drive backup password warning."
+  },
+  "drive_password_short": {
+    "message": "At least 8 characters",
+    "description": "Drive backup password error."
+  },
+  "drive_tab_title": {
+    "message": "Connect Google Drive",
+    "description": "Drive tab title."
+  },
+  "drive_tab_lead": {
+    "message": "The extension will save an encrypted copy of your accounts to the folder “2FAuthenticator” in your Drive by itself. Other files in Drive are hidden from it.",
+    "description": "Drive tab lead."
+  },
+  "drive_step_signin": {
+    "message": "Sign in to Google",
+    "description": "Drive tab step."
+  },
+  "drive_signin_google": {
+    "message": "Sign in with Google",
+    "description": "Drive tab button."
+  },
+  "drive_signin_info": {
+    "message": "Google asks you to pick an account and lets the extension see only the files it creates.",
+    "description": "Drive tab step."
+  },
+  "drive_copies_found": {
+    "message": "copies in the folder: $COUNT$",
+    "description": "Drive tab step.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "4"
+      }
+    }
+  },
+  "drive_step_password": {
+    "message": "Backup password",
+    "description": "Drive tab step."
+  },
+  "drive_step_password_info": {
+    "message": "The extension password is not set, so copies are encrypted with a separate password.",
+    "description": "Drive tab step."
+  },
+  "drive_step_password_set": {
+    "message": "Copies are encrypted with the extension password.",
+    "description": "Drive tab step."
+  },
+  "drive_password_label": {
+    "message": "Backup password, at least 8 characters",
+    "description": "Drive tab field."
+  },
+  "drive_password_again": {
+    "message": "Again",
+    "description": "Drive tab field."
+  },
+  "drive_password_strength": {
+    "message": "Copies cannot be restored without this password, and it cannot be reset. Anyone who gets into your Google account can try to guess it, so choose a long one.",
+    "description": "Drive tab warning."
+  },
+  "drive_save_and_upload": {
+    "message": "Save and upload a copy",
+    "description": "Drive tab button."
+  },
+  "drive_step_upload": {
+    "message": "First copy",
+    "description": "Drive tab step."
+  },
+  "drive_done": {
+    "message": "Done, you can close this tab.",
+    "description": "Drive tab result."
+  },
+  "drive_retry": {
+    "message": "Try again",
+    "description": "Drive tab button."
+  },
+  "drive_restore_hint": {
+    "message": "Moving accounts to this browser? Restore them from a copy: popup → “Backup and import” → “Restore”. You can set the backup password afterwards.",
+    "description": "Drive tab hint."
+  },
+  "drive_consent_info": {
+    "message": "Firefox asks for a permission to send data: the encrypted copy goes to Google Drive.",
+    "description": "Drive tab consent step."
+  },
+  "drive_consent_denied": {
+    "message": "Without the permission to transfer data, Firefox does not let the extension upload copies.",
+    "description": "Drive tab consent refused."
+  },
+  "drive_signin_failed": {
+    "message": "Could not sign in to Google. Try again.",
+    "description": "Drive tab sign-in error."
+  },
+  "drive_signin_again": {
+    "message": "Sign in to Google again",
+    "description": "Drive tab title for sign-in only."
   }
 }

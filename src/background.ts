@@ -9,42 +9,26 @@ import {
 } from "./utils";
 import { isCodeReady } from "./models/otp";
 
-import { UserSettings } from "./models/settings";
-import {
-  handleCaptureMessage,
-  startCaptureFromCommand,
-  stopCaptureOnAutolock,
-} from "./capture";
+import { startCaptureFromCommand } from "./capture";
+import { handleAlarm, handleMessage } from "./backgroundEvents";
+import { handleStorageChange, scheduleIfConnected } from "./drive/background";
 
-chrome.runtime.onMessage.addListener(async (message, sender) => {
-  await UserSettings.updateItems();
+chrome.runtime.onMessage.addListener(handleMessage);
 
-  await handleCaptureMessage(message, sender);
-  if (message.action === "cachePassphrase") {
-    chrome.storage.session.set({
-      cachedPassphrase: message.value,
-      cachedKeyId: message.keyId,
-    });
-    chrome.alarms.clear("autolock");
-    setAutolock();
-  } else if (message.action === "lock") {
-    chrome.storage.session.set({ cachedPassphrase: null, cachedKeyId: null });
-  } else if (message.action === "resetAutolock") {
-    chrome.alarms.clear("autolock");
-    setAutolock();
-  }
-
-  // https://stackoverflow.com/a/56483156
-  return true;
+chrome.alarms.onAlarm.addListener((alarm) => {
+  handleAlarm(alarm).catch((error) => console.error(error));
 });
 
-chrome.alarms.onAlarm.addListener(() => {
-  chrome.storage.session.set({ cachedPassphrase: null, cachedKeyId: null });
-  stopCaptureOnAutolock();
-  chrome.runtime.sendMessage({ action: "stopImport" });
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  handleStorageChange(changes, areaName).catch((error) => console.error(error));
+});
 
-  // https://stackoverflow.com/a/56483156
-  return true;
+chrome.runtime.onStartup.addListener(() => {
+  scheduleIfConnected().catch((error) => console.error(error));
+});
+
+chrome.runtime.onInstalled.addListener(() => {
+  scheduleIfConnected().catch((error) => console.error(error));
 });
 
 chrome.commands.onCommand.addListener(async (command: string) => {
@@ -94,16 +78,3 @@ chrome.commands.onCommand.addListener(async (command: string) => {
   // https://stackoverflow.com/a/56483156
   return true;
 });
-
-async function setAutolock() {
-  // Set default autolock value
-  if (UserSettings.items.autolock === undefined) {
-    UserSettings.items.autolock = 30;
-  }
-
-  if (Number(UserSettings.items.autolock) > 0) {
-    chrome.alarms.create("autolock", {
-      delayInMinutes: Number(UserSettings.items.autolock),
-    });
-  }
-}

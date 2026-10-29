@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { UserSettings } from "../models/settings";
+import { UserSettings, today } from "../models/settings";
+import { readDriveRecord } from "../drive/state";
 
 export interface ConfirmOptions {
   title?: string;
@@ -19,10 +20,6 @@ export interface PromptOptions {
 
 const TOAST_DURATION = 1500;
 const BACKUP_REMINDER_DAYS = 30;
-
-function today() {
-  return Math.floor(new Date().getTime() / 1000 / 3600 / 24);
-}
 
 export const useNotificationStore = defineStore("notification", () => {
   const message = ref<string[]>([]); // Message content for alert with ok button
@@ -104,7 +101,8 @@ export const useNotificationStore = defineStore("notification", () => {
       return;
     }
 
-    const days = today() - Number(lastReminder);
+    const lastUpload = (await readDriveRecord())?.lastUpload?.day ?? 0;
+    const days = today() - Math.max(Number(lastReminder), lastUpload);
     if (days >= BACKUP_REMINDER_DAYS || days < 0) {
       backupReminder.value = true;
     }

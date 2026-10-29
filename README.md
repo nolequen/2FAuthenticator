@@ -9,7 +9,7 @@
 How it differs from the original:
 
 - its own name and extension ID in Chrome, Edge and Firefox;
-- no cloud backups (Google Drive, Dropbox, OneDrive): backups are exported to a file only;
+- backups go to a file or to your own Google Drive, always encrypted; Dropbox and OneDrive backups are gone;
 - the interface is in English and Russian only;
 - no Advisor, browser context menu, permissions page, enterprise policies or Steam and Battle.net account types;
 - bug fixes.
@@ -48,6 +48,20 @@ Compare the hash with the line for that file in `SHA256SUMS.txt`. On Linux, run 
 
 2FAuthenticator is a separate extension with its own storage: it does not see the accounts of Authenticator, and installing it changes nothing in Authenticator. To move your accounts, open **Backup** in Authenticator and download a backup file, then open **Backup** in 2FAuthenticator, click **Import Backup** and choose the file. If you set a password in Authenticator, use **Download Password-Protected Backup** and enter that password when importing. Otherwise **Download Backup File** saves all your secrets as plain text: delete the file right after the import. A password-protected backup made by Authenticator older than 8.0 does not import: import it into Authenticator and download the backup again.
 
+## Google Drive backups
+
+**Backup and import** > **Connect Google Drive** opens a tab where you sign in to Google. After that the extension keeps an encrypted copy of your accounts in the folder `2FAuthenticator` in your Drive:
+
+- the copy is updated a minute after you add, change, reorder or delete an account, and **Save now** updates it at once;
+- each browser writes one file a day, `2fauthenticator-<browser>-<date>.json`, and keeps its last 30 files; older files go to the Drive trash;
+- the copy is always encrypted: with the extension password, or, when there is none, with a separate backup password that you set when you connect. Without that password the copies cannot be restored, and it cannot be reset;
+- only accounts go into the copy, no settings. The file names and labels in Drive show the browser, the date and the number of accounts, never the names of the accounts;
+- the extension asks Google only for access to the files it creates itself (`drive.file`): it does not see any other file in your Drive.
+
+**Restore** in the Google Drive section lists the copies of all your browsers. A copy can also be downloaded from drive.google.com and imported as a file with **Import**.
+
+**Disconnect** revokes the access of the extension and forgets the sign-in; the copies stay in Drive. **Delete all** in the extension options disconnects Google Drive too. In Firefox the extension asks for the permission to transfer data when you connect; Chrome and Edge ask for no extra permission.
+
 ## Building
 
 You need Node.js 24 and npm. The commands work in PowerShell on Windows as well as on Linux and macOS.
@@ -60,6 +74,8 @@ npm run edge
 ```
 
 Each command builds the extension into the `chrome/`, `firefox/` or `edge/` folder. `npm run prod` builds all three into `release/`. The package submitted to addons.mozilla.org is the `release/firefox` folder built by `npm ci` and `npm run prod`.
+
+Google Drive in Firefox needs the secret of the Desktop OAuth client in `secrets/google-oauth.json` (`{"desktopClientSecret": "..."}`). The folder is ignored by git; without the file the Firefox build shows Google Drive as unavailable. Chrome and Edge do not use it.
 
 `npm test` rebuilds the test build and runs the tests in headless Chrome started by Puppeteer.
 

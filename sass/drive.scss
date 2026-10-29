@@ -1,0 +1,156 @@
+.drive-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drive-step {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+
+  &.todo {
+    color: var(--text-2);
+  }
+
+  &.active,
+  &.busy {
+    padding: 19px;
+    border: 2px solid var(--accent);
+  }
+}
+
+.drive-step-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.drive-step-mark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--segment-bg);
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 700;
+
+  .active &,
+  .busy & {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .done & {
+    background: var(--ok-bg);
+    color: var(--ok-text);
+  }
+
+  svg.lucide {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.drive-step-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.drive-step-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.drive-step-info {
+  display: block;
+  margin: 2px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.drive-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 42px;
+
+  > .notice {
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.45;
+
+    svg.lucide {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.backup-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .notice {
+    margin: 0;
+  }
+}
+
+.drive-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.drive-hint {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+
+  svg.lucide {
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+  }
+}
+
+.drive-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: drive-spin 0.8s linear infinite;
+}
+
+@keyframes drive-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drive-spinner {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .drive-step {
+    border-color: CanvasText;
+  }
+}

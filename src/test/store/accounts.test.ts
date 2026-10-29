@@ -12,6 +12,13 @@ import { Encryption } from "../../models/encryption";
 import { EntryStorage } from "../../models/storage";
 import { OTPEntry, OTPType } from "../../models/otp";
 import { StorageLocation, UserSettings } from "../../models/settings";
+import { DRIVE_RECORD } from "../../drive/config";
+import {
+  driveRecord,
+  resetDrive,
+  storeDriveRecord,
+  storedDriveRecord,
+} from "../drive-helper";
 import {
   holdStorageLock,
   randomPassphrase,
@@ -88,6 +95,7 @@ describe("Accounts", () => {
   afterEach(async () => {
     await resetStorage();
     await clearSession();
+    await resetDrive();
   });
 
   describe("updateCodes", () => {
@@ -278,6 +286,50 @@ describe("Accounts", () => {
         .expect((await chrome.storage.sync.get())[hash])
         .to.not.equal(undefined);
       chai.expect((await chrome.storage.local.get())[hash]).to.equal(undefined);
+    });
+
+    it("should keep the Google Drive connection local when the accounts move to sync", async () => {
+      const hash = crypto.randomUUID();
+      await chrome.storage.local.set({
+        [hash]: { ...rawEntry(hash, "alice", 0), dataType: "OTPStorage" },
+      });
+      const record = await storeDriveRecord(
+        driveRecord({ refreshToken: "refresh-token" }),
+      );
+      const store = await createStore();
+
+      chai
+        .expect(await store.migrateStorage(StorageLocation.Sync))
+        .to.equal("updateSuccess");
+
+      const sync = await chrome.storage.sync.get();
+      chai.expect(sync[hash]).to.not.equal(undefined);
+      chai.expect(sync[DRIVE_RECORD]).to.equal(undefined);
+      chai.expect(await storedDriveRecord()).to.deep.equal(record);
+      chai.expect((await chrome.storage.local.get())[hash]).to.equal(undefined);
+    });
+
+    it("should leave the Google Drive connection local when the accounts move back from sync", async () => {
+      const hash = crypto.randomUUID();
+      await chrome.storage.local.set({
+        UserSettings: { storageLocation: StorageLocation.Sync },
+      });
+      await UserSettings.updateItems();
+      await chrome.storage.sync.set({
+        [hash]: { ...rawEntry(hash, "alice", 0), dataType: "OTPStorage" },
+      });
+      const record = await storeDriveRecord();
+      const store = await createStore();
+
+      chai
+        .expect(await store.migrateStorage(StorageLocation.Local))
+        .to.equal("updateSuccess");
+
+      chai.expect(await storedDriveRecord()).to.deep.equal(record);
+      chai
+        .expect((await chrome.storage.local.get())[hash])
+        .to.not.equal(undefined);
+      (await chrome.storage.sync.get()).should.deep.equal({});
     });
 
     it("should migrate by the settings in the storage, not by an older copy in memory", async () => {

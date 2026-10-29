@@ -9,7 +9,20 @@ import { Encryption } from "../../models/encryption";
 import { OTPAlgorithm, OTPEntry, OTPType } from "../../models/otp";
 import { StorageLocation, UserSettings } from "../../models/settings";
 import { BrowserStorage, EntryStorage } from "../../models/storage";
-import { randomPassphrase, resetStorage, storeKey } from "../storage-helper";
+import { updateDriveRecord } from "../../drive/state";
+import {
+  driveRecord,
+  resetDrive,
+  storeDriveRecord,
+  storedDriveRecord,
+} from "../drive-helper";
+import {
+  holdStorageLock,
+  randomPassphrase,
+  resetStorage,
+  storeKey,
+  waitForStorageLockRequests,
+} from "../storage-helper";
 
 chai.use(sinonChai);
 mocha.setup("bdd");
@@ -502,7 +515,37 @@ describe("EntryStorage", () => {
 
 describe("BrowserStorage", () => {
   beforeEach(() => resetStorage());
-  afterEach(() => resetStorage());
+  afterEach(async () => {
+    await resetStorage();
+    await resetDrive();
+  });
+
+  describe("get", () => {
+    it("should leave out the settings, the keys and the Google Drive connection", async () => {
+      const raw = rawEntry();
+      await chrome.storage.local.set({ [raw.hash]: raw });
+      await storeKey("test-key");
+      await storeDriveRecord();
+
+      (await BrowserStorage.get()).should.deep.equal({ [raw.hash]: raw });
+    });
+
+    it("should read no account and no key from the Google Drive connection", async () => {
+      const key: Key = {
+        dataType: "Key",
+        id: "backup-key",
+        salt: "salt",
+        hash: "hash",
+        version: 3,
+      };
+      await storeDriveRecord(
+        driveRecord({ backupKey: { key, passphrase: randomPassphrase() } }),
+      );
+
+      (await EntryStorage.get()).should.deep.equal([]);
+      (await EntryStorage.hasEncryptionKey()).should.equal(false);
+    });
+  });
 
   describe("clearLogs", () => {
     it("should keep all the data", async () => {
@@ -511,6 +554,25 @@ describe("BrowserStorage", () => {
       await BrowserStorage.clearLogs();
 
       (await chrome.storage.local.get()).should.deep.equal(before);
+    });
+
+    it("should keep a change of the Google Drive connection made while it runs", async () => {
+      await storeAccount(chrome.storage.local);
+      const record = await storeDriveRecord();
+      const release = await holdStorageLock();
+      const clearing = BrowserStorage.clearLogs();
+      const updating = updateDriveRecord(
+        (changed) => ({ ...changed, email: "user@example.com" }),
+        record.connectionId,
+      );
+      await waitForStorageLockRequests(2);
+      await release();
+      await Promise.all([clearing, updating]);
+
+      chai.expect(await storedDriveRecord()).to.deep.equal({
+        ...record,
+        email: "user@example.com",
+      });
     });
 
     it("should keep all the data in sync storage", async () => {

@@ -11,6 +11,7 @@ import {
 import { StorageLocation, UserSettings } from "./settings";
 import { DataType } from "./otp";
 import { normalizeGroup } from "../groups";
+import { DRIVE_RECORD } from "../drive/config";
 
 export const STORAGE_LOCK = "storage";
 const CLEAR_LOGS_RETRY_DELAYS = [100, 500, 1000];
@@ -70,10 +71,12 @@ export class BrowserStorage {
         const item = items[itemId];
 
         if (
-          item !== null &&
-          typeof item === "object" &&
-          "dataType" in item &&
-          item.dataType === "Key"
+          itemId === "UserSettings" ||
+          itemId === DRIVE_RECORD ||
+          (item !== null &&
+            typeof item === "object" &&
+            "dataType" in item &&
+            item.dataType === "Key")
         ) {
           delete items[itemId];
         }

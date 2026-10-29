@@ -39,6 +39,9 @@ const deleteConfirm = ref(false);
 const deleteComplete = ref(false);
 
 async function deleteEverything() {
+  await chrome.runtime
+    .sendMessage({ action: "drive.disconnect" })
+    .catch((error) => console.warn(error));
   await chrome.storage.sync.clear();
   await chrome.storage.local.clear();
   chrome.runtime.sendMessage({ action: "lock" });

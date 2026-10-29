@@ -46,7 +46,7 @@ export default defineConfig(
       ...tseslint.configs.eslintRecommended.rules,
       "vue/multi-word-component-names": [
         "error",
-        { ignores: ["Import", "Options", "Popup"] },
+        { ignores: ["Drive", "Import", "Options", "Popup"] },
       ],
       "vue/no-mutating-props": ["error", { shallowOnly: true }],
     },
