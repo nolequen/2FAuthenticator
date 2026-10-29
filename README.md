@@ -62,6 +62,10 @@ Compare the hash with the line for that file in `SHA256SUMS.txt`. On Linux, run 
 
 **Disconnect** revokes the access of the extension and forgets the sign-in; the copies stay in Drive. **Delete all** in the extension options disconnects Google Drive too. In Firefox the extension asks for the permission to transfer data when you connect; Chrome and Edge ask for no extra permission.
 
+## Privacy
+
+The extension has no server and collects no analytics. What it sends, where and when is described in the [privacy policy](PRIVACY.md).
+
 ## Building
 
 You need Node.js 24 and npm. The commands work in PowerShell on Windows as well as on Linux and macOS.
