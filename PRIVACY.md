@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Effective date: October 29, 2026
+Effective date: November 1, 2026
 
 2FAuthenticator is a browser extension for Chrome, Edge and Firefox, including Firefox for Android, that generates two-factor authentication codes. It is developed in the open at [github.com/nolequen/2FAuthenticator](https://github.com/nolequen/2FAuthenticator).
 
