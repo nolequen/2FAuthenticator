@@ -4,6 +4,7 @@ import "chai/register-should";
 import * as sinon from "sinon";
 import { createPinia, setActivePinia } from "pinia";
 
+import { setAndroid } from "../../browser";
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
 import { useMenuStore } from "../../store/Menu";
@@ -96,6 +97,47 @@ describe("Accounts", () => {
     await resetStorage();
     await clearSession();
     await resetDrive();
+  });
+
+  describe("on a phone", () => {
+    afterEach(() => setAndroid(false));
+
+    function pause(ms: number) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    it("should read the list again once after the accounts change", async () => {
+      const listen = sinon.stub(chrome.storage.onChanged, "addListener");
+      setAndroid(true);
+      const store = await createStore();
+      const changed = listen.firstCall.args[0];
+      const hash = crypto.randomUUID();
+      await chrome.storage.local.set({
+        [hash]: { ...rawEntry(hash, "alice"), dataType: "OTPStorage" },
+      });
+      const get = sinon.spy(EntryStorage, "get");
+
+      changed({ UserSettings: {}, [DRIVE_RECORD]: {} }, "local");
+      changed({ [hash]: {} }, "sync");
+      await pause(300);
+      get.callCount.should.equal(0);
+      store.entries.length.should.equal(0);
+
+      changed({ [hash]: {} }, "local");
+      changed({ [hash]: {} }, "local");
+      await pause(300);
+
+      store.entries.map((entry) => entry.account).should.deep.equal(["alice"]);
+      get.callCount.should.equal(1);
+    });
+
+    it("should not watch the accounts on a computer", async () => {
+      const listen = sinon.stub(chrome.storage.onChanged, "addListener");
+
+      await createStore();
+
+      listen.called.should.equal(false);
+    });
   });
 
   describe("updateCodes", () => {

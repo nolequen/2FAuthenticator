@@ -1,6 +1,7 @@
 import { computed, type MaybeRefOrGetter, type Ref, toValue, watch } from "vue";
 import type { Options, SortableEvent } from "sortablejs";
 import { useDraggable } from "vue-draggable-plus";
+import { isAndroid } from "../../browser";
 import { useStyleStore } from "../../store/Style";
 
 export function useSortable(
@@ -18,6 +19,7 @@ export function useSortable(
       fallbackTolerance: 5,
       animation: 150,
       ...toValue(options),
+      ...(isAndroid ? { disabled: true } : {}),
       immediate: false,
       onStart: (event: SortableEvent) => {
         origin = event.item.parentNode && {

@@ -1,6 +1,7 @@
 import {
   DRIVE_ALARM,
   DRIVE_CHECK_ALARM,
+  DRIVE_MIRROR_ALARM,
   DRIVE_RECORD,
   DRIVE_SESSION,
 } from "../drive/config";
@@ -35,4 +36,5 @@ export async function resetDrive() {
   await chrome.storage.session.remove(DRIVE_SESSION);
   await chrome.alarms.clear(DRIVE_ALARM);
   await chrome.alarms.clear(DRIVE_CHECK_ALARM);
+  await chrome.alarms.clear(DRIVE_MIRROR_ALARM);
 }

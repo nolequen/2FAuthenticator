@@ -3,6 +3,7 @@ import * as chai from "chai";
 import "chai/register-should";
 import * as sinon from "sinon";
 
+import { setAndroid } from "../../browser";
 import { OTPEntry, OTPType } from "../../models/otp";
 import { UserSettings } from "../../models/settings";
 import { useNotificationStore } from "../../store/Notification";
@@ -83,6 +84,16 @@ describe("Notification", () => {
 
     it("should not remind while some accounts are not decrypted", async () => {
       await check(TODAY - 31, [entry(), entry(null)]);
+      notification.backupReminder.should.equal(false);
+    });
+
+    it("should not remind on a phone", async () => {
+      setAndroid(true);
+      try {
+        await check(TODAY - 31);
+      } finally {
+        setAndroid(false);
+      }
       notification.backupReminder.should.equal(false);
     });
 

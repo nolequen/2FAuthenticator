@@ -10,7 +10,33 @@ export type DriveAttention =
   | { kind: "consent" }
   | { kind: "backupPassword" }
   | { kind: "unlock" }
-  | { kind: "shrink"; from: number; to: number; sourceHash: string };
+  | { kind: "shrink"; from: number; to: number; sourceHash: string }
+  | { kind: "mirrorPassword"; fileId: string }
+  | {
+      kind: "mirrorShrink";
+      fileId: string;
+      modifiedTime: string;
+      from: number;
+      to: number;
+    };
+
+export interface MirrorCopy {
+  fileId: string;
+  modifiedTime: string;
+  accounts: number;
+  at: number;
+}
+
+export interface DriveMirror {
+  source?: DriveBrowser;
+  keys: { [keyId: string]: string };
+  skippedKeys?: string[];
+  applied?: MirrorCopy;
+  kept?: { fileId: string; modifiedTime: string };
+  shrinkApproved?: string;
+  checkedAt?: number;
+  undecrypted?: number;
+}
 
 export interface DriveUpload {
   day: number;
@@ -40,6 +66,13 @@ export interface DriveRecord {
   shrinkApproved?: string;
   shrinkSkipped?: string;
   error?: { kind: DriveErrorKind; at: number };
+  mirror?: DriveMirror;
+}
+
+export function isMirror(
+  record: DriveRecord | null | undefined,
+): record is DriveRecord & { mirror: DriveMirror } {
+  return !!record?.mirror;
 }
 
 export interface DriveToken {

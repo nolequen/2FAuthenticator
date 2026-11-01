@@ -31,7 +31,7 @@ chrome.runtime.onInstalled.addListener(() => {
   scheduleIfConnected().catch((error) => console.error(error));
 });
 
-chrome.commands.onCommand.addListener(async (command: string) => {
+chrome.commands?.onCommand.addListener(async (command: string) => {
   const { cachedPassphrase, cachedKeyId } =
     await chrome.storage.session.get<SessionData>();
 

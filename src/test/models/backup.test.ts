@@ -21,7 +21,7 @@ const BACKUP_PASSWORD = "backup password";
 async function createV4Backup() {
   await chrome.storage.local.set(V3_FIXTURE_ENTRIES);
   const entries = await EntryStorage.get();
-  const { key, encryption } = await createKey(BACKUP_PASSWORD);
+  const { key, encryption, passphrase } = await createKey(BACKUP_PASSWORD);
   for (const entry of entries) {
     entry.changeEncryption(encryption);
   }
@@ -32,7 +32,7 @@ async function createV4Backup() {
     [key.id]: key,
   };
   await resetStorage();
-  return { backup, key, encryption };
+  return { backup, key, encryption, passphrase };
 }
 
 async function importBackup(
@@ -196,5 +196,36 @@ describe("decryptBackup", function () {
     Object.keys(result.data).should.have.members(rest);
     result.failed.should.equal(1);
     result.wrongPassword.should.equal(false);
+  });
+
+  it("should give the derived key of the password that opened the backup", async () => {
+    const { backup, key, passphrase } = await createV4Backup();
+
+    const result = await decryptBackup(backup, BACKUP_PASSWORD);
+
+    result.unlocked.should.deep.equal({ [key.id]: passphrase });
+    const again = await decryptBackup(
+      backup,
+      null,
+      new Map([[key.id, new Encryption(result.unlocked[key.id], key.id)]]),
+    );
+    Object.keys(again.data).should.have.members(
+      Object.keys(V3_FIXTURE_ENTRIES),
+    );
+  });
+
+  it("should give no key for a wrong password or a known key", async () => {
+    const { backup, key, encryption } = await createV4Backup();
+
+    (await decryptBackup(backup, "wrong password")).unlocked.should.deep.equal(
+      {},
+    );
+    (
+      await decryptBackup(
+        backup,
+        BACKUP_PASSWORD,
+        new Map([[key.id, encryption]]),
+      )
+    ).unlocked.should.deep.equal({});
   });
 });

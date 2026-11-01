@@ -16,10 +16,14 @@ import { useDriveStore } from "./store/Drive";
 import { syncTimeWithGoogle } from "./syncTime";
 import { UserSettings } from "./models/settings";
 import { applyTheme, normalizeTheme, trackInputModality } from "./theme";
+import { markAndroid, openLinksInTabs } from "./android";
+import { isMirror } from "./drive/state";
 
 const TEXT_FIELDS = "input, textarea, select, [contenteditable]";
 
 async function init() {
+  markAndroid();
+  openLinksInTabs();
   await UserSettings.updateItems();
   applyTheme(normalizeTheme(UserSettings.items.theme));
   trackInputModality();
@@ -50,6 +54,9 @@ async function init() {
   await menu.init();
   await drive.init();
   notification.checkBackupReminder(accounts);
+  if (isMirror(drive.record)) {
+    drive.mirrorCheck(false).catch((error) => console.warn(error));
+  }
 
   // Render
   app.mount("#authenticator");

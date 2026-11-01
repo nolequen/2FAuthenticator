@@ -11,7 +11,9 @@ export type Page =
   | "SetPassword"
   | "Backup"
   | "DriveCopies"
-  | "BackupPassword";
+  | "BackupPassword"
+  | "MirrorBrowser"
+  | "MirrorPassword";
 
 export const useCurrentViewStore = defineStore("currentView", () => {
   const stack = ref<Page[]>([]);

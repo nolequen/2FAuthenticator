@@ -6,8 +6,10 @@ import { i18n, loadI18nMessages } from "./store/i18n";
 
 import { UserSettings } from "./models/settings";
 import { applyTheme, normalizeTheme, trackInputModality } from "./theme";
+import { markAndroid } from "./android";
 
 async function init() {
+  markAndroid();
   await UserSettings.updateItems();
   applyTheme(normalizeTheme(UserSettings.items.theme));
   trackInputModality();

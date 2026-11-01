@@ -5,6 +5,8 @@ import {
   DESKTOP_CLIENT_SECRET,
   DRIVE_AUTH_LOCK,
   DRIVE_SCOPE,
+  LOOPBACK_ORIGIN,
+  LOOPBACK_REDIRECT,
   WEB_CLIENT_ID,
 } from "./config";
 import {
@@ -22,6 +24,7 @@ const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const REVOKE_URL = "https://oauth2.googleapis.com/revoke";
 const RENEW_MARGIN = 5 * 60 * 1000;
 const SILENT_TIMEOUT = 30000;
+const REQUEST_TIMEOUT = 30000;
 const SIGNIN_ERRORS = [
   "interaction_required",
   "login_required",
@@ -32,6 +35,7 @@ const SIGNIN_ERRORS = [
 const DATA_COLLECTION_PERMISSION = {
   data_collection: [DATA_COLLECTION],
 } as chrome.permissions.Permissions;
+const LOOPBACK_PERMISSION = { origins: [LOOPBACK_ORIGIN] };
 
 export type DriveAuthFailure = "signin" | "network" | "cancelled" | "denied";
 
@@ -67,6 +71,9 @@ export function driveAvailable(client = driveClient()) {
 }
 
 export function redirectUri(client: DriveClient) {
+  if (!chrome.identity) {
+    return LOOPBACK_REDIRECT;
+  }
   const url = chrome.identity.getRedirectURL();
   if (client === "web") {
     return url;
@@ -149,7 +156,72 @@ function toSession(token: TokenResponse | URLSearchParams): DriveToken {
   };
 }
 
+export function launchInTab(url: string, redirect: string) {
+  return new Promise<string>((resolve, reject) => {
+    let signInTab: number | undefined;
+    let settled = false;
+
+    const settle = () => {
+      if (settled) {
+        return false;
+      }
+      settled = true;
+      chrome.tabs.onUpdated.removeListener(updated);
+      chrome.tabs.onRemoved.removeListener(removed);
+      return true;
+    };
+    const updated = (
+      tabId: number,
+      changeInfo: { url?: string },
+      tab: chrome.tabs.Tab,
+    ) => {
+      const address = changeInfo.url ?? tab.url;
+      if (tabId !== signInTab || !address?.startsWith(redirect) || !settle()) {
+        return;
+      }
+      resolve(address);
+      closeSignInTab(tabId);
+    };
+    const removed = (tabId: number) => {
+      if (tabId === signInTab && settle()) {
+        reject(new DriveAuthError("cancelled", "The sign-in tab was closed."));
+      }
+    };
+
+    chrome.tabs.onUpdated.addListener(updated);
+    chrome.tabs.onRemoved.addListener(removed);
+    chrome.tabs.create({ url }).then(
+      (tab) => {
+        signInTab = tab.id;
+      },
+      (error) => {
+        if (settle()) {
+          reject(new DriveAuthError("cancelled", String(error)));
+        }
+      },
+    );
+  });
+}
+
+async function closeSignInTab(tabId: number) {
+  const current = await chrome.tabs.getCurrent().catch(() => undefined);
+  await chrome.tabs
+    .remove(tabId)
+    .catch((error) => console.warn("Could not close the sign-in tab.", error));
+  if (current?.id !== undefined) {
+    await chrome.tabs
+      .update(current.id, { active: true })
+      .catch((error) => console.warn("Could not return to the tab.", error));
+  }
+}
+
 async function launch(details: chrome.identity.WebAuthFlowDetails) {
+  if (!chrome.identity) {
+    if (!details.interactive) {
+      throw new DriveAuthError("signin", "No identity API.");
+    }
+    return await launchInTab(details.url, redirectUri("desktop"));
+  }
   let responseUrl: string | undefined;
   try {
     responseUrl = await chrome.identity.launchWebAuthFlow(details);
@@ -176,6 +248,7 @@ async function requestToken(body: { [name: string]: string }) {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams(body),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT),
     });
   } catch (error) {
     throw new DriveAuthError("network", String(error));
@@ -320,20 +393,49 @@ export async function revokeAccess(record: DriveRecord) {
   if (!token) {
     try {
       token = await getAccessToken(record);
-    } catch {
-      return;
+    } catch (error) {
+      return (
+        record.client === "desktop" &&
+        error instanceof DriveAuthError &&
+        error.reason === "signin"
+      );
     }
   }
-  await fetch(REVOKE_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ token }),
-  }).catch((error) => console.warn("Could not revoke the access.", error));
+  try {
+    const response = await fetch(REVOKE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ token }),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+    });
+    if (response.ok) {
+      return true;
+    }
+    const body: TokenResponse = await response.json().catch(() => ({}));
+    return body.error === "invalid_token";
+  } catch (error) {
+    console.warn("Could not revoke the access.", error);
+    return false;
+  }
+}
+
+function requestLoopback() {
+  try {
+    return chrome.permissions
+      .request({ ...DATA_COLLECTION_PERMISSION, ...LOOPBACK_PERMISSION })
+      .catch(() => chrome.permissions.request(LOOPBACK_PERMISSION))
+      .catch(() => false);
+  } catch {
+    return chrome.permissions.request(LOOPBACK_PERMISSION).catch(() => false);
+  }
 }
 
 export function requestDataCollection() {
   if (!isFirefox) {
     return Promise.resolve(true);
+  }
+  if (!chrome.identity) {
+    return requestLoopback();
   }
   try {
     return chrome.permissions

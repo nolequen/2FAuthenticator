@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { UserSettings, today } from "../models/settings";
 import { readDriveRecord } from "../drive/state";
+import { isAndroid } from "../browser";
 
 export interface ConfirmOptions {
   title?: string;
@@ -90,7 +91,11 @@ export const useNotificationStore = defineStore("notification", () => {
     entries: OTPEntryInterface[];
     currentlyEncrypted: boolean;
   }) {
-    if (accounts.entries.length === 0 || accounts.currentlyEncrypted) {
+    if (
+      isAndroid ||
+      accounts.entries.length === 0 ||
+      accounts.currentlyEncrypted
+    ) {
       return;
     }
 

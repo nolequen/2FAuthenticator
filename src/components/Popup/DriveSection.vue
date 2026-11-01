@@ -57,6 +57,9 @@
         <a-button variant="danger-soft" small @click="disconnect()">
           {{ i18n.drive_disconnect }}
         </a-button>
+        <a-button variant="danger-soft" small @click="signOutEverywhere()">
+          {{ signOutLabel }}
+        </a-button>
       </div>
     </section>
     <div v-if="retiredDate" class="notice info">
@@ -88,6 +91,7 @@ import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
 import { useDriveStore } from "../../store/Drive";
 import { useNotificationStore } from "../../store/Notification";
+import { useDriveActions } from "./driveActions";
 
 import IconCloud from "lucide-static/icons/cloud.svg";
 import IconCloudCheck from "lucide-static/icons/cloud-check.svg";
@@ -137,16 +141,5 @@ async function saveNow() {
   }
 }
 
-async function disconnect() {
-  if (
-    await notification.confirm({
-      title: i18n.drive_disconnect_title,
-      message: i18n.drive_disconnect_text,
-      confirm: i18n.drive_disconnect,
-      danger: true,
-    })
-  ) {
-    await currentView.withBusy(() => drive.disconnect());
-  }
-}
+const { signOutLabel, disconnect, signOutEverywhere } = useDriveActions();
 </script>

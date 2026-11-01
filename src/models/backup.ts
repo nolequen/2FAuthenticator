@@ -5,6 +5,7 @@ export interface BackupDecryption {
   failed: number;
   wrongPassword: boolean;
   missingKey: boolean;
+  unlocked: { [keyId: string]: string };
 }
 
 export function unknownKeyIds(
@@ -35,6 +36,7 @@ export async function decryptBackup(
     failed: 0,
     wrongPassword: false,
     missingKey: false,
+    unlocked: {},
   };
   const keys: Map<string, EncryptionInterface | null> = new Map(known);
   let triedKeys = 0;
@@ -61,6 +63,7 @@ export async function decryptBackup(
           const unlocked = await unlockKey(key, passphrase);
           if (unlocked) {
             unlockedKeys++;
+            result.unlocked[keyId] = unlocked.passphrase;
           }
           keys.set(keyId, unlocked ? unlocked.encryption : null);
         }

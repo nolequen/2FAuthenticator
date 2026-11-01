@@ -8,11 +8,18 @@ import { DriveApi } from "../../drive/api";
 import {
   DriveAuthError,
   getAccessToken,
+  launchInTab,
   parseRedirect,
   pkceChallenge,
+  redirectUri,
+  revokeAccess,
   signIn,
 } from "../../drive/auth";
-import { DRIVE_SCOPE, DRIVE_SESSION } from "../../drive/config";
+import {
+  DRIVE_SCOPE,
+  DRIVE_SESSION,
+  LOOPBACK_REDIRECT,
+} from "../../drive/config";
 import {
   CONNECTION_ID,
   driveRecord,
@@ -371,6 +378,265 @@ describe("Drive authorization", () => {
 
       token.should.have.been.calledTwice;
       token.secondCall.should.have.been.calledWith("old-token");
+    });
+  });
+
+  describe("revoke", () => {
+    function answerRevoke(response: Response | Error) {
+      const fetch = sinon.fake(async () => {
+        if (response instanceof Error) {
+          throw response;
+        }
+        return response;
+      });
+      sinon.replace(window, "fetch", fetch as unknown as typeof window.fetch);
+      return fetch;
+    }
+
+    const record = driveRecord({ client: "desktop", refreshToken: "refresh" });
+
+    it("should revoke the refresh token with a time limit", async () => {
+      const fetch = answerRevoke(new Response("", { status: 200 }));
+
+      (await revokeAccess(record)).should.equal(true);
+
+      const [url, init] = fetch.firstCall.args as unknown as [
+        string,
+        RequestInit,
+      ];
+      url.should.equal("https://oauth2.googleapis.com/revoke");
+      String(init.body).should.equal("token=refresh");
+      chai.expect(init.signal).to.be.instanceOf(AbortSignal);
+    });
+
+    it("should take a token that is no longer valid as revoked", async () => {
+      answerRevoke(tokenResponse(400, { error: "invalid_token" }));
+
+      (await revokeAccess(record)).should.equal(true);
+    });
+
+    it("should tell a revoke that Google refuses or does not answer", async () => {
+      sinon.stub(console, "warn");
+      answerRevoke(tokenResponse(400, { error: "invalid_request" }));
+      (await revokeAccess(record)).should.equal(false);
+
+      sinon.restore();
+      sinon.stub(console, "warn");
+      answerRevoke(tokenResponse(503, {}));
+      (await revokeAccess(record)).should.equal(false);
+
+      sinon.restore();
+      sinon.stub(console, "warn");
+      answerRevoke(new TypeError("Failed to fetch"));
+      (await revokeAccess(record)).should.equal(false);
+    });
+
+    it("should take a computer that has to sign in again as revoked", async () => {
+      const fetch = answerRevoke(new Response("", { status: 200 }));
+
+      (await revokeAccess(driveRecord({ client: "desktop" }))).should.equal(
+        true,
+      );
+
+      fetch.should.not.have.been.called;
+    });
+
+    it("should tell a revoke without a token in Chrome and Edge", async () => {
+      launch.rejects(new Error("User interaction required."));
+
+      (await revokeAccess(driveRecord())).should.equal(false);
+    });
+
+    it("should ask for a new access token with a time limit", async () => {
+      const fetch = sinon.fake.resolves(
+        tokenResponse(200, { access_token: "renewed", expires_in: 3599 }),
+      );
+      sinon.replace(window, "fetch", fetch as unknown as typeof window.fetch);
+
+      await getAccessToken(
+        driveRecord({ client: "desktop", refreshToken: "refresh" }),
+      );
+
+      chai
+        .expect((fetch.firstCall.args[1] as RequestInit).signal)
+        .to.be.instanceOf(AbortSignal);
+    });
+  });
+
+  describe("without the identity API", () => {
+    const AUTH = "https://accounts.google.com/o/oauth2/v2/auth?state=state";
+
+    let addUpdated: sinon.SinonStub;
+    let removeUpdated: sinon.SinonStub;
+    let addRemoved: sinon.SinonStub;
+    let removeRemoved: sinon.SinonStub;
+    let create: sinon.SinonStub;
+    let remove: sinon.SinonStub;
+    let update: sinon.SinonStub;
+
+    beforeEach(() => {
+      sinon.stub(chrome, "identity").value(undefined);
+      addUpdated = sinon.stub(chrome.tabs.onUpdated, "addListener");
+      removeUpdated = sinon.stub(chrome.tabs.onUpdated, "removeListener");
+      addRemoved = sinon.stub(chrome.tabs.onRemoved, "addListener");
+      removeRemoved = sinon.stub(chrome.tabs.onRemoved, "removeListener");
+      create = sinon
+        .stub(chrome.tabs, "create")
+        .resolves({ id: 7 } as chrome.tabs.Tab);
+      remove = sinon.stub(chrome.tabs, "remove").resolves();
+      update = sinon.stub(chrome.tabs, "update").resolves();
+      sinon
+        .stub(chrome.tabs, "getCurrent")
+        .resolves({ id: 3 } as chrome.tabs.Tab);
+    });
+
+    function tab(id: number, url?: string) {
+      return { id, url } as chrome.tabs.Tab;
+    }
+
+    async function opened() {
+      await waitFor(() => create.called && addUpdated.called);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      return {
+        updated: addUpdated.firstCall.args[0] as (
+          tabId: number,
+          changeInfo: { url?: string },
+          tab: chrome.tabs.Tab,
+        ) => void,
+        removed: addRemoved.firstCall.args[0] as (tabId: number) => void,
+      };
+    }
+
+    async function waitFor(condition: () => boolean) {
+      for (let attempt = 0; attempt < 100 && !condition(); attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      if (!condition()) {
+        throw new Error("The condition did not come true.");
+      }
+    }
+
+    it("should use the loopback address for both clients", () => {
+      redirectUri("desktop").should.equal(LOOPBACK_REDIRECT);
+      redirectUri("web").should.equal(LOOPBACK_REDIRECT);
+    });
+
+    it("should take the address of the sign-in tab once it reaches the loopback address", async () => {
+      const signedIn = launchInTab(AUTH, LOOPBACK_REDIRECT);
+      const { updated } = await opened();
+
+      updated(8, { url: `${LOOPBACK_REDIRECT}?code=other` }, tab(8));
+      updated(7, { url: "https://accounts.google.com/next" }, tab(7));
+      updated(7, { url: "http://127.0.0.1/other?code=other" }, tab(7));
+      updated(7, { url: `${LOOPBACK_REDIRECT}?code=code` }, tab(7));
+
+      (await signedIn).should.equal(`${LOOPBACK_REDIRECT}?code=code`);
+      create.should.have.been.calledOnceWith({ url: AUTH });
+      removeUpdated.should.have.been.calledOnceWith(updated);
+      removeRemoved.should.have.been.calledOnce;
+      await waitFor(() => update.called);
+      remove.should.have.been.calledOnceWith(7);
+      update.should.have.been.calledOnceWith(3, { active: true });
+    });
+
+    it("should read the address from the tab when the change has none", async () => {
+      const signedIn = launchInTab(AUTH, LOOPBACK_REDIRECT);
+      const { updated } = await opened();
+
+      updated(7, {}, tab(7, `${LOOPBACK_REDIRECT}?code=code`));
+
+      (await signedIn).should.equal(`${LOOPBACK_REDIRECT}?code=code`);
+    });
+
+    it("should take the first of two events for the same address", async () => {
+      const signedIn = launchInTab(AUTH, LOOPBACK_REDIRECT);
+      const { updated } = await opened();
+
+      updated(7, { url: `${LOOPBACK_REDIRECT}?code=first` }, tab(7));
+      updated(7, { url: `${LOOPBACK_REDIRECT}?code=second` }, tab(7));
+
+      (await signedIn).should.equal(`${LOOPBACK_REDIRECT}?code=first`);
+      await waitFor(() => update.called);
+      remove.should.have.been.calledOnce;
+    });
+
+    it("should tell a sign-in tab closed by the user", async () => {
+      const signedIn = launchInTab(AUTH, LOOPBACK_REDIRECT);
+      const { updated, removed } = await opened();
+
+      removed(8);
+      removed(7);
+      updated(7, { url: `${LOOPBACK_REDIRECT}?code=code` }, tab(7));
+
+      const error = await caught(signedIn);
+      chai.expect(error).to.be.instanceOf(DriveAuthError);
+      (error as DriveAuthError).reason.should.equal("cancelled");
+      removeUpdated.should.have.been.calledOnce;
+      remove.should.not.have.been.called;
+    });
+
+    it("should go on when the sign-in tab cannot be closed", async () => {
+      remove.rejects(new Error("not supported"));
+      const warn = sinon.stub(console, "warn");
+      const signedIn = launchInTab(AUTH, LOOPBACK_REDIRECT);
+      const { updated } = await opened();
+
+      updated(7, { url: `${LOOPBACK_REDIRECT}?code=code` }, tab(7));
+
+      (await signedIn).should.equal(`${LOOPBACK_REDIRECT}?code=code`);
+      await waitFor(() => update.called);
+      warn.should.have.been.called;
+      update.should.have.been.calledOnceWith(3, { active: true });
+    });
+
+    it("should tell a sign-in tab that cannot be opened", async () => {
+      create.rejects(new Error("no tabs"));
+
+      const error = await caught(launchInTab(AUTH, LOOPBACK_REDIRECT));
+
+      (error as DriveAuthError).reason.should.equal("cancelled");
+      removeUpdated.should.have.been.calledOnce;
+    });
+
+    it("should exchange the code from the sign-in tab with the loopback address", async () => {
+      const fetch = sinon.fake.resolves(
+        tokenResponse(200, {
+          access_token: "token",
+          expires_in: 3599,
+          refresh_token: "refresh",
+        }),
+      );
+      sinon.replace(window, "fetch", fetch as unknown as typeof window.fetch);
+
+      const signedIn = signIn("desktop");
+      const { updated } = await opened();
+      const url = new URL(
+        (create.firstCall.args[0] as chrome.tabs.CreateProperties).url!,
+      );
+      const state = url.searchParams.get("state");
+      updated(
+        7,
+        { url: `${LOOPBACK_REDIRECT}?code=code&state=${state}` },
+        tab(7),
+      );
+      const result = await signedIn;
+
+      chai.expect(result.refreshToken).to.equal("refresh");
+      chai
+        .expect(url.searchParams.get("redirect_uri"))
+        .to.equal(LOOPBACK_REDIRECT);
+      const body = new URLSearchParams(
+        String((fetch.firstCall.args[1] as RequestInit).body),
+      );
+      chai.expect(body.get("code")).to.equal("code");
+      chai.expect(body.get("redirect_uri")).to.equal(LOOPBACK_REDIRECT);
+    });
+
+    it("should ask to sign in instead of a silent renewal", async () => {
+      const error = await caught(getAccessToken(driveRecord()));
+
+      (error as DriveAuthError).reason.should.equal("signin");
+      create.should.not.have.been.called;
     });
   });
 });

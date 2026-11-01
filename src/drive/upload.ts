@@ -22,6 +22,7 @@ import {
   type DriveBrowser,
   type DriveErrorKind,
   type DriveRecord,
+  isMirror,
   readDriveRecord,
   updateDriveRecord,
 } from "./state";
@@ -72,8 +73,8 @@ export function scheduleBackup() {
   });
 }
 
-export function driveApi(record: DriveRecord) {
-  return new DriveApi((rejected) => getAccessToken(record, rejected));
+export function driveApi(record: DriveRecord, timeout?: number) {
+  return new DriveApi((rejected) => getAccessToken(record, rejected), timeout);
 }
 
 export async function findFolder(api: DriveApi, record: DriveRecord) {
@@ -154,7 +155,7 @@ async function backup(force: boolean): Promise<BackupResult> {
     return { status: "disconnected" };
   }
   const { connectionId, browser } = record;
-  if (!driveAvailable(record.client)) {
+  if (isMirror(record) || !driveAvailable(record.client)) {
     return { status: "unavailable" };
   }
 

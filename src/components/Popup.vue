@@ -64,7 +64,13 @@
     </div>
 
     <!-- CLIPBOARD -->
-    <input id="codeClipboard" type="text" tabindex="-1" aria-hidden="true" />
+    <input
+      id="codeClipboard"
+      type="text"
+      tabindex="-1"
+      aria-hidden="true"
+      readonly
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -82,6 +88,8 @@ import SetPasswordPage from "./Popup/SetPasswordPage.vue";
 import BackupPage from "./Popup/BackupPage.vue";
 import DriveCopiesPage from "./Popup/DriveCopiesPage.vue";
 import BackupPasswordPage from "./Popup/BackupPasswordPage.vue";
+import MirrorBrowserPage from "./Popup/MirrorBrowserPage.vue";
+import MirrorPasswordPage from "./Popup/MirrorPasswordPage.vue";
 import EntryMenu from "./Popup/EntryMenu.vue";
 import EnterPasswordPage from "./Popup/EnterPasswordPage.vue";
 import LoadingPage from "./Popup/LoadingPage.vue";
@@ -104,6 +112,8 @@ const pages: { [page in Page]: Component } = {
   Backup: BackupPage,
   DriveCopies: DriveCopiesPage,
   BackupPassword: BackupPasswordPage,
+  MirrorBrowser: MirrorBrowserPage,
+  MirrorPassword: MirrorPasswordPage,
 };
 
 const qrStore = useQrStore();

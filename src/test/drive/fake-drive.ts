@@ -53,6 +53,11 @@ export class FakeDrive {
     status: number;
     reason: string;
   }[] = [];
+  private pauses: {
+    match: (request: FakeRequest) => boolean;
+    reached: () => void;
+    resumed: Promise<void>;
+  }[] = [];
   private counter = 0;
   private clock = Date.parse("2026-10-01T10:00:00Z");
 
@@ -112,6 +117,15 @@ export class FakeDrive {
     this.failures.push({ match, status, reason });
   }
 
+  pause(match: (request: FakeRequest) => boolean) {
+    let reached: () => void = () => undefined;
+    let resume: () => void = () => undefined;
+    const waiting = new Promise<void>((resolve) => (reached = resolve));
+    const resumed = new Promise<void>((resolve) => (resume = resolve));
+    this.pauses.push({ match, reached, resumed });
+    return { reached: waiting, resume };
+  }
+
   private async handle(input: string, init: RequestInit): Promise<Response> {
     const headers = (init.headers ?? {}) as { [name: string]: string };
     const request: FakeRequest = {
@@ -121,10 +135,19 @@ export class FakeDrive {
     };
     this.requests.push(request);
 
+    const pause = this.pauses.find((item) => item.match(request));
+    if (pause) {
+      this.pauses.splice(this.pauses.indexOf(pause), 1);
+      pause.reached();
+      await pause.resumed;
+    }
     const failure = this.failures.find((item) => item.match(request));
     if (failure) {
       this.failures.splice(this.failures.indexOf(failure), 1);
       return apiError(failure.status, failure.reason);
+    }
+    if (request.url.pathname === "/revoke") {
+      return new Response("", { status: 200 });
     }
     if (headers.Authorization !== `Bearer ${this.token}`) {
       return apiError(401, "authError");

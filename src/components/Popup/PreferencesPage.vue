@@ -33,6 +33,7 @@
           :description="i18n.site_icons_info"
         />
         <a-toggle-input
+          v-if="!isAndroid"
           v-model="browserSync"
           :label="i18n.browser_sync"
           :description="i18n.browser_sync_info"
@@ -44,6 +45,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { isAndroid } from "../../browser";
 import { UserSettings } from "../../models/settings";
 import type { Theme } from "../../theme";
 import { i18n } from "../../store/i18n";

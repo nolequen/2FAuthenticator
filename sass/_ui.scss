@@ -364,6 +364,16 @@ input:checked + .switch {
   }
 }
 
+.mirror-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .notice {
+    margin: 0;
+  }
+}
+
 .section-title {
   margin: 10px 4px 0;
   color: var(--text-2);

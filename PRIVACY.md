@@ -2,7 +2,7 @@
 
 Effective date: October 29, 2026
 
-2FAuthenticator is a browser extension for Chrome, Edge and Firefox that generates two-factor authentication codes. It is developed in the open at [github.com/nolequen/2FAuthenticator](https://github.com/nolequen/2FAuthenticator).
+2FAuthenticator is a browser extension for Chrome, Edge and Firefox, including Firefox for Android, that generates two-factor authentication codes. It is developed in the open at [github.com/nolequen/2FAuthenticator](https://github.com/nolequen/2FAuthenticator).
 
 ## In short
 
@@ -36,8 +36,9 @@ This happens only after you connect Google Drive in **Backup and import**.
 - **Encryption**: every copy is encrypted on your device with the extension password or, if there is none, with a separate backup password. The password never leaves your device. Neither the developer nor Google can read the accounts in a copy.
 - **Sign-in tokens**: in Chrome and Edge the extension keeps a short-lived access token from Google in the browser's session storage, which is cleared when the browser closes. In Firefox it also keeps a refresh token in the extension's storage, so it can renew the access without a sign-in window. The tokens are sent only to Google: `accounts.google.com`, `oauth2.googleapis.com` and `www.googleapis.com`.
 - **Firefox permission**: Firefox asks you to allow the transfer of authentication information when you connect, because the extension sends these sign-in tokens to Google. They go only to Google, never to the developer.
+- **Firefox for Android**: the phone only reads the copies of the browser you choose and uploads nothing. It signs in to Google in a normal tab; Google then sends the tab to `http://127.0.0.1/2fauthenticator`, an address on the phone itself, where the extension takes the sign-in code and closes the tab. That is why Firefox asks for access to `127.0.0.1`. The phone keeps the refresh token, the keys derived from the copy passwords (never the passwords) and the decrypted accounts in the extension's local storage on the phone. Anyone who can open Firefox on the unlocked phone can see the codes.
 
-**Disconnect** revokes the extension's access at Google and deletes the tokens and the email address from the extension. **Delete all** in the options does the same. You can also remove the access at [myaccount.google.com/permissions](https://myaccount.google.com/permissions). The copies stay in your Drive until you delete them there. The extension keeps the last 30 copies of each browser and moves older ones to the Drive trash.
+**Disconnect** deletes the tokens and the email address from this browser; on a phone it also deletes the accounts and the copy keys. It does not revoke the extension's access at Google, so your other browsers and phones stay connected. **Delete all** in the options does the same. **Sign out on all devices** in Firefox revokes the access at Google for Firefox on every computer and phone, and **Sign out of all Chrome and Edge** in Chrome and Edge does it for them. You can also remove the access at [myaccount.google.com/connections](https://myaccount.google.com/connections). Revoking the access does not erase the accounts already on a phone. The copies stay in your Drive until you delete them there. The extension keeps the last 30 copies of each browser and moves older ones to the Drive trash.
 
 2FAuthenticator's use and transfer of information received from Google APIs adheres to the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), including the Limited Use requirements. The data received from Google is used only to save and restore your backup copies. It is not transferred to anyone, not used for advertising, not used to train AI models and not read by people.
 

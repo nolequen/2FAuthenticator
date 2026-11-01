@@ -6,12 +6,15 @@
     </div>
     <div>
       <h1>{{ heading }}</h1>
-      <p class="lead">{{ i18n.drive_tab_lead }}</p>
+      <p class="lead">
+        {{ isAndroid ? i18n.mirror_tab_lead : i18n.drive_tab_lead }}
+      </p>
     </div>
     <div v-if="!drive.available" class="notice warning">
       <IconTriangle />
       <span>{{ i18n.drive_unavailable }}</span>
     </div>
+    <MirrorConnect v-else-if="isAndroid" :signin="mode === 'signin'" />
     <ol v-else class="drive-steps">
       <li :class="['drive-step', signin]">
         <div class="drive-step-head">
@@ -131,13 +134,12 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { isEdge, isFirefox } from "../browser";
+import { isAndroid, isFirefox } from "../browser";
 import { DriveApi } from "../drive/api";
 import { driveClient, requestDataCollection, signIn } from "../drive/auth";
+import { connectedRecord } from "../drive/connect";
 import { attentionText, resultText } from "../drive/status";
 import {
-  type DriveBrowser,
-  type DriveRecord,
   readDriveRecord,
   updateDriveRecord,
   writeDriveRecord,
@@ -148,6 +150,7 @@ import { EntryStorage } from "../models/storage";
 import { i18n, t } from "../store/i18n";
 import { useDriveStore } from "../store/Drive";
 import BackupPasswordForm from "./Drive/BackupPasswordForm.vue";
+import MirrorConnect from "./Drive/MirrorConnect.vue";
 
 import IconApp from "../../images/icon.svg";
 import IconCheck from "lucide-static/icons/check.svg";
@@ -195,52 +198,12 @@ onMounted(async () => {
   hasExtensionPassword.value = await EntryStorage.hasEncryptionKey();
 });
 
-function driveBrowser(): DriveBrowser {
-  return isFirefox ? "firefox" : isEdge ? "edge" : "chrome";
-}
-
 function signInClick() {
   connect(requestDataCollection());
 }
 
 function allowClick() {
   allow(requestDataCollection());
-}
-
-function connectedRecord(
-  previous: DriveRecord | null,
-  address: string | undefined,
-  refreshToken: string | undefined,
-): DriveRecord {
-  const sameAccount =
-    !!previous && (!address || !previous.email || previous.email === address);
-  const record: DriveRecord = {
-    ...(previous ?? {}),
-    connectionId: crypto.randomUUID(),
-    client: driveClient(),
-    browser: driveBrowser(),
-  };
-  delete record.attention;
-  delete record.error;
-  if (!sameAccount) {
-    delete record.folderId;
-    delete record.lastUpload;
-    delete record.skipped;
-    delete record.shrinkApproved;
-    delete record.shrinkSkipped;
-  }
-  const accountEmail = address ?? (sameAccount ? previous?.email : undefined);
-  if (accountEmail) {
-    record.email = accountEmail;
-  } else {
-    delete record.email;
-  }
-  if (refreshToken) {
-    record.refreshToken = refreshToken;
-  } else {
-    delete record.refreshToken;
-  }
-  return record;
 }
 
 async function connect(consent: Promise<boolean>) {

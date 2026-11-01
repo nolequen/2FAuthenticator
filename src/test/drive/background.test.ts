@@ -4,13 +4,25 @@ import "chai/register-should";
 import * as sinon from "sinon";
 import sinonChai from "sinon-chai";
 
+import { handleAlarm } from "../../backgroundEvents";
 import {
   type DriveListResponse,
+  backupAfterUnlock,
   handleDriveMessage,
   handleStorageChange,
+  scheduleIfConnected,
 } from "../../drive/background";
-import { DRIVE_ALARM, DRIVE_RECORD, DRIVE_SESSION } from "../../drive/config";
+import {
+  DRIVE_ALARM,
+  DRIVE_CHECK_ALARM,
+  DRIVE_MIRROR_ALARM,
+  DRIVE_RECORD,
+  DRIVE_SESSION,
+} from "../../drive/config";
+import type { DriveRecord } from "../../drive/state";
+import { runBackup } from "../../drive/upload";
 import { StorageLocation } from "../../models/settings";
+import { EntryStorage } from "../../models/storage";
 import {
   CONNECTION_ID,
   driveRecord,
@@ -18,13 +30,40 @@ import {
   storeDriveRecord,
   storedDriveRecord,
 } from "../drive-helper";
-import { resetStorage } from "../storage-helper";
+import { resetStorage, storeKey } from "../storage-helper";
 import { FakeDrive } from "./fake-drive";
 
 chai.use(sinonChai);
 mocha.setup("bdd");
 
 const CHANGE = { newValue: {} };
+
+function mirrorRecord(fields: Partial<DriveRecord> = {}) {
+  return driveRecord({
+    client: "desktop",
+    browser: "firefox",
+    refreshToken: "refresh",
+    mirror: { source: "chrome", keys: {} },
+    ...fields,
+  });
+}
+
+async function storeAccounts(count: number) {
+  const items: { [hash: string]: RawOTPStorage } = {};
+  for (let index = 0; index < count; index++) {
+    const hash = crypto.randomUUID();
+    items[hash] = {
+      dataType: "OTPStorage",
+      account: `account ${index}`,
+      encrypted: false,
+      hash,
+      index,
+      secret: "JBSWY3DPEHPK3PXP",
+      type: "totp",
+    };
+  }
+  await chrome.storage.local.set(items);
+}
 
 async function storeSession() {
   await chrome.storage.session.set({
@@ -172,8 +211,10 @@ describe("Drive background", () => {
         .to.deep.equal({ kind: "signin" });
     });
 
-    it("should revoke the access and forget the connection", async () => {
-      await storeDriveRecord();
+    it("should forget the connection without revoking the access", async () => {
+      await storeAccounts(1);
+      await storeDriveRecord(driveRecord({ refreshToken: "refresh" }));
+      const clear = sinon.spy(chrome.alarms, "clear");
 
       await handleDriveMessage({ action: "drive.disconnect" });
 
@@ -183,10 +224,105 @@ describe("Drive background", () => {
           (await chrome.storage.session.get(DRIVE_SESSION))[DRIVE_SESSION],
         )
         .to.equal(undefined);
+      drive.requests.should.have.lengthOf(0);
+      for (const alarm of [
+        DRIVE_ALARM,
+        DRIVE_CHECK_ALARM,
+        DRIVE_MIRROR_ALARM,
+      ]) {
+        clear.should.have.been.calledWith(alarm);
+      }
+      (await EntryStorage.count()).should.equal(1);
+    });
+
+    it("should revoke the access and then forget the connection when signing out everywhere", async () => {
+      await storeDriveRecord(driveRecord({ refreshToken: "refresh" }));
+      let connected: DriveRecord | undefined;
+      const original = window.fetch;
+      sinon.restore();
+      sinon.replace(
+        window,
+        "fetch",
+        sinon.fake(async (input: RequestInfo | URL, init?: RequestInit) => {
+          connected = await storedDriveRecord();
+          return original(input, init);
+        }) as unknown as typeof fetch,
+      );
+
+      (
+        await handleDriveMessage({ action: "drive.signOutEverywhere" })
+      ).should.deep.equal({ status: "done" });
+
+      const revoke = drive.requests.find(
+        (request) => request.url.pathname === "/revoke",
+      );
+      chai.expect(revoke?.body).to.equal("token=refresh");
+      chai.expect(connected?.connectionId).to.equal(CONNECTION_ID);
+      chai.expect(await storedDriveRecord()).to.equal(undefined);
+    });
+
+    it("should revoke the access token when there is no refresh token", async () => {
+      await storeDriveRecord();
+
+      (
+        await handleDriveMessage({ action: "drive.signOutEverywhere" })
+      ).should.deep.equal({ status: "done" });
+
       const revoke = drive.requests.find(
         (request) => request.url.pathname === "/revoke",
       );
       chai.expect(revoke?.body).to.equal("token=access-token");
+      chai.expect(await storedDriveRecord()).to.equal(undefined);
+    });
+
+    it("should stay connected when the access cannot be revoked", async () => {
+      await storeAccounts(1);
+      await storeDriveRecord(mirrorRecord());
+      drive.fail(
+        (request) => request.url.pathname === "/revoke",
+        503,
+        "backendError",
+      );
+
+      (
+        await handleDriveMessage({ action: "drive.signOutEverywhere" })
+      ).should.deep.equal({ status: "failed" });
+
+      chai.expect(await storedDriveRecord()).to.not.equal(undefined);
+      chai
+        .expect(
+          (await chrome.storage.session.get(DRIVE_SESSION))[DRIVE_SESSION],
+        )
+        .to.not.equal(undefined);
+      (await EntryStorage.count()).should.equal(1);
+    });
+
+    it("should remove the accounts and the keys of a phone on disconnect", async () => {
+      await storeAccounts(2);
+      await storeKey("extension-key");
+      await storeDriveRecord(mirrorRecord());
+
+      await handleDriveMessage({ action: "drive.disconnect" });
+
+      chai.expect(await storedDriveRecord()).to.equal(undefined);
+      (await EntryStorage.count()).should.equal(0);
+      (await EntryStorage.hasEncryptionKey()).should.equal(false);
+      chai
+        .expect((await chrome.storage.local.get("UserSettings")).UserSettings)
+        .to.not.equal(undefined);
+      drive.requests.should.have.lengthOf(0);
+    });
+
+    it("should keep the accounts of a phone whose browser was not chosen yet", async () => {
+      await storeAccounts(2);
+      await storeDriveRecord(
+        mirrorRecord({ mirror: { source: undefined, keys: {} } }),
+      );
+
+      await handleDriveMessage({ action: "drive.disconnect" });
+
+      chai.expect(await storedDriveRecord()).to.equal(undefined);
+      (await EntryStorage.count()).should.equal(2);
     });
 
     it("should leave the copy as it is when a smaller one is not saved", async () => {
@@ -204,6 +340,114 @@ describe("Drive background", () => {
       chai.expect(stored?.attention).to.equal(undefined);
       chai.expect(stored?.shrinkApproved).to.equal(undefined);
       chai.expect(stored?.shrinkSkipped).to.equal("hash");
+      drive.uploads().should.have.lengthOf(0);
+    });
+  });
+
+  describe("phone", () => {
+    let drive: FakeDrive;
+
+    beforeEach(async () => {
+      drive = new FakeDrive().install();
+      await storeSession();
+      await storeAccounts(2);
+    });
+
+    async function expectNoUpload(record: DriveRecord) {
+      drive.requests.should.have.lengthOf(0);
+      (await storedDriveRecord())!.should.deep.equal(record);
+    }
+
+    it("should not back up the accounts of a phone", async () => {
+      const record = await storeDriveRecord(mirrorRecord());
+
+      (await runBackup(true)).should.deep.equal({ status: "unavailable" });
+      await handleAlarm({
+        name: DRIVE_ALARM,
+        scheduledTime: Date.now(),
+        persistAcrossSessions: false,
+      });
+      await handleAlarm({
+        name: DRIVE_CHECK_ALARM,
+        scheduledTime: Date.now(),
+        persistAcrossSessions: false,
+      });
+
+      await expectNoUpload(record);
+      create.should.not.have.been.called;
+    });
+
+    it("should not schedule a backup when the accounts of a phone change", async () => {
+      await storeDriveRecord(mirrorRecord());
+
+      await handleStorageChange({ [crypto.randomUUID()]: CHANGE }, "local");
+
+      create.should.not.have.been.called;
+    });
+
+    it("should schedule the hourly check of a phone instead of a backup", async () => {
+      await storeDriveRecord(mirrorRecord());
+
+      await scheduleIfConnected();
+
+      create.should.have.been.calledOnceWith(DRIVE_MIRROR_ALARM, {
+        periodInMinutes: 60,
+      });
+    });
+
+    it("should still check the copy of a computer at the start", async () => {
+      await storeDriveRecord();
+
+      await scheduleIfConnected();
+
+      create.should.have.been.calledOnceWith(DRIVE_CHECK_ALARM, {
+        delayInMinutes: 1,
+      });
+    });
+
+    it("should not back up after an unlock on a phone", async () => {
+      const record = await storeDriveRecord(
+        mirrorRecord({ attention: { kind: "unlock" } }),
+      );
+
+      await backupAfterUnlock();
+
+      await expectNoUpload(record);
+    });
+
+    it("should refuse to save now or decide on a smaller copy on a phone", async () => {
+      const record = await storeDriveRecord(
+        mirrorRecord({
+          attention: { kind: "shrink", from: 10, to: 3, sourceHash: "hash" },
+        }),
+      );
+
+      (
+        await handleDriveMessage({ action: "drive.backupNow" })
+      ).should.deep.equal({ status: "unavailable" });
+      (
+        await handleDriveMessage({ action: "drive.shrink", decision: "save" })
+      ).should.deep.equal({ status: "unavailable" });
+      (
+        await handleDriveMessage({ action: "drive.shrink", decision: "skip" })
+      ).should.deep.equal({ status: "unavailable" });
+
+      await expectNoUpload(record);
+    });
+
+    it("should check the copies on the hourly alarm of a phone", async () => {
+      await storeDriveRecord(mirrorRecord());
+
+      await handleAlarm({
+        name: DRIVE_MIRROR_ALARM,
+        scheduledTime: Date.now(),
+        persistAcrossSessions: false,
+      });
+
+      chai
+        .expect((await storedDriveRecord())?.mirror?.checkedAt)
+        .to.be.a("number");
+      drive.requests.length.should.be.greaterThan(0);
       drive.uploads().should.have.lengthOf(0);
     });
   });

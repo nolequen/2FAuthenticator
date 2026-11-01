@@ -23,6 +23,7 @@
       <IconLock />
     </button>
     <button
+      v-if="!isAndroid"
       id="i-plus"
       type="button"
       class="icon-button primary"
@@ -36,6 +37,7 @@
 </template>
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
+import { isAndroid } from "../../browser";
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
 

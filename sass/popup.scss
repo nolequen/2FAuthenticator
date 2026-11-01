@@ -16,6 +16,25 @@ body {
   overflow: hidden;
 }
 
+.android {
+  &,
+  body,
+  #authenticator,
+  #popup {
+    width: 100%;
+    height: 100%;
+  }
+
+  .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .section-header {
+    height: 44px;
+  }
+}
+
 .base,
 .page,
 .lock-screen {
@@ -309,6 +328,7 @@ body {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
+  user-select: none;
 
   svg.lucide {
     width: 14px;
@@ -1222,6 +1242,7 @@ body {
 
 .drive-links {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   padding-top: 8px;

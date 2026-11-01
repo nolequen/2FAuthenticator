@@ -2,8 +2,16 @@ export const DRIVE_RECORD = "GoogleDrive";
 export const DRIVE_SESSION = "GoogleDriveSession";
 export const DRIVE_ALARM = "drive-backup";
 export const DRIVE_CHECK_ALARM = "drive-check";
+export const DRIVE_MIRROR_ALARM = "drive-mirror";
 export const DRIVE_AUTH_LOCK = "drive-auth";
 export const DRIVE_BACKUP_LOCK = "drive-backup";
+export const DRIVE_MIRROR_LOCK = "drive-mirror";
+
+export const MIRROR_PERIOD_MINUTES = 60;
+export const MIRROR_CHECK_INTERVAL = 60 * 1000;
+export const MIRROR_TIMEOUT = 30 * 1000;
+export const LOOPBACK_ORIGIN = "http://127.0.0.1/*";
+export const LOOPBACK_REDIRECT = "http://127.0.0.1/2fauthenticator";
 
 export const BACKUP_DELAY_MINUTES = 1;
 export const RETRY_DELAY_MINUTES = 30;

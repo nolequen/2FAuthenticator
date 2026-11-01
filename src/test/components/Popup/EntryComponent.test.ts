@@ -7,6 +7,7 @@ import sinonChai from "sinon-chai";
 import { mount } from "@vue/test-utils";
 import { nextTick, reactive } from "vue";
 
+import { setAndroid } from "../../../browser";
 import EntryComponent from "../../../components/Popup/EntryComponent.vue";
 import { CodeState, OTPEntry, OTPType } from "../../../models/otp";
 import { i18n, loadI18nMessages } from "../../../store/i18n";
@@ -306,6 +307,140 @@ describe("EntryComponent", () => {
 
       chai.expect(useEntryMenuStore(pinia).menu?.hash).to.equal(entry.hash);
       event.defaultPrevented.should.equal(true);
+      wrapper.unmount();
+    });
+  });
+
+  describe("on a phone", () => {
+    let close: sinon.SinonStub;
+
+    beforeEach(() => {
+      setAndroid(true);
+      close = sinon.stub(window, "close");
+    });
+
+    afterEach(() => setAndroid(false));
+
+    async function waitFor(condition: () => boolean) {
+      for (let attempt = 0; attempt < 200 && !condition(); attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+    }
+
+    function pasteInto(url: string) {
+      sinon.replace(
+        chrome.tabs,
+        "query",
+        sinon.fake.resolves([
+          { id: 7, windowId: 3, url },
+        ]) as unknown as typeof chrome.tabs.query,
+      );
+      sinon.replace(
+        chrome.scripting,
+        "executeScript",
+        sinon.fake.resolves(
+          [],
+        ) as unknown as typeof chrome.scripting.executeScript,
+      );
+      sinon.replace(
+        chrome.scripting,
+        "insertCSS",
+        sinon.fake.resolves(
+          undefined,
+        ) as unknown as typeof chrome.scripting.insertCSS,
+      );
+    }
+
+    it("should close the popup after copying the code", async () => {
+      const entry = createEntry();
+      entry.code = "123456";
+      const { wrapper } = mountEntry(entry);
+
+      await wrapper.find("a.entry").trigger("click");
+      await waitFor(() => close.called);
+
+      execCommand.should.have.been.calledWith("Copy");
+      close.should.have.been.calledOnce;
+      execCommand.should.have.been.calledBefore(close);
+      wrapper.unmount();
+    });
+
+    it("should close the popup once the page has the code", async () => {
+      pasteInto("https://example.com/login");
+      let answer: (value: unknown) => void = () => undefined;
+      const sendMessage = sinon.fake(
+        () => new Promise((resolve) => (answer = resolve)),
+      );
+      sinon.replace(
+        chrome.tabs,
+        "sendMessage",
+        sendMessage as unknown as typeof chrome.tabs.sendMessage,
+      );
+      const entry = createEntry();
+      entry.code = "123456";
+      const { pinia, wrapper } = mountEntry(entry);
+      useMenuStore(pinia).useAutofill = true;
+
+      await wrapper.find("a.entry").trigger("click");
+      await waitFor(() => sendMessage.called);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      close.should.not.have.been.called;
+
+      answer(true);
+      await waitFor(() => close.called);
+
+      sendMessage.should.have.been.calledOnceWith(7, {
+        action: "pastecode",
+        code: "123456",
+      });
+      close.should.have.been.calledOnce;
+      wrapper.unmount();
+    });
+
+    it("should close the popup when the page does not answer in half a second", async () => {
+      pasteInto("https://example.com/login");
+      const sendMessage = sinon.fake(() => new Promise(() => undefined));
+      sinon.replace(
+        chrome.tabs,
+        "sendMessage",
+        sendMessage as unknown as typeof chrome.tabs.sendMessage,
+      );
+      const entry = createEntry();
+      entry.code = "123456";
+      const { pinia, wrapper } = mountEntry(entry);
+      useMenuStore(pinia).useAutofill = true;
+
+      await wrapper.find("a.entry").trigger("click");
+      await waitFor(() => sendMessage.called);
+      const sent = Date.now();
+      await waitFor(() => close.called);
+
+      close.should.have.been.calledOnce;
+      (Date.now() - sent).should.be.within(400, 1500);
+      wrapper.unmount();
+    });
+
+    it("should not open the menu of the account", async () => {
+      const entry = createEntry();
+      const { pinia, wrapper } = mountEntry(entry);
+      const event = new MouseEvent("contextmenu", {
+        bubbles: true,
+        cancelable: true,
+        clientX: 120,
+        clientY: 80,
+      });
+
+      wrapper.find("a.entry").element.dispatchEvent(event);
+
+      chai.expect(useEntryMenuStore(pinia).menu).to.equal(null);
+      event.defaultPrevented.should.equal(true);
+      wrapper.unmount();
+    });
+
+    it("should have no next code button for a counter based account", () => {
+      const { wrapper } = mountEntry(createEntry(OTPType.hotp));
+
+      wrapper.find(".counter").exists().should.equal(false);
       wrapper.unmount();
     });
   });

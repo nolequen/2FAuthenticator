@@ -13,20 +13,23 @@
         {{ content.action }}
       </button>
       <button
-        v-if="attention.kind === 'shrink'"
+        v-if="attention.kind === 'shrink' || attention.kind === 'mirrorShrink'"
         type="button"
         class="reminder-secondary"
         @click="skip()"
       >
-        {{ i18n.drive_dont_save }}
+        {{
+          attention.kind === "shrink" ? i18n.drive_dont_save : i18n.mirror_keep
+        }}
       </button>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { computed } from "vue";
-import type { DriveAttention } from "../../drive/state";
-import { resultText } from "../../drive/status";
+import { accountsCount } from "../../drive/display";
+import { type DriveAttention, isMirror } from "../../drive/state";
+import { mirrorResultText, resultText } from "../../drive/status";
 import { i18n, t } from "../../store/i18n";
 import { useCurrentViewStore } from "../../store/CurrentView";
 import { useDriveStore } from "../../store/Drive";
@@ -48,8 +51,26 @@ function bannerContent(attention: DriveAttention) {
     case "signin":
       return {
         title: i18n.drive_banner_signin_title,
-        text: i18n.drive_banner_signin_text,
+        text: isMirror(drive.record)
+          ? i18n.mirror_banner_signin_text
+          : i18n.drive_banner_signin_text,
         action: i18n.drive_signin,
+      };
+    case "mirrorPassword":
+      return {
+        title: i18n.mirror_banner_password_title,
+        text: i18n.mirror_banner_password_text,
+        action: i18n.mirror_enter_password,
+      };
+    case "mirrorShrink":
+      return {
+        title: t(
+          "mirror_banner_shrink_title",
+          accountsCount(attention.to),
+          String(attention.from),
+        ),
+        text: i18n.mirror_banner_shrink_text,
+        action: i18n.mirror_apply,
       };
     case "consent":
       return {
@@ -93,6 +114,16 @@ async function act() {
     case "backupPassword":
       currentView.open("BackupPassword");
       break;
+    case "mirrorPassword":
+      currentView.open("MirrorPassword");
+      break;
+    case "mirrorShrink": {
+      const result = await currentView.withBusy(() => drive.mirrorShrink(true));
+      if (result?.status !== "applied" && result?.status !== "unchanged") {
+        notification.alert(mirrorResultText(result));
+      }
+      break;
+    }
     case "shrink": {
       const result = await currentView.withBusy(() => drive.decideShrink(true));
       if (result?.status === "uploaded") {
@@ -106,6 +137,10 @@ async function act() {
 }
 
 async function skip() {
-  await drive.decideShrink(false);
+  if (props.attention.kind === "mirrorShrink") {
+    await drive.mirrorShrink(false);
+  } else {
+    await drive.decideShrink(false);
+  }
 }
 </script>

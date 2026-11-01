@@ -72,9 +72,11 @@ function query(params: { [name: string]: string }) {
 
 export class DriveApi {
   private readonly token: (rejected?: string) => Promise<string>;
+  private readonly timeout?: number;
 
-  constructor(token: (rejected?: string) => Promise<string>) {
+  constructor(token: (rejected?: string) => Promise<string>, timeout?: number) {
     this.token = token;
+    this.timeout = timeout;
   }
 
   private async request(url: string, init: ApiRequest = {}) {
@@ -95,6 +97,7 @@ export class DriveApi {
       return await fetch(url, {
         ...init,
         headers: { ...init.headers, Authorization: `Bearer ${token}` },
+        signal: this.timeout ? AbortSignal.timeout(this.timeout) : undefined,
       });
     } catch (error) {
       throw new DriveApiError(0, "network", String(error));

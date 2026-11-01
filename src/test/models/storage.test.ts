@@ -8,7 +8,12 @@ import * as CryptoJS from "crypto-js";
 import { Encryption } from "../../models/encryption";
 import { OTPAlgorithm, OTPEntry, OTPType } from "../../models/otp";
 import { StorageLocation, UserSettings } from "../../models/settings";
-import { BrowserStorage, EntryStorage } from "../../models/storage";
+import { setAndroid } from "../../browser";
+import {
+  BrowserStorage,
+  EntryStorage,
+  STORAGE_LOCK,
+} from "../../models/storage";
 import { updateDriveRecord } from "../../drive/state";
 import {
   driveRecord,
@@ -396,6 +401,208 @@ describe("EntryStorage", () => {
     });
   });
 
+  describe("replaceAll", () => {
+    const allowed = async () => true;
+
+    async function storedItems() {
+      return (await BrowserStorage.get()) as { [hash: string]: RawOTPStorage };
+    }
+
+    it("should add, change and remove the accounts as in the copy under the storage lock", async () => {
+      const kept = rawEntry({ account: "kept", index: 0 });
+      const changed = rawEntry({ account: "before", index: 1 });
+      const removed = rawEntry({ account: "removed", index: 2 });
+      await chrome.storage.local.set({
+        [kept.hash]: kept,
+        [changed.hash]: changed,
+        [removed.hash]: removed,
+      });
+      const underLock = async () => {
+        const { held = [] } = await navigator.locks.query();
+        return held.some((lock) => lock.name === STORAGE_LOCK);
+      };
+
+      (
+        await EntryStorage.replaceAll(
+          {
+            [kept.hash]: kept,
+            [changed.hash]: {
+              ...changed,
+              account: "after",
+              group: "Work",
+              pinned: true,
+            },
+            "copy-id": rawEntry({ account: "added", index: 5, hash: "" }),
+          },
+          [],
+          underLock,
+        )
+      ).should.equal(true);
+
+      const stored = await storedItems();
+      Object.keys(stored).should.have.members([
+        kept.hash,
+        changed.hash,
+        "copy-id",
+      ]);
+      chai.expect(stored[changed.hash].account).to.equal("after");
+      chai.expect(stored[changed.hash].group).to.equal("Work");
+      chai.expect(stored[changed.hash].pinned).to.equal(true);
+      stored["copy-id"].hash.should.equal("copy-id");
+      [
+        stored[kept.hash].index,
+        stored[changed.hash].index,
+        stored["copy-id"].index,
+      ].should.deep.equal([0, 1, 2]);
+    });
+
+    it("should keep the accounts it is told to keep when the phone has them", async () => {
+      const kept = rawEntry({ account: "kept" });
+      const removed = rawEntry({ account: "removed" });
+      await chrome.storage.local.set({
+        [kept.hash]: kept,
+        [removed.hash]: removed,
+      });
+      const added = rawEntry({ account: "added" });
+
+      await EntryStorage.replaceAll(
+        { [added.hash]: added },
+        [kept.hash, "missing"],
+        allowed,
+      );
+
+      const stored = await storedItems();
+      Object.keys(stored).should.have.members([kept.hash, added.hash]);
+      chai.expect(stored[kept.hash].account).to.equal("kept");
+    });
+
+    it("should write the new accounts before it removes the old ones", async () => {
+      const removed = rawEntry({ account: "removed" });
+      await chrome.storage.local.set({ [removed.hash]: removed });
+      const added = rawEntry({ account: "added" });
+      const set = sinon.spy(chrome.storage.local, "set");
+      const remove = sinon.spy(chrome.storage.local, "remove");
+
+      await EntryStorage.replaceAll({ [added.hash]: added }, [], allowed);
+
+      set.should.have.been.calledBefore(remove);
+      chai.expect(set.lastCall.args[0]).to.have.property(added.hash);
+      remove.should.have.been.calledOnceWith([removed.hash]);
+    });
+
+    it("should refuse to replace the accounts while the extension has a password", async () => {
+      const before = rawEntry({ account: "before" });
+      await chrome.storage.local.set({ [before.hash]: before });
+      await storeKey("extension-key");
+      const error = sinon.stub(console, "error");
+      const stored = await chrome.storage.local.get();
+      const added = rawEntry();
+
+      (
+        await EntryStorage.replaceAll({ [added.hash]: added }, [], allowed)
+      ).should.equal(false);
+
+      (await chrome.storage.local.get()).should.deep.equal(stored);
+      error.should.have.been.called;
+    });
+
+    it("should change nothing when the check under the lock fails", async () => {
+      const before = rawEntry();
+      await chrome.storage.local.set({ [before.hash]: before });
+      const stored = await chrome.storage.local.get();
+      const added = rawEntry();
+
+      (
+        await EntryStorage.replaceAll(
+          { [added.hash]: added },
+          [],
+          async () => false,
+        )
+      ).should.equal(false);
+
+      (await chrome.storage.local.get()).should.deep.equal(stored);
+    });
+
+    it("should skip the settings, the connection, keys and accounts it cannot read", async () => {
+      const settings = await chrome.storage.local.get("UserSettings");
+      const account = rawEntry({ account: "account" });
+      const key: Key = {
+        dataType: "Key",
+        id: "key",
+        salt: "salt",
+        hash: "hash",
+        version: 3,
+      };
+
+      await EntryStorage.replaceAll(
+        {
+          UserSettings: rawEntry({ account: "settings" }),
+          GoogleDrive: rawEntry({ account: "drive" }),
+          GoogleDriveSession: rawEntry({ account: "session" }),
+          cachedPassphrase: rawEntry({ account: "passphrase" }),
+          key: key as unknown as RawOTPStorage,
+          locked: rawEntry({ encrypted: true }),
+          empty: rawEntry({ secret: "" }),
+          [account.hash]: account,
+        },
+        ["UserSettings", "GoogleDrive"],
+        allowed,
+      );
+
+      Object.keys(await chrome.storage.local.get()).should.have.members([
+        "UserSettings",
+        account.hash,
+      ]);
+      (await chrome.storage.local.get("UserSettings")).should.deep.equal(
+        settings,
+      );
+    });
+
+    it("should read the accounts the same way as import", async () => {
+      const entries = [
+        rawEntry({ type: "battle", digits: 6 }),
+        rawEntry({ secret: `blz-${BASE32_SECRET}` }),
+        rawEntry({ secret: HEX_SECRET }),
+        rawEntry({ type: "hotp", secret: HEX_SECRET, counter: 4 }),
+        rawEntry({ type: "HOTP", counter: -3 }),
+        rawEntry({ algorithm: "sha256", period: 0, digits: 12 }),
+        rawEntry({ group: "  Work ", pinned: true, issuer: "Issuer" }),
+      ];
+      const data = () => {
+        const items: { [hash: string]: RawOTPStorage } = {};
+        for (const entry of entries) {
+          items[entry.hash] = { ...entry };
+        }
+        return items;
+      };
+      await EntryStorage.import(new Encryption("", ""), data());
+      const imported = await chrome.storage.local.get();
+      await resetStorage();
+
+      await EntryStorage.replaceAll(data(), [], allowed);
+
+      (await chrome.storage.local.get()).should.deep.equal(imported);
+    });
+  });
+
+  describe("clearAll", () => {
+    it("should remove the accounts and the keys and keep the settings and the connection", async () => {
+      const raw = rawEntry();
+      await chrome.storage.local.set({ [raw.hash]: raw });
+      await storeKey("extension-key");
+      await storeDriveRecord();
+      (await EntryStorage.count()).should.equal(1);
+
+      await EntryStorage.clearAll();
+
+      (await EntryStorage.count()).should.equal(0);
+      Object.keys(await chrome.storage.local.get()).should.have.members([
+        "UserSettings",
+        "GoogleDrive",
+      ]);
+    });
+  });
+
   describe("get", () => {
     it("should read a stored hex entry with its period", async () => {
       const raw = rawEntry({ type: "hex", secret: HEX_SECRET, period: 60 });
@@ -544,6 +751,34 @@ describe("BrowserStorage", () => {
 
       (await EntryStorage.get()).should.deep.equal([]);
       (await EntryStorage.hasEncryptionKey()).should.equal(false);
+    });
+  });
+
+  describe("on Android", () => {
+    afterEach(() => setAndroid(false));
+
+    it("should keep the accounts in local storage whatever the settings say", async () => {
+      await chrome.storage.local.set({
+        UserSettings: { storageLocation: StorageLocation.Sync },
+      });
+      setAndroid(true);
+      const raw = rawEntry();
+
+      await BrowserStorage.set({ [raw.hash]: raw });
+
+      (await chrome.storage.local.get(raw.hash)).should.deep.equal({
+        [raw.hash]: raw,
+      });
+      (await chrome.storage.sync.get()).should.deep.equal({});
+      chai
+        .expect(
+          (
+            await chrome.storage.local.get<{
+              UserSettings?: { storageLocation?: string };
+            }>("UserSettings")
+          ).UserSettings?.storageLocation,
+        )
+        .to.equal(StorageLocation.Local);
     });
   });
 

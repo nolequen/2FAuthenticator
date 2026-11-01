@@ -1,3 +1,4 @@
+import { isAndroid } from "../browser";
 import { KeyUtilities } from "./key-utilities";
 import { UserSettings } from "./settings";
 import { EntryStorage, withStorageLock } from "./storage";
@@ -219,7 +220,10 @@ export class OTPEntry implements OTPEntryInterface {
     } else {
       this.period = 30;
     }
-    if (this.type !== OTPType.hotp && this.type !== OTPType.hhex) {
+    if (
+      isAndroid ||
+      (this.type !== OTPType.hotp && this.type !== OTPType.hhex)
+    ) {
       this.generate();
     }
   }
@@ -291,7 +295,10 @@ export class OTPEntry implements OTPEntryInterface {
     this.secret = decryptedData.secret;
     this.type = type;
 
-    if (this.type !== OTPType.hotp && this.type !== OTPType.hhex) {
+    if (
+      isAndroid ||
+      (this.type !== OTPType.hotp && this.type !== OTPType.hhex)
+    ) {
       this.generate();
     }
 

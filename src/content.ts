@@ -24,6 +24,7 @@ if (!document.getElementById("__ga_grayLayout__")) {
         break;
       case "pastecode":
         pasteCode(message.code);
+        sendResponse(true);
         break;
       case "stopCapture": {
         const captureBox = document.getElementById("__ga_captureBox__");

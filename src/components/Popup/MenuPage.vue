@@ -14,6 +14,7 @@
           <IconChevronRight class="row-trail" />
         </button>
         <button
+          v-if="!isAndroid"
           type="button"
           class="row"
           :title="i18n.security"
@@ -78,6 +79,8 @@
 </template>
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
+import { openTab } from "../../android";
+import { isAndroid } from "../../browser";
 import { syncTimeWithGoogle } from "../../syncTime";
 import { i18n, t } from "../../store/i18n";
 import { useAccountsStore } from "../../store/Accounts";
@@ -99,14 +102,11 @@ const notification = useNotificationStore();
 const { version } = storeToRefs(useMenuStore());
 
 function openHelp() {
-  chrome.tabs.create({
-    url: "https://github.com/nolequen/2FAuthenticator/issues",
-  });
+  openTab("https://github.com/nolequen/2FAuthenticator/issues");
 }
 
 function openLink(url: string) {
-  window.open(url, "_blank");
-  return;
+  openTab(url);
 }
 
 function openPage(page: Page) {

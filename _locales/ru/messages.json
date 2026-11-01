@@ -872,8 +872,14 @@
     "description": "Drive disconnect dialog."
   },
   "drive_disconnect_text": {
-    "message": "Расширение перестанет сохранять копии и откажется от доступа к Drive. Копии в Drive останутся.",
-    "description": "Drive disconnect dialog."
+    "message": "Расширение перестанет сохранять копии. Доступ расширения в аккаунте Google останется: снять его можно кнопкой «$BUTTON$» или в настройках аккаунта Google. Копии в Drive останутся.",
+    "description": "Drive disconnect dialog.",
+    "placeholders": {
+      "button": {
+        "content": "$1",
+        "example": "Sign out on all devices"
+      }
+    }
   },
   "drive_footer_password": {
     "message": "Копия обновляется через минуту после изменений, хранятся 30 последних дней. Шифруется паролем расширения.",
@@ -1206,5 +1212,225 @@
   "drive_signin_again": {
     "message": "Повторный вход в Google",
     "description": "Drive tab title for sign-in only."
+  },
+  "drive_sign_out": {
+    "message": "Выйти на всех устройствах",
+    "description": "Drive button and dialog confirmation."
+  },
+  "drive_sign_out_title": {
+    "message": "Выйти на всех устройствах?",
+    "description": "Drive sign-out dialog."
+  },
+  "drive_sign_out_text": {
+    "message": "Доступ к Google Drive потеряет Firefox на всех компьютерах и телефонах, подключённых к этому аккаунту Google; войти придётся заново на каждом. Chrome и Edge входят в Google отдельно: для них нажмите кнопку выхода в Chrome или Edge либо снимите доступ в настройках аккаунта Google.",
+    "description": "Drive sign-out dialog in Firefox and on the phone."
+  },
+  "mirror_connect_title": {
+    "message": "Подключите Google Drive, чтобы видеть коды с компьютера",
+    "description": "Phone: empty list without Drive."
+  },
+  "mirror_connect": {
+    "message": "Подключить",
+    "description": "Phone: connect Drive button."
+  },
+  "mirror_loading": {
+    "message": "Загружаем коды из Google Drive",
+    "description": "Phone: empty list while the first copy loads."
+  },
+  "mirror_tab_lead": {
+    "message": "Телефон показывает аккаунты, которые браузер на компьютере сохраняет в Google Drive. Он только читает копии и ничего не загружает.",
+    "description": "Phone Drive tab lead."
+  },
+  "mirror_consent_info": {
+    "message": "Firefox спросит два разрешения: на передачу данных для входа и на перехват ответа Google по адресу 127.0.0.1.",
+    "description": "Phone Drive tab sign-in step."
+  },
+  "mirror_permission_denied": {
+    "message": "Без этих разрешений Firefox не даст расширению войти в Google.",
+    "description": "Phone Drive tab: permissions refused."
+  },
+  "mirror_step_browser": {
+    "message": "Браузер на компьютере",
+    "description": "Phone Drive tab step."
+  },
+  "mirror_step_browser_info": {
+    "message": "Телефон будет следить за копиями одного браузера.",
+    "description": "Phone Drive tab step."
+  },
+  "mirror_copy_time": {
+    "message": "копия: $WHEN$",
+    "description": "Phone: time of a Drive copy.",
+    "placeholders": {
+      "when": {
+        "content": "$1",
+        "example": "today, 14:02"
+      }
+    }
+  },
+  "mirror_choose": {
+    "message": "Далее",
+    "description": "Phone Drive tab button."
+  },
+  "mirror_password_info": {
+    "message": "Пароль расширения на компьютере или пароль бэкапа",
+    "description": "Phone: copy password hint."
+  },
+  "mirror_password_warning": {
+    "message": "На телефоне коды будут открываться без пароля. Защита – блокировка телефона.",
+    "description": "Phone: warning above the copy password."
+  },
+  "mirror_replace_warning": {
+    "message": "На телефоне уже есть аккаунты: $COUNT$. Они будут заменены аккаунтами из Drive.",
+    "description": "Phone Drive tab: existing accounts.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "mirror_show_codes": {
+    "message": "Показать коды",
+    "description": "Phone: copy password button."
+  },
+  "mirror_step_codes": {
+    "message": "Коды на телефоне",
+    "description": "Phone Drive tab step."
+  },
+  "mirror_no_copies": {
+    "message": "В Drive аккаунта $EMAIL$ нет копий: подключите Google Drive с этим аккаунтом в расширении на компьютере.",
+    "description": "Phone Drive tab: no copies.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "name@gmail.com"
+      }
+    }
+  },
+  "mirror_status_applied": {
+    "message": "Обновлено: $WHEN$",
+    "description": "Phone Drive status.",
+    "placeholders": {
+      "when": {
+        "content": "$1",
+        "example": "today, 14:05"
+      }
+    }
+  },
+  "mirror_status_none": {
+    "message": "Коды ещё не загружены",
+    "description": "Phone Drive status."
+  },
+  "mirror_status_network": {
+    "message": "Не обновлено: нет связи с Google Drive",
+    "description": "Phone Drive status."
+  },
+  "mirror_status_password": {
+    "message": "Нужен пароль копии",
+    "description": "Phone Drive status."
+  },
+  "mirror_undecrypted": {
+    "message": "Не расшифровалось: $COUNT$",
+    "description": "Phone: entries of the copy that did not open.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "mirror_refresh": {
+    "message": "Обновить сейчас",
+    "description": "Phone Drive button."
+  },
+  "mirror_change_browser": {
+    "message": "Сменить браузер",
+    "description": "Phone Drive button and page title."
+  },
+  "mirror_updated": {
+    "message": "Коды обновлены",
+    "description": "Phone Drive toast."
+  },
+  "mirror_up_to_date": {
+    "message": "Коды актуальны",
+    "description": "Phone Drive toast."
+  },
+  "mirror_disconnect_text": {
+    "message": "Телефон перестанет следить за копиями и удалит свои аккаунты. Доступ расширения в аккаунте Google останется: снять его можно кнопкой «Выйти на всех устройствах» или в настройках аккаунта Google.",
+    "description": "Phone Drive disconnect dialog."
+  },
+  "mirror_footer": {
+    "message": "Телефон только читает копии выбранного браузера и заменяет свой список каждой новой копией. В Drive он ничего не загружает.",
+    "description": "Phone Drive footnote."
+  },
+  "mirror_banner_signin_text": {
+    "message": "Коды не обновляются: Google больше не принимает вход расширения.",
+    "description": "Phone Drive banner."
+  },
+  "mirror_banner_password_title": {
+    "message": "Google Drive: введите пароль копии",
+    "description": "Phone Drive banner."
+  },
+  "mirror_banner_password_text": {
+    "message": "Новая копия зашифрована другим паролем. Пока что телефон показывает прежний список.",
+    "description": "Phone Drive banner."
+  },
+  "mirror_enter_password": {
+    "message": "Ввести",
+    "description": "Phone Drive banner button."
+  },
+  "mirror_banner_shrink_title": {
+    "message": "Google Drive: в копии $ACCOUNTS$ вместо $FROM$",
+    "description": "Phone Drive banner.",
+    "placeholders": {
+      "accounts": {
+        "content": "$1",
+        "example": "1 account"
+      },
+      "from": {
+        "content": "$2",
+        "example": "40"
+      }
+    }
+  },
+  "mirror_banner_shrink_text": {
+    "message": "Применить копию или оставить прежний список до следующей копии?",
+    "description": "Phone Drive banner."
+  },
+  "mirror_apply": {
+    "message": "Применить",
+    "description": "Phone Drive banner button."
+  },
+  "mirror_keep": {
+    "message": "Оставить",
+    "description": "Phone Drive banner button."
+  },
+  "drive_sign_out_web": {
+    "message": "Выйти во всех Chrome и Edge",
+    "description": "Drive button in Chrome and Edge: revoke the access."
+  },
+  "drive_sign_out_web_title": {
+    "message": "Выйти во всех Chrome и Edge?",
+    "description": "Drive sign-out dialog in Chrome and Edge."
+  },
+  "drive_sign_out_web_text": {
+    "message": "Доступ к Google Drive потеряют Chrome и Edge на всех компьютерах, подключённых к этому аккаунту Google; войти придётся заново в каждом. Firefox и телефоны входят в Google отдельно: для них нажмите «Выйти на всех устройствах» в Firefox либо снимите доступ в настройках аккаунта Google.",
+    "description": "Drive sign-out dialog in Chrome and Edge."
+  },
+  "drive_sign_out_failed": {
+    "message": "Не удалось отозвать доступ: проверьте подключение к интернету и попробуйте ещё раз или снимите доступ в настройках аккаунта Google. Этот браузер остался подключён.",
+    "description": "Drive sign-out failed."
+  },
+  "mirror_none": {
+    "message": "В Drive нет копий выбранного браузера: сохраните копию на компьютере или выберите другой браузер.",
+    "description": "Phone: no copy to show."
+  },
+  "mirror_setup_title": {
+    "message": "Подключение Google Drive не закончено",
+    "description": "Phone empty screen: connected, but no browser chosen."
+  },
+  "mirror_setup_continue": {
+    "message": "Продолжить",
+    "description": "Phone empty screen button."
   }
 }

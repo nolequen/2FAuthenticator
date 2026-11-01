@@ -1,7 +1,10 @@
 <template>
   <div>
     <a-page-header :title="i18n.backup" @back="currentView.back()" />
-    <div class="page-body">
+    <div v-if="isAndroid" class="page-body">
+      <DriveMirrorSection />
+    </div>
+    <div v-else class="page-body">
       <h2 class="section-title">{{ i18n.backup_save_header }}</h2>
       <div v-if="currentlyEncrypted" class="notice warning">
         <IconTriangle />
@@ -59,6 +62,8 @@ import { storeToRefs } from "pinia";
 import { BrowserStorage, EntryStorage } from "../../models/storage";
 import { useAccountsStore } from "../../store/Accounts";
 import { useCurrentViewStore } from "../../store/CurrentView";
+import { isAndroid } from "../../browser";
+import DriveMirrorSection from "./DriveMirrorSection.vue";
 import DriveSection from "./DriveSection.vue";
 
 import IconLock from "lucide-static/icons/lock.svg";
@@ -75,7 +80,9 @@ const exportEncryptedFile = ref("");
 const exportOneLineOtpAuthFile = ref("");
 let builds = 0;
 
-buildBackupFiles();
+if (!isAndroid) {
+  buildBackupFiles();
+}
 
 onUnmounted(() => {
   builds++;

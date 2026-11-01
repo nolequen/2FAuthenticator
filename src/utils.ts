@@ -129,6 +129,13 @@ function isMatchedEntry(
 }
 
 export async function getCurrentTab() {
+  if (!chrome.windows) {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    return tab;
+  }
   const currentWindow = await chrome.windows.getCurrent();
   const queryOptions = { active: true, windowId: currentWindow.id };
   // `tab` will either be a `tabs.Tab` instance or `undefined`.
@@ -146,10 +153,14 @@ export async function injectContentScript(tab: TabWithIdAndURL) {
     target: { tabId: tab.id },
     files: ["/dist/content.js"],
   });
-  await chrome.scripting.insertCSS({
-    target: { tabId: tab.id },
-    files: ["/css/content.css"],
-  });
+  try {
+    await chrome.scripting.insertCSS({
+      target: { tabId: tab.id },
+      files: ["/css/content.css"],
+    });
+  } catch (error) {
+    console.warn("Could not insert the content styles.", error);
+  }
 }
 
 export function okToInjectContentScript(

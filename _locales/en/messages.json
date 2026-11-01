@@ -880,8 +880,14 @@
     "description": "Drive disconnect dialog."
   },
   "drive_disconnect_text": {
-    "message": "The extension stops saving copies and gives up its access to Drive. The copies stay in Drive.",
-    "description": "Drive disconnect dialog."
+    "message": "The extension stops saving copies. Its access in your Google account stays: remove it with “$BUTTON$” or in your Google account settings. The copies stay in Drive.",
+    "description": "Drive disconnect dialog.",
+    "placeholders": {
+      "button": {
+        "content": "$1",
+        "example": "Sign out on all devices"
+      }
+    }
   },
   "drive_footer_password": {
     "message": "The copy updates a minute after changes, the last 30 days are kept. It is encrypted with the extension password.",
@@ -1214,5 +1220,225 @@
   "drive_signin_again": {
     "message": "Sign in to Google again",
     "description": "Drive tab title for sign-in only."
+  },
+  "drive_sign_out": {
+    "message": "Sign out on all devices",
+    "description": "Drive button and dialog confirmation."
+  },
+  "drive_sign_out_title": {
+    "message": "Sign out on all devices?",
+    "description": "Drive sign-out dialog."
+  },
+  "drive_sign_out_text": {
+    "message": "Firefox on every computer and phone connected to this Google account loses its access to Google Drive; you will have to sign in again on each of them. Chrome and Edge sign in to Google separately: to sign them out, use the sign-out button in Chrome or Edge or remove the access in your Google account settings.",
+    "description": "Drive sign-out dialog in Firefox and on the phone."
+  },
+  "mirror_connect_title": {
+    "message": "Connect Google Drive to see the codes from your computer",
+    "description": "Phone: empty list without Drive."
+  },
+  "mirror_connect": {
+    "message": "Connect",
+    "description": "Phone: connect Drive button."
+  },
+  "mirror_loading": {
+    "message": "Loading the codes from Google Drive",
+    "description": "Phone: empty list while the first copy loads."
+  },
+  "mirror_tab_lead": {
+    "message": "The phone shows the accounts that a browser on your computer saves to Google Drive. It only reads the copies and uploads nothing.",
+    "description": "Phone Drive tab lead."
+  },
+  "mirror_consent_info": {
+    "message": "Firefox asks for two permissions: to transfer the sign-in data and to catch the answer of Google at 127.0.0.1.",
+    "description": "Phone Drive tab sign-in step."
+  },
+  "mirror_permission_denied": {
+    "message": "Without these permissions Firefox does not let the extension sign in to Google.",
+    "description": "Phone Drive tab: permissions refused."
+  },
+  "mirror_step_browser": {
+    "message": "Browser on the computer",
+    "description": "Phone Drive tab step."
+  },
+  "mirror_step_browser_info": {
+    "message": "The phone follows the copies of one browser.",
+    "description": "Phone Drive tab step."
+  },
+  "mirror_copy_time": {
+    "message": "copy: $WHEN$",
+    "description": "Phone: time of a Drive copy.",
+    "placeholders": {
+      "when": {
+        "content": "$1",
+        "example": "today, 14:02"
+      }
+    }
+  },
+  "mirror_choose": {
+    "message": "Next",
+    "description": "Phone Drive tab button."
+  },
+  "mirror_password_info": {
+    "message": "The extension password on the computer or the backup password",
+    "description": "Phone: copy password hint."
+  },
+  "mirror_password_warning": {
+    "message": "On the phone the codes will open without a password. Their protection is the screen lock of the phone.",
+    "description": "Phone: warning above the copy password."
+  },
+  "mirror_replace_warning": {
+    "message": "Accounts already on the phone: $COUNT$. They will be replaced with the accounts from Drive.",
+    "description": "Phone Drive tab: existing accounts.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "mirror_show_codes": {
+    "message": "Show the codes",
+    "description": "Phone: copy password button."
+  },
+  "mirror_step_codes": {
+    "message": "Codes on the phone",
+    "description": "Phone Drive tab step."
+  },
+  "mirror_no_copies": {
+    "message": "There are no copies in the Drive of $EMAIL$: connect Google Drive with this account in the extension on your computer.",
+    "description": "Phone Drive tab: no copies.",
+    "placeholders": {
+      "email": {
+        "content": "$1",
+        "example": "name@gmail.com"
+      }
+    }
+  },
+  "mirror_status_applied": {
+    "message": "Updated: $WHEN$",
+    "description": "Phone Drive status.",
+    "placeholders": {
+      "when": {
+        "content": "$1",
+        "example": "today, 14:05"
+      }
+    }
+  },
+  "mirror_status_none": {
+    "message": "The codes are not loaded yet",
+    "description": "Phone Drive status."
+  },
+  "mirror_status_network": {
+    "message": "Not updated: no connection to Google Drive",
+    "description": "Phone Drive status."
+  },
+  "mirror_status_password": {
+    "message": "The copy password is needed",
+    "description": "Phone Drive status."
+  },
+  "mirror_undecrypted": {
+    "message": "Could not decrypt: $COUNT$",
+    "description": "Phone: entries of the copy that did not open.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "mirror_refresh": {
+    "message": "Update now",
+    "description": "Phone Drive button."
+  },
+  "mirror_change_browser": {
+    "message": "Change browser",
+    "description": "Phone Drive button and page title."
+  },
+  "mirror_updated": {
+    "message": "The codes are updated",
+    "description": "Phone Drive toast."
+  },
+  "mirror_up_to_date": {
+    "message": "The codes are up to date",
+    "description": "Phone Drive toast."
+  },
+  "mirror_disconnect_text": {
+    "message": "The phone stops following the copies and removes its accounts. The access of the extension in your Google account stays: remove it with “Sign out on all devices” or in your Google account settings.",
+    "description": "Phone Drive disconnect dialog."
+  },
+  "mirror_footer": {
+    "message": "The phone only reads the copies of the chosen browser and replaces its list with each newer copy. It uploads nothing to Drive.",
+    "description": "Phone Drive footnote."
+  },
+  "mirror_banner_signin_text": {
+    "message": "The codes are not updated: Google no longer accepts the sign-in of the extension.",
+    "description": "Phone Drive banner."
+  },
+  "mirror_banner_password_title": {
+    "message": "Google Drive: enter the copy password",
+    "description": "Phone Drive banner."
+  },
+  "mirror_banner_password_text": {
+    "message": "The new copy is encrypted with another password. Until then the phone shows the previous list.",
+    "description": "Phone Drive banner."
+  },
+  "mirror_enter_password": {
+    "message": "Enter",
+    "description": "Phone Drive banner button."
+  },
+  "mirror_banner_shrink_title": {
+    "message": "Google Drive: $ACCOUNTS$ in the copy instead of $FROM$",
+    "description": "Phone Drive banner.",
+    "placeholders": {
+      "accounts": {
+        "content": "$1",
+        "example": "1 account"
+      },
+      "from": {
+        "content": "$2",
+        "example": "40"
+      }
+    }
+  },
+  "mirror_banner_shrink_text": {
+    "message": "Apply the copy or keep the current list until the next copy?",
+    "description": "Phone Drive banner."
+  },
+  "mirror_apply": {
+    "message": "Apply",
+    "description": "Phone Drive banner button."
+  },
+  "mirror_keep": {
+    "message": "Keep",
+    "description": "Phone Drive banner button."
+  },
+  "drive_sign_out_web": {
+    "message": "Sign out of all Chrome and Edge",
+    "description": "Drive button in Chrome and Edge: revoke the access."
+  },
+  "drive_sign_out_web_title": {
+    "message": "Sign out of all Chrome and Edge?",
+    "description": "Drive sign-out dialog in Chrome and Edge."
+  },
+  "drive_sign_out_web_text": {
+    "message": "Chrome and Edge on every computer connected to this Google account lose their access to Google Drive; you will have to sign in again in each of them. Firefox and phones sign in to Google separately: to sign them out, use “Sign out on all devices” in Firefox or remove the access in your Google account settings.",
+    "description": "Drive sign-out dialog in Chrome and Edge."
+  },
+  "drive_sign_out_failed": {
+    "message": "Could not revoke the access: check the internet connection and try again, or remove the access in your Google account settings. This browser stays connected.",
+    "description": "Drive sign-out failed."
+  },
+  "mirror_none": {
+    "message": "There are no copies of the chosen browser in Drive: save a copy on the computer or choose another browser.",
+    "description": "Phone: no copy to show."
+  },
+  "mirror_setup_title": {
+    "message": "Google Drive setup is not finished",
+    "description": "Phone empty screen: connected, but no browser chosen."
+  },
+  "mirror_setup_continue": {
+    "message": "Continue",
+    "description": "Phone empty screen button."
   }
 }

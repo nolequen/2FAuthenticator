@@ -8,7 +8,7 @@ import {
 import { Encryption } from "../models/encryption";
 import { OTPType } from "../models/otp";
 import { getSiteName, getMatchedEntriesHash } from "../utils";
-import { isChromium } from "../browser";
+import { isAndroid, isChromium } from "../browser";
 import { StorageLocation, UserSettings } from "../models/settings";
 import { DRIVE_RECORD } from "../drive/config";
 import {
@@ -24,6 +24,8 @@ import type { SectionRef } from "../groups";
 import { useCurrentViewStore } from "./CurrentView";
 import { useMenuStore } from "./Menu";
 import { useNotificationStore } from "./Notification";
+
+const ENTRIES_DELAY = 100;
 
 export const useAccountsStore = defineStore("accounts", () => {
   const currentView = useCurrentViewStore();
@@ -41,6 +43,8 @@ export const useAccountsStore = defineStore("accounts", () => {
   const siteName = ref<(string | null)[]>([]);
   const wrongPassword = ref(false);
   const initComplete = ref(false);
+  let watchingEntries = false;
+  let entriesTimer: ReturnType<typeof setTimeout> | undefined;
 
   async function init() {
     const { cachedPassphrase, cachedKeyId } =
@@ -58,6 +62,29 @@ export const useAccountsStore = defineStore("accounts", () => {
     await UserSettings.updateItems();
 
     siteName.value = await getSiteName();
+
+    if (isAndroid && !watchingEntries) {
+      watchingEntries = true;
+      chrome.storage.onChanged.addListener(entriesChanged);
+    }
+  }
+
+  function entriesChanged(
+    changes: { [key: string]: chrome.storage.StorageChange },
+    areaName: string,
+  ) {
+    if (
+      areaName !== "local" ||
+      !Object.keys(changes).some(
+        (key) => key !== "UserSettings" && key !== DRIVE_RECORD,
+      )
+    ) {
+      return;
+    }
+    clearTimeout(entriesTimer);
+    entriesTimer = setTimeout(() => {
+      updateEntries().catch((error) => console.warn(error));
+    }, ENTRIES_DELAY);
   }
 
   const matchedEntries = computed(() =>

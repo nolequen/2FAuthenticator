@@ -11,9 +11,17 @@ import {
 import { StorageLocation, UserSettings } from "./settings";
 import { DataType } from "./otp";
 import { normalizeGroup } from "../groups";
-import { DRIVE_RECORD } from "../drive/config";
+import { DRIVE_RECORD, DRIVE_SESSION } from "../drive/config";
+import { isAndroid } from "../browser";
 
 export const STORAGE_LOCK = "storage";
+const RESERVED_KEYS = [
+  "UserSettings",
+  DRIVE_RECORD,
+  DRIVE_SESSION,
+  "cachedPassphrase",
+  "cachedKeyId",
+];
 const CLEAR_LOGS_RETRY_DELAYS = [100, 500, 1000];
 
 export async function withStorageLock<T>(callback: () => Promise<T>) {
@@ -23,6 +31,13 @@ export async function withStorageLock<T>(callback: () => Promise<T>) {
 export class BrowserStorage {
   private static async getStorageLocation(): Promise<StorageLocation> {
     await UserSettings.updateItems();
+    if (isAndroid) {
+      if (UserSettings.items.storageLocation !== StorageLocation.Local) {
+        UserSettings.items.storageLocation = StorageLocation.Local;
+        await UserSettings.commitItems();
+      }
+      return StorageLocation.Local;
+    }
     if (
       UserSettings.items.storageLocation !== StorageLocation.Sync &&
       UserSettings.items.storageLocation !== StorageLocation.Local
@@ -384,6 +399,75 @@ export class EntryStorage {
     }
   }
 
+  private static normalize(item: RawOTPStorage, hash: string) {
+    const { type, digits } = parseOTPType(item.type, item.digits);
+    const entryData: {
+      account: string;
+      encrypted: false;
+      index: number;
+      issuer: string;
+      secret: string;
+      type: OTPType;
+      counter: number;
+      period: number;
+      hash: string;
+      digits: number;
+      algorithm: OTPAlgorithm;
+      pinned: boolean;
+      group: string;
+    } = {
+      type,
+      index: item.index || 0,
+      issuer: item.issuer || "",
+      account: item.account || "",
+      encrypted: false,
+      secret: item.secret,
+      counter: parseOTPCounter(item.counter),
+      period: item.period || 30,
+      digits: digits || 6,
+      algorithm: parseOTPAlgorithm(item.algorithm) ?? OTPAlgorithm.SHA1,
+      pinned: item.pinned || false,
+      group: normalizeGroup(item.group),
+      hash,
+    };
+
+    if (isNaN(entryData.period) || entryData.period <= 0) {
+      entryData.period = 30;
+    }
+
+    // If invalid digits, then use default.
+    if (entryData.digits > 10 || entryData.digits < 1) {
+      entryData.digits = 6;
+    }
+
+    if (/^(blz-|bliz-)/.test(entryData.secret)) {
+      const secretMatches = entryData.secret.match(/^(blz-|bliz-)(.*)/);
+      if (secretMatches && secretMatches.length >= 3) {
+        entryData.secret = secretMatches[2];
+        entryData.type = OTPType.totp;
+        entryData.digits = 8;
+      }
+    }
+
+    if (
+      !/^[a-z2-7]+=*$/i.test(entryData.secret) &&
+      /^[0-9a-f]+$/i.test(entryData.secret) &&
+      entryData.type === OTPType.totp
+    ) {
+      entryData.type = OTPType.hex;
+    }
+
+    if (
+      !/^[a-z2-7]+=*$/i.test(entryData.secret) &&
+      /^[0-9a-f]+$/i.test(entryData.secret) &&
+      entryData.type === OTPType.hotp
+    ) {
+      entryData.type = OTPType.hhex;
+    }
+
+    return entryData;
+  }
+
   static async import(
     encryption: Encryption,
     data: { [hash: string]: RawOTPStorage },
@@ -397,70 +481,7 @@ export class EntryStorage {
         continue;
       }
 
-      const { type, digits } = parseOTPType(data[hash].type, data[hash].digits);
-      const entryData: {
-        account: string;
-        encrypted: false;
-        index: number;
-        issuer: string;
-        secret: string;
-        type: OTPType;
-        counter: number;
-        period: number;
-        hash: string;
-        digits: number;
-        algorithm: OTPAlgorithm;
-        pinned: boolean;
-        group: string;
-      } = {
-        type,
-        index: data[hash].index || 0,
-        issuer: data[hash].issuer || "",
-        account: data[hash].account || "",
-        encrypted: false,
-        secret: data[hash].secret,
-        counter: parseOTPCounter(data[hash].counter),
-        period: data[hash].period || 30,
-        digits: digits || 6,
-        algorithm: parseOTPAlgorithm(data[hash].algorithm) ?? OTPAlgorithm.SHA1,
-        pinned: data[hash].pinned || false,
-        group: normalizeGroup(data[hash].group),
-        hash: data[hash].hash || hash,
-      };
-
-      if (isNaN(entryData.period) || entryData.period <= 0) {
-        entryData.period = 30;
-      }
-
-      // If invalid digits, then use default.
-      if (entryData.digits > 10 || entryData.digits < 1) {
-        entryData.digits = 6;
-      }
-
-      if (/^(blz-|bliz-)/.test(entryData.secret)) {
-        const secretMatches = entryData.secret.match(/^(blz-|bliz-)(.*)/);
-        if (secretMatches && secretMatches.length >= 3) {
-          entryData.secret = secretMatches[2];
-          entryData.type = OTPType.totp;
-          entryData.digits = 8;
-        }
-      }
-
-      if (
-        !/^[a-z2-7]+=*$/i.test(entryData.secret) &&
-        /^[0-9a-f]+$/i.test(entryData.secret) &&
-        entryData.type === OTPType.totp
-      ) {
-        entryData.type = OTPType.hex;
-      }
-
-      if (
-        !/^[a-z2-7]+=*$/i.test(entryData.secret) &&
-        /^[0-9a-f]+$/i.test(entryData.secret) &&
-        entryData.type === OTPType.hotp
-      ) {
-        entryData.type = OTPType.hhex;
-      }
+      const entryData = this.normalize(data[hash], data[hash].hash || hash);
 
       // not a valid / old hash
       if (
@@ -480,6 +501,72 @@ export class EntryStorage {
       ...imported,
     });
     await BrowserStorage.set(_data);
+  }
+
+  static replaceAll(
+    data: { [hash: string]: RawOTPStorage },
+    keep: string[],
+    allowed: () => Promise<boolean>,
+  ) {
+    return withStorageLock(async () => {
+      if (!(await allowed())) {
+        return false;
+      }
+      if (await this.hasEncryptionKey()) {
+        console.error("Encrypted accounts cannot be replaced.");
+        return false;
+      }
+
+      const encryption = new Encryption("", "");
+      const stored = await BrowserStorage.get();
+      const items: { [hash: string]: OTPStorage } = {};
+      for (const hash of Object.keys(data)) {
+        const item = data[hash];
+        if (
+          RESERVED_KEYS.includes(hash) ||
+          !item ||
+          typeof item !== "object" ||
+          (item as { dataType?: string }).dataType === "Key" ||
+          !item.secret ||
+          item.encrypted
+        ) {
+          continue;
+        }
+        const entry = new OTPEntry(this.normalize(item, hash), encryption);
+        items[hash] = await this.getOTPStorageFromEntry(entry);
+      }
+      for (const hash of keep) {
+        if (
+          !RESERVED_KEYS.includes(hash) &&
+          !(hash in items) &&
+          Object.prototype.hasOwnProperty.call(stored, hash)
+        ) {
+          items[hash] = stored[hash];
+        }
+      }
+
+      const replaced = this.ensureUniqueIndex(items);
+      await BrowserStorage.set(replaced);
+      const removed = Object.keys(stored).filter((hash) => !(hash in replaced));
+      if (removed.length) {
+        await BrowserStorage.remove(removed);
+      }
+      return true;
+    });
+  }
+
+  static clearAll() {
+    return withStorageLock(async () => {
+      const keys = (await BrowserStorage.getKeys()).map((key) => key.id);
+      const entries = Object.keys(await BrowserStorage.get());
+      if (keys.length || entries.length) {
+        await BrowserStorage.remove([...entries, ...keys]);
+      }
+    });
+  }
+
+  static async count() {
+    return Object.keys(await BrowserStorage.get()).length;
   }
 
   private static async ensureKeysStored(entries: OTPEntryInterface[]) {

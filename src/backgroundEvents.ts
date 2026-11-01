@@ -1,11 +1,16 @@
 import { UserSettings } from "./models/settings";
 import { handleCaptureMessage, stopCaptureOnAutolock } from "./capture";
-import { DRIVE_ALARM, DRIVE_CHECK_ALARM } from "./drive/config";
+import {
+  DRIVE_ALARM,
+  DRIVE_CHECK_ALARM,
+  DRIVE_MIRROR_ALARM,
+} from "./drive/config";
 import {
   backupAfterUnlock,
   handleDriveMessage,
   isDriveMessage,
 } from "./drive/background";
+import { runMirror } from "./drive/mirror";
 import { runBackup } from "./drive/upload";
 
 export function handleMessage(
@@ -67,6 +72,8 @@ async function handleExtensionMessage(
 export async function handleAlarm(alarm: chrome.alarms.Alarm) {
   if (alarm.name === DRIVE_ALARM || alarm.name === DRIVE_CHECK_ALARM) {
     await runBackup();
+  } else if (alarm.name === DRIVE_MIRROR_ALARM) {
+    await runMirror();
   } else if (alarm.name === "autolock") {
     chrome.storage.session.set({ cachedPassphrase: null, cachedKeyId: null });
     stopCaptureOnAutolock();

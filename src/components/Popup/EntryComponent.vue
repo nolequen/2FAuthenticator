@@ -65,7 +65,7 @@
       />
     </svg>
     <button
-      v-else
+      v-else-if="!isAndroid"
       type="button"
       :class="{ counter: true, disabled: style.hotpDisabled }"
       :disabled="style.hotpDisabled"
@@ -81,6 +81,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
+import { isAndroid } from "../../browser";
 import { OTPType, CodeState, MASK_DIGIT, isCodeReady } from "../../models/otp";
 import {
   getCurrentTab,
@@ -99,6 +100,8 @@ import EntryAvatar from "./EntryAvatar.vue";
 
 import IconPin from "lucide-static/icons/pin.svg";
 import IconRefresh from "lucide-static/icons/rotate-cw.svg";
+
+const PASTE_TIMEOUT = 500;
 
 const props = defineProps<{
   entry: OTPEntryInterface;
@@ -165,6 +168,9 @@ function activate(entry: OTPEntryInterface) {
 }
 
 function openMenu(event: MouseEvent | KeyboardEvent) {
+  if (isAndroid) {
+    return;
+  }
   const card = event.currentTarget as HTMLElement;
   if (
     event instanceof KeyboardEvent ||
@@ -224,6 +230,9 @@ async function copyCode(entry: OTPEntryInterface) {
   if (menu.useAutofill) {
     await pasteCode(entry.code);
   }
+  if (isAndroid) {
+    window.close();
+  }
 }
 
 function showCopied() {
@@ -242,10 +251,16 @@ async function pasteCode(code: string) {
     const tab = await getCurrentTab();
     if (tab && okToInjectContentScript(tab)) {
       await injectContentScript(tab);
-      chrome.tabs.sendMessage(tab.id, {
+      const pasted = chrome.tabs.sendMessage(tab.id, {
         action: "pastecode",
         code,
       });
+      if (isAndroid) {
+        await Promise.race([
+          pasted.catch(() => undefined),
+          new Promise((resolve) => setTimeout(resolve, PASTE_TIMEOUT)),
+        ]);
+      }
     }
   } catch (error) {
     console.error(error);

@@ -91,7 +91,24 @@
           />
         </EntrySection>
       </div>
-      <div v-if="entries.length === 0 && initComplete" class="empty no-entry">
+      <div
+        v-if="entries.length === 0 && initComplete && isAndroid"
+        class="empty no-entry"
+      >
+        <div class="hero-icon"><IconCloud /></div>
+        <div class="hero-text">
+          <h2>{{ mirrorEmptyTitle }}</h2>
+        </div>
+        <div v-if="!driveRecord?.mirror?.source" class="empty-actions">
+          <a-button variant="primary" block @click="drive.openTab()">
+            {{ driveRecord ? i18n.mirror_setup_continue : i18n.mirror_connect }}
+          </a-button>
+        </div>
+      </div>
+      <div
+        v-else-if="entries.length === 0 && initComplete"
+        class="empty no-entry"
+      >
         <div class="hero-icon"><IconKey /></div>
         <div class="hero-text">
           <h2>{{ i18n.no_entries_title }}</h2>
@@ -116,6 +133,7 @@
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import { storeToRefs } from "pinia";
 import type { SortableEvent } from "sortablejs";
+import { isAndroid } from "../../browser";
 import { issuerName } from "../../display";
 import {
   type EntrySection as Section,
@@ -142,6 +160,7 @@ import IconX from "lucide-static/icons/x.svg";
 import IconFunnel from "lucide-static/icons/funnel.svg";
 import IconDownload from "lucide-static/icons/download.svg";
 import IconKey from "lucide-static/icons/key.svg";
+import IconCloud from "lucide-static/icons/cloud.svg";
 
 const HOST_MARKER = "%HOST%";
 
@@ -152,7 +171,20 @@ const notification = useNotificationStore();
 const { entries, sections, filter, initComplete, shouldFilter, filterHost } =
   storeToRefs(accounts);
 const { backupReminder } = storeToRefs(notification);
-const { attention: driveAttention } = storeToRefs(useDriveStore());
+const drive = useDriveStore();
+const { attention: driveAttention, record: driveRecord } = storeToRefs(drive);
+
+const mirrorEmptyTitle = computed(() => {
+  if (!driveRecord.value) {
+    return i18n.mirror_connect_title;
+  }
+  if (!driveRecord.value.mirror?.source) {
+    return i18n.mirror_setup_title;
+  }
+  return driveRecord.value.error
+    ? i18n.mirror_status_network
+    : i18n.mirror_loading;
+});
 
 const searchText = ref("");
 const searchInput = useTemplateRef<HTMLInputElement>("searchInput");

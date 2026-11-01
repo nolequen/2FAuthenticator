@@ -31,6 +31,7 @@
 <script setup lang="ts">
 import { computed, useTemplateRef } from "vue";
 import type { SortableEvent } from "sortablejs";
+import { isAndroid } from "../../browser";
 import type { EntrySection } from "../../groups";
 import { i18n } from "../../store/i18n";
 import { useAccountsStore } from "../../store/Accounts";
@@ -113,7 +114,7 @@ function toggle() {
 }
 
 function openMenu(event: MouseEvent | KeyboardEvent) {
-  if (props.section.kind !== "group") {
+  if (props.section.kind !== "group" || isAndroid) {
     return;
   }
   const header = event.currentTarget as HTMLElement;

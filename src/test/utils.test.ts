@@ -5,6 +5,7 @@ import sinonChai from "sinon-chai";
 
 import { OTPEntry, OTPType } from "../models/otp";
 import {
+  getCurrentTab,
   getMatchedEntries,
   injectContentScript,
   type TabWithIdAndURL,
@@ -87,6 +88,43 @@ describe("injectContentScript", () => {
     }
 
     chai.expect(error).to.be.an("error");
+  });
+
+  it("should add the content script when its style cannot be added", async () => {
+    const executeScript = sinon.fake.resolves([]);
+    sinon.replace(
+      chrome.scripting,
+      "executeScript",
+      executeScript as unknown as typeof chrome.scripting.executeScript,
+    );
+    sinon.replace(
+      chrome.scripting,
+      "insertCSS",
+      sinon.fake.rejects(
+        new Error("insertCSS is not supported"),
+      ) as unknown as typeof chrome.scripting.insertCSS,
+    );
+    const warn = sinon.stub(console, "warn");
+
+    await injectContentScript(TAB);
+
+    executeScript.should.have.been.calledOnce;
+    warn.should.have.been.calledOnce;
+  });
+});
+
+describe("getCurrentTab", () => {
+  it("should take the active tab of the current window without the windows API", async () => {
+    const tab = { id: 4, url: "https://example.com/" } as chrome.tabs.Tab;
+    sinon.stub(chrome, "windows").value(undefined);
+    const query = sinon.stub(chrome.tabs, "query").resolves([tab]);
+
+    chai.expect(await getCurrentTab()).to.equal(tab);
+
+    query.should.have.been.calledOnceWith({
+      active: true,
+      currentWindow: true,
+    });
   });
 });
 

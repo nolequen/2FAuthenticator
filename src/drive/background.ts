@@ -1,13 +1,24 @@
+import { EntryStorage } from "../models/storage";
 import { driveAvailable, revokeAccess } from "./auth";
 import {
   BACKUP_DELAY_MINUTES,
   DRIVE_ALARM,
   DRIVE_CHECK_ALARM,
+  DRIVE_MIRROR_ALARM,
+  DRIVE_MIRROR_LOCK,
   DRIVE_RECORD,
 } from "./config";
 import { readStorageLocation } from "./copy";
 import {
+  type DriveCopyInfo,
+  copyInfo,
+  decideMirrorShrink,
+  runMirror,
+  scheduleMirror,
+} from "./mirror";
+import {
   type DriveErrorKind,
+  isMirror,
   readDriveRecord,
   removeDriveRecord,
   updateDriveRecord,
@@ -23,29 +34,27 @@ import {
   sortCopies,
 } from "./upload";
 
+export type { DriveCopyInfo } from "./mirror";
+
 export type DriveMessage =
   | { action: "drive.backupNow" }
   | { action: "drive.shrink"; decision: "save" | "skip" }
   | { action: "drive.list" }
   | { action: "drive.download"; id: string }
-  | { action: "drive.disconnect" };
+  | { action: "drive.disconnect" }
+  | { action: "drive.signOutEverywhere" }
+  | { action: "drive.mirrorCheck"; force: boolean }
+  | { action: "drive.mirrorShrink"; decision: "apply" | "keep" };
 
 export type DriveFailure =
   DriveErrorKind | "signin" | "disconnected" | "unavailable";
-
-export interface DriveCopyInfo {
-  id: string;
-  name: string;
-  modifiedTime: string;
-  browser: string;
-  day: string;
-  accounts: number;
-}
 
 export type DriveListResponse =
   { files: DriveCopyInfo[] } | { error: DriveFailure };
 
 export type DriveDownloadResponse = { text: string } | { error: DriveFailure };
+
+export type SignOutResponse = { status: "done" | "failed" };
 
 export function isDriveMessage(message: unknown): message is DriveMessage {
   return (
@@ -82,14 +91,7 @@ async function listCopies(): Promise<DriveListResponse> {
       return { files: [] };
     }
     return {
-      files: sortCopies(await api.listCopies(folderId)).map((file) => ({
-        id: file.id,
-        name: file.name,
-        modifiedTime: file.modifiedTime,
-        browser: file.properties?.browser ?? "",
-        day: file.properties?.day ?? "",
-        accounts: Number(file.properties?.accounts) || 0,
-      })),
+      files: sortCopies(await api.listCopies(folderId)).map(copyInfo),
     };
   } catch (error) {
     return await failed(error, record.connectionId);
@@ -130,23 +132,38 @@ async function decideShrink(save: boolean): Promise<BackupResult> {
   return save ? await runBackup(true) : { status: "unchanged" };
 }
 
-export async function disconnect() {
-  await chrome.alarms.clear(DRIVE_ALARM);
-  await chrome.alarms.clear(DRIVE_CHECK_ALARM);
+export function disconnect() {
+  return navigator.locks.request(DRIVE_MIRROR_LOCK, async () => {
+    await chrome.alarms.clear(DRIVE_ALARM);
+    await chrome.alarms.clear(DRIVE_CHECK_ALARM);
+    await chrome.alarms.clear(DRIVE_MIRROR_ALARM);
+    const record = await readDriveRecord();
+    await removeDriveRecord();
+    await writeDriveSession(null);
+    if (isMirror(record) && record.mirror.source) {
+      await EntryStorage.clearAll();
+    }
+  });
+}
+
+export async function signOutEverywhere(): Promise<SignOutResponse> {
   const record = await readDriveRecord();
-  if (record) {
-    await revokeAccess(record);
+  if (record && !(await revokeAccess(record))) {
+    return { status: "failed" };
   }
-  await removeDriveRecord();
-  await writeDriveSession(null);
+  await disconnect();
+  return { status: "done" };
 }
 
 export async function handleDriveMessage(message: DriveMessage) {
+  const mirrored = isMirror(await readDriveRecord());
   switch (message.action) {
     case "drive.backupNow":
-      return await runBackup(true);
+      return mirrored ? { status: "unavailable" } : await runBackup(true);
     case "drive.shrink":
-      return await decideShrink(message.decision === "save");
+      return mirrored
+        ? { status: "unavailable" }
+        : await decideShrink(message.decision === "save");
     case "drive.list":
       return await listCopies();
     case "drive.download":
@@ -154,6 +171,16 @@ export async function handleDriveMessage(message: DriveMessage) {
     case "drive.disconnect":
       await disconnect();
       return {};
+    case "drive.signOutEverywhere":
+      return await signOutEverywhere();
+    case "drive.mirrorCheck":
+      return mirrored
+        ? await runMirror(message.force)
+        : { status: "unavailable" };
+    case "drive.mirrorShrink":
+      return mirrored
+        ? await decideMirrorShrink(message.decision === "apply")
+        : { status: "unavailable" };
   }
 }
 
@@ -165,16 +192,22 @@ export async function handleStorageChange(
     !Object.keys(changes).some(
       (key) => key !== "UserSettings" && key !== DRIVE_RECORD,
     ) ||
-    areaName !== (await readStorageLocation()) ||
-    !(await readDriveRecord())
+    areaName !== (await readStorageLocation())
   ) {
+    return;
+  }
+  const record = await readDriveRecord();
+  if (!record || isMirror(record)) {
     return;
   }
   await scheduleBackup();
 }
 
 export async function scheduleIfConnected() {
-  if (await readDriveRecord()) {
+  const record = await readDriveRecord();
+  if (isMirror(record)) {
+    await scheduleMirror();
+  } else if (record) {
     await chrome.alarms.create(DRIVE_CHECK_ALARM, {
       delayInMinutes: BACKUP_DELAY_MINUTES,
     });
@@ -183,7 +216,7 @@ export async function scheduleIfConnected() {
 
 export async function backupAfterUnlock() {
   const record = await readDriveRecord();
-  if (record?.attention?.kind === "unlock") {
+  if (!isMirror(record) && record?.attention?.kind === "unlock") {
     await runBackup();
   }
 }

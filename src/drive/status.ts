@@ -1,5 +1,6 @@
 import { i18n, t } from "../store/i18n";
 import { formatMoment } from "./display";
+import type { MirrorResult } from "./mirror";
 import type { DriveAttention, DriveErrorKind, DriveRecord } from "./state";
 import type { BackupResult } from "./upload";
 
@@ -14,7 +15,42 @@ export function attentionText(attention: DriveAttention) {
     case "unlock":
       return i18n.drive_status_unlock;
     case "shrink":
+    case "mirrorShrink":
       return i18n.drive_status_shrink;
+    case "mirrorPassword":
+      return i18n.mirror_status_password;
+  }
+}
+
+export function mirrorStatusText(record: DriveRecord) {
+  if (record.attention) {
+    return attentionText(record.attention);
+  }
+  if (record.error) {
+    return i18n.mirror_status_network;
+  }
+  const applied = record.mirror?.applied;
+  return applied
+    ? t("mirror_status_applied", formatMoment(applied.at))
+    : i18n.mirror_status_none;
+}
+
+export function mirrorResultText(result: MirrorResult | undefined) {
+  switch (result?.status) {
+    case "applied":
+      return i18n.mirror_updated;
+    case "unchanged":
+      return i18n.mirror_up_to_date;
+    case "none":
+      return i18n.mirror_none;
+    case "unavailable":
+      return i18n.drive_unavailable;
+    case "attention":
+      return attentionText(result.attention);
+    case "error":
+      return errorText(result.error);
+    default:
+      return i18n.updateFailure;
   }
 }
 

@@ -34,6 +34,14 @@ Firefox updates the extension by itself. To check now, click **Check for Updates
 
 To update, delete the old files from the folder, extract the new ZIP into it and click **Reload** on the extension card. Your accounts stay because the extension ID does not change. Do not remove the extension: removing it deletes your accounts. Chrome and Edge do not update unpacked extensions, so watch the repository releases (**Watch** > **Custom** > **Releases**) to hear about new versions.
 
+### Firefox for Android
+
+1. Download `2fauthenticator-<version>-firefox.xpi` on the phone: it is the same file as for Firefox on a computer.
+2. In Firefox, open **Settings** > **About Firefox** and tap the Firefox logo five times to turn on the debug menu.
+3. Go back to **Settings**, choose **Install extension from file** and pick the downloaded file.
+
+To open the extension, open any web page and choose **Extensions** > **2FAuthenticator** in the Firefox menu. On the phone the extension shows the accounts of one of your computer browsers from Google Drive: see [On a phone](#on-a-phone). To update, install the newer `.xpi` the same way.
+
 ### Verifying a download
 
 Each release has `SHA256SUMS.txt` with the SHA-256 checksum of every package. In PowerShell:
@@ -60,7 +68,21 @@ Compare the hash with the line for that file in `SHA256SUMS.txt`. On Linux, run 
 
 **Restore** in the Google Drive section lists the copies of all your browsers. A copy can also be downloaded from drive.google.com and imported as a file with **Import**.
 
-**Disconnect** revokes the access of the extension and forgets the sign-in; the copies stay in Drive. **Delete all** in the extension options disconnects Google Drive too. In Firefox the extension asks for the permission to transfer data when you connect; Chrome and Edge ask for no extra permission.
+**Disconnect** forgets the sign-in in this browser only: the access of the extension in your Google account and the copies in Drive stay. **Delete all** in the extension options disconnects Google Drive too. **Sign out on all devices** in Firefox revokes the access of the extension at Google and then disconnects: Firefox on every computer and phone connected to this Google account has to sign in again. Chrome and Edge sign in to Google separately, and there the button is **Sign out of all Chrome and Edge**. To remove every access at once, use [myaccount.google.com/connections](https://myaccount.google.com/connections). In Firefox the extension asks for the permission to transfer data when you connect; Chrome and Edge ask for no extra permission.
+
+### On a phone
+
+Firefox for Android keeps no accounts of its own. It shows the accounts of one of your computer browsers from its copies in Google Drive and never uploads anything.
+
+1. Connect Google Drive in that browser on the computer first.
+2. On the phone, open the extension and tap **Connect**. Allow what Firefox asks for: the transfer of sign-in data, and access to `127.0.0.1`, where Google returns after the sign-in.
+3. Sign in to the same Google account, choose the browser and enter the password of its copy: the extension password on that computer or the backup password.
+
+After that the phone replaces its whole list with each newer copy of that browser, including deletions, order and groups: when the popup opens, once an hour and with **Update now**. **Change browser** picks another source. If the computer changes the password, the phone asks for the new one. If a copy has fewer than half of the phone's accounts, the phone asks before applying it.
+
+On the phone the codes open without a password: the phone keeps the key of the copy, so the screen lock of the phone protects them. You cannot add, edit, reorder or delete accounts there, scan QR codes, import or export, set a password or show the next HOTP code: make changes on the computer. Tapping an account copies the code and closes the popup. **Disconnect** on the phone also removes its accounts.
+
+If you lose the phone, click **Sign out on all devices** in Firefox on the computer, or remove the access of 2FAuthenticator at [myaccount.google.com/connections](https://myaccount.google.com/connections), and connect the computer again. This does not erase the accounts already on the phone, and the phone keeps the key that opens your older copies: change the extension password or the backup password on the computer, and re-issue two-factor secrets if someone may have used the phone.
 
 ## Privacy
 
