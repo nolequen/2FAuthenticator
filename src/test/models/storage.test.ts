@@ -754,6 +754,26 @@ describe("BrowserStorage", () => {
     });
   });
 
+  describe("storage location", () => {
+    it("should keep the synced settings when a new browser finds the accounts in sync", async () => {
+      await chrome.storage.local.clear();
+      await UserSettings.updateItems();
+      const raw = rawEntry();
+      const synced = { siteIconsOff: [raw.hash], theme: "dark" };
+      await chrome.storage.sync.set({ [raw.hash]: raw, UserSettings: synced });
+
+      await BrowserStorage.get();
+
+      chai
+        .expect((await chrome.storage.sync.get("UserSettings")).UserSettings)
+        .to.deep.equal(synced);
+      chai
+        .expect((await chrome.storage.local.get("UserSettings")).UserSettings)
+        .to.deep.equal({ storageLocation: StorageLocation.Sync });
+      chai.expect(UserSettings.items.theme).to.equal("dark");
+    });
+  });
+
   describe("on Android", () => {
     afterEach(() => setAndroid(false));
 

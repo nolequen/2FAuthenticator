@@ -453,11 +453,13 @@ export const useAccountsStore = defineStore("accounts", () => {
           )
         ) {
           UserSettings.items.storageLocation = StorageLocation.Sync;
+          UserSettings.mergeItems(syncData.UserSettings ?? {});
           await chrome.storage.local.clear();
           if (drive) {
             await chrome.storage.local.set({ [DRIVE_RECORD]: drive });
           }
           await UserSettings.commitItems();
+          await menu.init();
           return "updateSuccess";
         } else {
           throw " All data not transferred successfully.";

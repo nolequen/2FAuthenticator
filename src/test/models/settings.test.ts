@@ -46,6 +46,31 @@ describe("UserSettings", () => {
     );
   });
 
+  it("should merge the lists of another browser and take only the settings this one lacks", () => {
+    UserSettings.items = {
+      storageLocation: StorageLocation.Local,
+      siteIconsOff: ["first-hash"],
+      theme: "light",
+    };
+
+    UserSettings.mergeItems({
+      autofill: true,
+      collapsed: "broken" as unknown as string[],
+      offset: 30,
+      siteIconsOff: ["first-hash", 7 as unknown as string, "second-hash"],
+      storageLocation: StorageLocation.Sync,
+      theme: "dark",
+      zoom: 2,
+    } as typeof UserSettings.items);
+
+    UserSettings.items.should.deep.equal({
+      autofill: true,
+      siteIconsOff: ["first-hash", "second-hash"],
+      storageLocation: StorageLocation.Local,
+      theme: "light",
+    });
+  });
+
   describe("legacy keys", () => {
     for (const location of [StorageLocation.Local, StorageLocation.Sync]) {
       it(`should be dropped on commit with storage location ${location}`, async () => {

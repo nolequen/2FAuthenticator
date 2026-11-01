@@ -60,8 +60,11 @@ export class BrowserStorage {
                 // Use default
                 UserSettings.items.storageLocation = StorageLocation.Sync;
               }
-              UserSettings.commitItems();
-              resolve(UserSettings.items.storageLocation);
+              const location = UserSettings.items.storageLocation;
+              if (location === StorageLocation.Sync) {
+                UserSettings.mergeItems(sync.UserSettings ?? {});
+              }
+              UserSettings.commitItems().then(() => resolve(location), reject);
               return;
             });
           } catch (error) {

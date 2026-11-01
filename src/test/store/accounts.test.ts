@@ -351,6 +351,46 @@ describe("Accounts", () => {
       chai.expect((await chrome.storage.local.get())[hash]).to.equal(undefined);
     });
 
+    it("should keep the settings already in sync when the accounts move to sync", async () => {
+      await chrome.storage.local.set({
+        UserSettings: {
+          storageLocation: StorageLocation.Local,
+          collapsed: ["local-section"],
+          siteIconsOff: ["local", "shared"],
+          theme: "light",
+        },
+      });
+      await chrome.storage.sync.set({
+        UserSettings: {
+          collapsed: ["synced-section"],
+          siteIcons: false,
+          siteIconsOff: ["shared", "synced"],
+          theme: "dark",
+        },
+      });
+      const store = await createStore();
+      const menu = useMenuStore();
+
+      chai
+        .expect(await store.migrateStorage(StorageLocation.Sync))
+        .to.equal("updateSuccess");
+
+      chai
+        .expect((await chrome.storage.sync.get()).UserSettings)
+        .to.deep.include({
+          collapsed: ["local-section", "synced-section"],
+          siteIcons: false,
+          siteIconsOff: ["local", "shared", "synced"],
+          theme: "light",
+        });
+      menu.siteIcons.should.equal(false);
+      [...menu.siteIconsOff].should.deep.equal(["local", "shared", "synced"]);
+      [...menu.collapsed].should.deep.equal([
+        "local-section",
+        "synced-section",
+      ]);
+    });
+
     it("should leave the Google Drive connection local when the accounts move back from sync", async () => {
       const hash = crypto.randomUUID();
       await chrome.storage.local.set({

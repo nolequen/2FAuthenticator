@@ -30,6 +30,8 @@ const LocalUserSettingsDataKeys = [
   "storageLocation",
 ];
 
+const MergedUserSettingsDataKeys = ["collapsed", "siteIconsOff"] as const;
+
 const LegacyUserSettingsDataKeys = [
   "advisorIgnoreList",
   "driveEncrypted",
@@ -55,6 +57,26 @@ export class UserSettings {
 
   static async updateItems() {
     UserSettings.items = await UserSettings.getAllItems();
+  }
+
+  static mergeItems(other: UserSettingsData) {
+    const { syncableSettings } = UserSettings.splitSettings(other);
+    for (const key of LegacyUserSettingsDataKeys) {
+      delete syncableSettings[key as keyof UserSettingsData];
+    }
+    for (const key of MergedUserSettingsDataKeys) {
+      const items = syncableSettings[key];
+      delete syncableSettings[key];
+      if (Array.isArray(items)) {
+        UserSettings.items[key] = [
+          ...new Set([
+            ...(UserSettings.items[key] ?? []),
+            ...items.filter((item) => typeof item === "string"),
+          ]),
+        ];
+      }
+    }
+    UserSettings.items = { ...syncableSettings, ...UserSettings.items };
   }
 
   static async commitItems() {
