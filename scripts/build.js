@@ -145,7 +145,8 @@ function compile(platform) {
   } else {
     runOrExit("webpack", []);
   }
-  runOrExit("sass", ["sass:css"]);
+  const sassArgs = platform === "prod" ? ["--no-source-map"] : [];
+  runOrExit("sass", [...sassArgs, "sass:css"]);
   copyCssExtras("css");
 }
 
