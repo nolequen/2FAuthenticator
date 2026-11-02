@@ -331,27 +331,22 @@ function requireKeys() {
   }
 }
 
-function amoToken() {
-  const encode = (data) =>
-    Buffer.from(JSON.stringify(data)).toString("base64url");
-  const now = Math.floor(Date.now() / 1000);
-  const body = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({
-    iss: process.env.WEB_EXT_API_KEY,
-    jti: crypto.randomUUID(),
-    iat: now,
-    exp: now + 60,
-  })}`;
-  const signature = crypto
-    .createHmac("sha256", process.env.WEB_EXT_API_SECRET)
-    .update(body)
-    .digest("base64url");
-  return `${body}.${signature}`;
-}
+let amoAuth;
 
-function amo(url, options = {}) {
+async function amo(url, options = {}) {
+  if (!amoAuth) {
+    const { JwtApiAuth } = await import("web-ext/util/submit-addon");
+    amoAuth = new JwtApiAuth({
+      apiKey: process.env.WEB_EXT_API_KEY,
+      apiSecret: process.env.WEB_EXT_API_SECRET,
+    });
+  }
   return fetch(new URL(url, AMO_API), {
     ...options,
-    headers: { Authorization: `JWT ${amoToken()}`, Accept: "application/json" },
+    headers: {
+      Authorization: await amoAuth.getAuthHeader(),
+      Accept: "application/json",
+    },
   });
 }
 
