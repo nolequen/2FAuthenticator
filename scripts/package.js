@@ -1,19 +1,26 @@
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
 const readline = require("readline");
-const zlib = require("zlib");
+const { isDeepStrictEqual } = require("util");
 const { spawnSync } = require("child_process");
+const zip = require("./zip.js");
 
 process.chdir(path.resolve(__dirname, ".."));
 
 const NAME = "2fauthenticator";
 const REPO_URL = "https://github.com/nolequen/2FAuthenticator";
 const UPDATE_URL = `${REPO_URL}/releases/latest/download/updates.json`;
+const AMO_API = "https://addons.mozilla.org/api/v5/addons/";
+const AMO_SIGNING_TIMEOUT_MINUTES = 15;
+const AMO_POLL_SECONDS = 10;
 const KEY_VARS = ["WEB_EXT_API_KEY", "WEB_EXT_API_SECRET"];
+const SIGN_FLAGS = ["--yes", "--dry-run"];
 const WEB_EXT = "node_modules/web-ext/bin/web-ext.js";
 const FIREFOX_DIR = path.join("release", "firefox");
 const DRIVE_SECRET_FILE = path.join("secrets", "google-oauth.json");
+const IN_CI = process.env.CI === "true";
 
 const color = (code, text) => `\x1b[${code}m${text}\x1b[0m`;
 
@@ -36,6 +43,8 @@ const amoDir = path.join("artifacts", `${version}-amo`);
 const signedDir = path.join(amoDir, "signed");
 const buildInfoFile = path.join(amoDir, "build-info.json");
 const uploadInfoFile = path.join(signedDir, "build-info.json");
+const sourceArchive = path.join(amoDir, `${NAME}-${version}-source.zip`);
+const metadataFile = path.join(amoDir, "amo-metadata.json");
 const packageName = (suffix) => `${NAME}-${version}-${suffix}`;
 const PACKAGES = ["firefox.xpi", "chrome.zip", "edge.zip"].map(packageName);
 
@@ -88,58 +97,97 @@ function isTreeClean() {
   return git(["status", "--porcelain"]) === "";
 }
 
-function sha256(file) {
-  return crypto
-    .createHash("sha256")
-    .update(fs.readFileSync(file))
-    .digest("hex");
+function isHeadInMain() {
+  return (
+    spawnSync("git", ["merge-base", "--is-ancestor", "HEAD", "origin/main"], {
+      stdio: "ignore",
+      env: envWithoutKeys(),
+    }).status === 0
+  );
 }
 
-function treeHash(dir) {
-  const hash = crypto.createHash("sha256");
-  fs.readdirSync(dir, { recursive: true })
+function sha256(data) {
+  return crypto.createHash("sha256").update(data).digest("hex");
+}
+
+function treeFiles(dir) {
+  return fs
+    .readdirSync(dir, { recursive: true })
     .map((file) => file.split(path.sep).join("/"))
     .filter(
       (file) =>
         !file.split("/").some((part) => part.startsWith(".")) &&
         fs.statSync(path.join(dir, file)).isFile()
     )
-    .sort()
-    .forEach((file) =>
-      hash.update(`${file}\0${sha256(path.join(dir, file))}\n`)
-    );
+    .sort();
+}
+
+function treeHash(dir) {
+  const hash = crypto.createHash("sha256");
+  for (const file of treeFiles(dir)) {
+    hash.update(`${file}\0${sha256(fs.readFileSync(path.join(dir, file)))}\n`);
+  }
   return hash.digest("hex");
 }
 
-function readZipEntry(file, name) {
-  const zip = fs.readFileSync(file);
-  const end = zip.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
-  if (end < 0) {
-    fail(`${file} is not a ZIP file.`);
-  }
-  let offset = zip.readUInt32LE(end + 16);
-  for (let count = zip.readUInt16LE(end + 10); count > 0; count--) {
-    const nameLength = zip.readUInt16LE(offset + 28);
-    const entry = zip.toString("utf8", offset + 46, offset + 46 + nameLength);
-    if (entry === name) {
-      const method = zip.readUInt16LE(offset + 10);
-      const size = zip.readUInt32LE(offset + 20);
-      const local = zip.readUInt32LE(offset + 42);
-      const start =
-        local +
-        30 +
-        zip.readUInt16LE(local + 26) +
-        zip.readUInt16LE(local + 28);
-      const data = zip.subarray(start, start + size);
-      return method === 0 ? data : zlib.inflateRawSync(data);
+function differencesFromBuild(xpi) {
+  const signed = new Map(
+    zip
+      .readEntries(xpi)
+      .filter((entry) => !entry.name.startsWith("META-INF/"))
+      .map((entry) => [entry.name, entry.data])
+  );
+  const differences = [];
+  for (const file of treeFiles(FIREFOX_DIR)) {
+    const built = fs.readFileSync(path.join(FIREFOX_DIR, file));
+    const data = signed.get(file);
+    signed.delete(file);
+    if (!data) {
+      differences.push(`${file}: missing from the signed .xpi`);
+    } else if (
+      file === "manifest.json"
+        ? !isDeepStrictEqual(JSON.parse(built), JSON.parse(data))
+        : !built.equals(data)
+    ) {
+      differences.push(`${file}: differs`);
     }
-    offset +=
-      46 +
-      nameLength +
-      zip.readUInt16LE(offset + 30) +
-      zip.readUInt16LE(offset + 32);
   }
-  fail(`${name} not found in ${file}.`);
+  for (const file of signed.keys()) {
+    differences.push(`${file}: not in ${FIREFOX_DIR}`);
+  }
+  return differences;
+}
+
+function checkSigned(xpi, gecko) {
+  const signed = JSON.parse(zip.readEntry(xpi, "manifest.json").toString("utf8"));
+  const signedId = signed.browser_specific_settings?.gecko?.id;
+  if (signed.version !== version || signedId !== gecko.id) {
+    fail(
+      `${xpi} is ${signedId} ${signed.version}, expected ${gecko.id} ${version}. Put the right signed .xpi into ${signedDir}.`
+    );
+  }
+  const differences = differencesFromBuild(xpi);
+  if (differences.length > 0) {
+    fail(
+      [
+        `${xpi} does not match ${FIREFOX_DIR}:`,
+        ...differences.map((line) => `  ${line}`),
+        "Find out where this file comes from before anything else: it is not the build that was checked.",
+      ].join("\n")
+    );
+  }
+}
+
+function compareVersions(a, b) {
+  const left = a.split(".").map(Number);
+  const right = b.split(".").map(Number);
+  for (let i = 0; i < Math.max(left.length, right.length); i++) {
+    const difference = (left[i] ?? 0) - (right[i] ?? 0);
+    if (difference !== 0) {
+      return Math.sign(difference);
+    }
+  }
+  return 0;
 }
 
 function ask(question) {
@@ -157,6 +205,21 @@ function ask(question) {
   });
 }
 
+function buildEnv() {
+  const env = envWithoutKeys();
+  if (env.DRIVE_DESKTOP_SECRET === "") {
+    delete env.DRIVE_DESKTOP_SECRET;
+  }
+  if (!env.DRIVE_DESKTOP_SECRET && !fs.existsSync(DRIVE_SECRET_FILE)) {
+    const text = `Neither DRIVE_DESKTOP_SECRET nor ${DRIVE_SECRET_FILE} is set: Google Drive backups will not work in the Firefox package.`;
+    if (IN_CI) {
+      fail(text);
+    }
+    console.log(color("7;33", text));
+  }
+  return env;
+}
+
 function buildPackages() {
   if (keysInEnv().length > 0) {
     fail(
@@ -167,15 +230,7 @@ function buildPackages() {
   fs.rmSync(buildInfoFile, { force: true });
   fs.rmSync(outDir, { recursive: true, force: true });
 
-  if (!fs.existsSync(DRIVE_SECRET_FILE)) {
-    console.log(
-      color(
-        "7;33",
-        `${DRIVE_SECRET_FILE} is missing: Google Drive backups will not work in the Firefox package.`
-      )
-    );
-  }
-  check(runNode("scripts/build.js", ["prod"]));
+  check(runNode("scripts/build.js", ["prod"], buildEnv()));
   check(
     runNode(WEB_EXT, ["lint", "--source-dir", FIREFOX_DIR, "--self-hosted"])
   );
@@ -207,6 +262,7 @@ function buildPackages() {
       )
     );
   }
+  console.log(`${FIREFOX_DIR} tree hash: ${info.firefox}`);
   console.log(color("32", `Packages for ${version} are in ${outDir}`));
 }
 
@@ -263,7 +319,7 @@ function signedXpis() {
     .map((file) => path.join(signedDir, file));
 }
 
-async function submit(info) {
+function requireKeys() {
   if (keysInEnv().length < KEY_VARS.length) {
     fail(
       [
@@ -273,25 +329,110 @@ async function submit(info) {
       ].join("\n")
     );
   }
-  if (fs.existsSync(uploadInfoFile)) {
-    console.log(
-      color(
-        "7;33",
-        `${version} was already submitted once. If Developer Hub shows this version, download the signed .xpi into ${signedDir} and run \`npm run sign\` again instead of submitting.`
-      )
+}
+
+function amoToken() {
+  const encode = (data) =>
+    Buffer.from(JSON.stringify(data)).toString("base64url");
+  const now = Math.floor(Date.now() / 1000);
+  const body = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({
+    iss: process.env.WEB_EXT_API_KEY,
+    jti: crypto.randomUUID(),
+    iat: now,
+    exp: now + 60,
+  })}`;
+  const signature = crypto
+    .createHmac("sha256", process.env.WEB_EXT_API_SECRET)
+    .update(body)
+    .digest("base64url");
+  return `${body}.${signature}`;
+}
+
+function amo(url, options = {}) {
+  return fetch(new URL(url, AMO_API), {
+    ...options,
+    headers: { Authorization: `JWT ${amoToken()}`, Accept: "application/json" },
+  });
+}
+
+async function amoJson(url) {
+  const response = await amo(url);
+  if (response.status === 404) {
+    return null;
+  }
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(`AMO ${url}: ${response.status} ${text.slice(0, 500)}`);
+  }
+  return JSON.parse(text);
+}
+
+async function amoDownload(url, file) {
+  const response = await amo(url);
+  if (!response.ok) {
+    throw new Error(`Downloading ${url} failed: ${response.status}`);
+  }
+  fs.writeFileSync(file, Buffer.from(await response.arrayBuffer()));
+}
+
+function versionsUrl(gecko) {
+  return `addon/${gecko.id}/versions/`;
+}
+
+async function amoVersions(gecko) {
+  const list = await amoJson(`${versionsUrl(gecko)}?filter=all_with_unlisted`);
+  return list?.results ?? [];
+}
+
+async function findVersion(gecko, wanted) {
+  const found =
+    (await amoVersions(gecko)).find((item) => item.version === wanted) ??
+    (await amoJson(`${versionsUrl(gecko)}v${wanted}/`));
+  return found && amoJson(`${versionsUrl(gecko)}${found.id}/`);
+}
+
+async function waitForSigning(gecko, id) {
+  const deadline = Date.now() + AMO_SIGNING_TIMEOUT_MINUTES * 60 * 1000;
+  for (;;) {
+    const detail = await amoJson(`${versionsUrl(gecko)}${id}/`);
+    const status = detail?.file?.status;
+    if (status === "public") {
+      return detail;
+    }
+    if (status === "disabled") {
+      fail(`AMO disabled the file of ${version}. Open Developer Hub to see why.`);
+    }
+    if (Date.now() > deadline) {
+      fail(
+        `AMO has not signed ${version} in ${AMO_SIGNING_TIMEOUT_MINUTES} minutes. Run \`npm run sign\` again later.`
+      );
+    }
+    console.log(`Waiting for AMO to sign ${version} (file status: ${status})`);
+    await new Promise((resolve) => setTimeout(resolve, AMO_POLL_SECONDS * 1000));
+  }
+}
+
+async function uploadSource(gecko, id) {
+  const form = new FormData();
+  form.set(
+    "source",
+    new File([fs.readFileSync(sourceArchive)], path.basename(sourceArchive))
+  );
+  const response = await amo(`${versionsUrl(gecko)}${id}/`, {
+    method: "PATCH",
+    body: form,
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Uploading the source code to AMO failed: ${response.status} ${(
+        await response.text()
+      ).slice(0, 500)}`
     );
   }
-  const answer = await ask(
-    `Submit ${version} to AMO? This version number can never be reused. [y/N] `
-  );
-  if (answer.toLowerCase() !== "y") {
-    fail("Cancelled.");
-  }
+}
 
-  const sourceArchive = path.join(amoDir, packageName("source.zip"));
+function prepareSubmission(info) {
   git(["archive", "--format=zip", "-o", sourceArchive, info.commit]);
-
-  const metadataFile = path.join(amoDir, "amo-metadata.json");
   writeJson(metadataFile, {
     version: {
       approval_notes: [
@@ -301,6 +442,41 @@ async function submit(info) {
       ].join("\n"),
     },
   });
+}
+
+async function finishExisting(existing, gecko, info) {
+  console.log(`AMO already has ${version}: finishing it instead of submitting.`);
+  const signed = await waitForSigning(gecko, existing.id);
+  const url = new URL(signed.file.url);
+  const xpi = path.join(signedDir, path.basename(url.pathname));
+  const download = `${xpi}.download`;
+  fs.mkdirSync(signedDir, { recursive: true });
+  await amoDownload(url, download);
+  checkSigned(download, gecko);
+  if (!("source" in signed)) {
+    console.log(
+      color(
+        "7;33",
+        `AMO does not say whether ${version} has its source code. Check it in Developer Hub; the archive is ${sourceArchive}.`
+      )
+    );
+  } else if (!signed.source) {
+    console.log(`Uploading ${sourceArchive} as the source code of ${version}`);
+    await uploadSource(gecko, existing.id);
+  }
+  writeJson(uploadInfoFile, info);
+  fs.renameSync(download, xpi);
+}
+
+async function submit(info, yes) {
+  if (!yes) {
+    const answer = await ask(
+      `Submit ${version} to AMO? This version number can never be reused. [y/N] `
+    );
+    if (answer.toLowerCase() !== "y") {
+      fail("Cancelled.");
+    }
+  }
 
   fs.mkdirSync(signedDir, { recursive: true });
   writeJson(uploadInfoFile, info);
@@ -324,22 +500,99 @@ async function submit(info) {
   if (result.error || result.status !== 0) {
     fail(
       [
-        "Signing failed. Do NOT run `npm run sign` again right away: AMO may already have this version.",
-        `Open Developer Hub. If ${version} is there, upload ${sourceArchive} as its source code if it is missing,`,
+        "Signing failed. Running `npm run sign` again is safe: it looks the version up in AMO first and never submits it twice.",
+        `If it keeps failing and Developer Hub shows ${version}: upload ${sourceArchive} as its source code if it is missing,`,
         `download the signed .xpi into ${signedDir} and run \`npm run sign\` again to finish packaging.`,
-        "If the version is not there, fix the error above and run `npm run sign` again.",
       ].join("\n"),
       result.status || 1
     );
   }
 }
 
-async function sign() {
+async function dryRun(gecko) {
+  requireKeys();
+  const latest = (await amoVersions(gecko)).reduce(
+    (newest, item) =>
+      !newest || compareVersions(item.version, newest.version) > 0
+        ? item
+        : newest,
+    null
+  );
+  if (!latest) {
+    fail(`AMO lists no versions of ${gecko.id}.`);
+  }
+  const found = await findVersion(gecko, latest.version);
+  const direct = await amoJson(`${versionsUrl(gecko)}v${latest.version}/`);
+  const problems = [];
+  if (found?.id !== latest.id) {
+    problems.push(`the version list does not find ${latest.version}`);
+  }
+  if (direct?.id !== latest.id) {
+    problems.push(
+      `versions/v${latest.version}/ does not find ${latest.version}`
+    );
+  }
+  if (!found?.source) {
+    problems.push(`AMO does not report the source code of ${latest.version}`);
+  }
+  if (found?.file?.status !== "public") {
+    problems.push(`the file of ${latest.version} is ${found?.file?.status}`);
+  }
+  if (problems.length > 0) {
+    fail(`Dry run: ${problems.join("; ")}.`);
+  }
+
+  const name = `${NAME}-${latest.version}-firefox.xpi`;
+  const response = await fetch(
+    `${REPO_URL}/releases/download/v${latest.version}/${name}`
+  );
+  if (!response.ok) {
+    fail(`Downloading ${name} from the GitHub release failed: ${response.status}`);
+  }
+  const fromGitHub = sha256(Buffer.from(await response.arrayBuffer()));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "2fa-amo-"));
+  try {
+    await amoDownload(found.file.url, path.join(dir, name));
+    const fromAmo = sha256(fs.readFileSync(path.join(dir, name)));
+    if (fromAmo !== fromGitHub) {
+      fail(
+        `Dry run: ${name} from AMO (${fromAmo}) differs from the GitHub release (${fromGitHub}).`
+      );
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+  console.log(
+    color(
+      "32",
+      `Dry run passed: AMO finds ${latest.version} both ways, has its source code, and its signed file matches the GitHub release (sha256 ${fromGitHub}, AMO reports ${found.file.hash}). Nothing was submitted.`
+    )
+  );
+}
+
+async function sign({ yes, dryRun: dry }) {
   const { info, gecko } = checkBuild();
+  if (!dry && !IN_CI && !isHeadInMain()) {
+    fail(
+      "HEAD is not in origin/main. Sign only the commit the release PR left in main: run `git fetch origin` and check that commit out in a worktree."
+    );
+  }
+  if (dry) {
+    prepareSubmission(info);
+    await dryRun(gecko);
+    return;
+  }
 
   let xpis = signedXpis();
   if (xpis.length === 0) {
-    await submit(info);
+    requireKeys();
+    prepareSubmission(info);
+    const existing = await findVersion(gecko, version);
+    if (existing) {
+      await finishExisting(existing, gecko, info);
+    } else {
+      await submit(info, yes);
+    }
     xpis = signedXpis();
   } else {
     const uploaded = fs.existsSync(uploadInfoFile)
@@ -355,15 +608,7 @@ async function sign() {
   if (xpis.length !== 1) {
     fail(`Expected one signed .xpi in ${signedDir}, found ${xpis.length}.`);
   }
-  const signed = JSON.parse(
-    readZipEntry(xpis[0], "manifest.json").toString("utf8")
-  );
-  const signedId = signed.browser_specific_settings?.gecko?.id;
-  if (signed.version !== version || signedId !== gecko.id) {
-    fail(
-      `${xpis[0]} is ${signedId} ${signed.version}, expected ${gecko.id} ${version}. Put the right signed .xpi into ${signedDir}.`
-    );
-  }
+  checkSigned(xpis[0], gecko);
 
   const xpi = path.join(outDir, PACKAGES[0]);
   fs.copyFileSync(xpis[0], xpi);
@@ -374,7 +619,7 @@ async function sign() {
           {
             version,
             update_link: `${REPO_URL}/releases/download/v${version}/${PACKAGES[0]}`,
-            update_hash: `sha256:${sha256(xpi)}`,
+            update_hash: `sha256:${sha256(fs.readFileSync(xpi))}`,
             applications: {
               gecko: { strict_min_version: gecko.strict_min_version },
             },
@@ -386,7 +631,8 @@ async function sign() {
   fs.writeFileSync(
     path.join(outDir, "SHA256SUMS.txt"),
     PACKAGES.map(
-      (file) => `${sha256(path.join(outDir, file))}  ${file}\n`
+      (file) =>
+        `${sha256(fs.readFileSync(path.join(outDir, file)))}  ${file}\n`
     ).join("")
   );
 
@@ -394,17 +640,21 @@ async function sign() {
   for (const file of fs.readdirSync(outDir)) {
     console.log(`  ${file}`);
   }
-  console.log(`Tag this commit: git tag v${version} ${info.commit}`);
+  console.log(`Tag this commit: git tag -a v${version} ${info.commit}`);
 }
 
-const [command, ...rest] = process.argv.slice(2);
+const [command, ...flags] = process.argv.slice(2);
 
-if (rest.length > 0) {
-  fail(`Unknown arguments: ${rest.join(" ")}`);
-} else if (command === "package") {
+if (command === "package" && flags.length === 0) {
   buildPackages();
-} else if (command === "sign") {
-  sign().catch((error) => fail(error.stack || String(error)));
+} else if (
+  command === "sign" &&
+  flags.every((flag) => SIGN_FLAGS.includes(flag))
+) {
+  sign({
+    yes: flags.includes("--yes"),
+    dryRun: flags.includes("--dry-run"),
+  }).catch((error) => fail(error.stack || String(error)));
 } else {
-  fail("Usage: node scripts/package.js <package|sign>");
+  fail("Usage: node scripts/package.js package | sign [--yes] [--dry-run]");
 }

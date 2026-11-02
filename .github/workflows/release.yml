@@ -1,0 +1,392 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "A throwaway annotated tag whose name does not start with v, to test the tag checks and the release notes"
+        required: false
+        default: ""
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/release.yml
+      - scripts/package.js
+      - scripts/update-check.mjs
+      - scripts/zip.js
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name != 'release'
+    runs-on: ubuntu-latest
+    name: Release build
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: ${{ github.event_name == 'pull_request' && 1 || 0 }}
+          persist-credentials: false
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Read the version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Check the tag
+        if: github.event_name == 'push' || inputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+          RELEASE: ${{ github.event_name == 'push' }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          fail() { echo "::error::$1"; exit 1; }
+          git fetch --force origin "refs/tags/$TAG:refs/tags/$TAG"
+          if [ "$(git cat-file -t "refs/tags/$TAG")" != tag ]; then
+            fail "$TAG is a lightweight tag. Tag the commit with git tag -a and put the release notes into its message."
+          fi
+          git for-each-ref --format='%(contents)' "refs/tags/$TAG" > "$RUNNER_TEMP/notes.md"
+          if [ -z "$(tr -d '[:space:]' < "$RUNNER_TEMP/notes.md")" ]; then
+            fail "The message of $TAG is empty. It becomes the release notes."
+          fi
+          if ! git merge-base --is-ancestor "refs/tags/$TAG^{commit}" origin/main; then
+            fail "The commit of $TAG is not in main."
+          fi
+          if [ "$RELEASE" = true ]; then
+            if [ "$(git rev-parse "refs/tags/$TAG^{commit}")" != "$(git rev-parse HEAD)" ]; then
+              fail "$TAG has moved since this run started. Start a new run from the tag instead of re-running this one."
+            fi
+            if [ "$TAG" != "v$VERSION" ]; then
+              fail "$TAG does not match version $VERSION in package.json."
+            fi
+            latest=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)
+            newest=$(printf '%s\n' "${latest#v}" "$VERSION" | sort -V | tail -n 1)
+            if [ "${latest#v}" = "$VERSION" ] || [ "$newest" != "$VERSION" ]; then
+              fail "$VERSION is not newer than the latest release $latest."
+            fi
+          fi
+
+      - name: Write placeholder notes
+        if: github.event_name == 'workflow_dispatch' && inputs.tag == ''
+        run: echo "Dry run of the release workflow." > "$RUNNER_TEMP/notes.md"
+
+      - name: List the commits since the latest release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)
+          {
+            echo "### Commits since $latest"
+            echo '```'
+            git log --oneline "$latest..HEAD"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test code
+        run: npm test
+
+      - name: Build the packages
+        run: npm run package
+        env:
+          DRIVE_DESKTOP_SECRET: ${{ github.event_name == 'pull_request' && 'test-secret' || secrets.DRIVE_DESKTOP_SECRET }}
+
+      - name: Upload the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: |
+            release/chrome
+            release/firefox
+            artifacts/
+          if-no-files-found: error
+          overwrite: true
+
+      - name: Upload the release notes
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: notes
+          path: ${{ runner.temp }}/notes.md
+          if-no-files-found: error
+          overwrite: true
+
+  check-chrome:
+    runs-on: ubuntu-latest
+    name: Release check chrome
+    needs: [build]
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Cache browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-chrome-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download the build
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+
+      - name: Download the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download --repo "$GITHUB_REPOSITORY" --pattern '*-chrome.zip' --dir "$RUNNER_TEMP/latest"
+
+      - name: Check the update
+        run: npm run update-check -- chrome "$RUNNER_TEMP"/latest/*-chrome.zip release/chrome
+
+  check-firefox:
+    runs-on: ubuntu-latest
+    name: Release check firefox
+    needs: [build]
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Cache browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-firefox-${{ hashFiles('package-lock.json', '.github/firefox-devedition-version') }}
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+
+      - name: Install Firefox Developer Edition
+        run: |
+          version=$(cat .github/firefox-devedition-version)
+          for attempt in 1 2 3; do
+            if npx puppeteer browsers install "firefox@devedition_$version"; then
+              exit 0
+            fi
+            sleep 15
+          done
+          exit 1
+
+      - name: Download the build
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+
+      - name: Download the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download --repo "$GITHUB_REPOSITORY" --pattern '*-firefox.xpi' --dir "$RUNNER_TEMP/latest"
+
+      - name: Check the update
+        run: npm run update-check -- firefox "$RUNNER_TEMP"/latest/*-firefox.xpi release/firefox
+
+  sign:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    name: Sign
+    needs: [build, check-chrome, check-firefox]
+    environment: amo
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Download the build
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+
+      - name: Check that the tag has not moved
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tagged=$(gh api "repos/$GITHUB_REPOSITORY/commits/refs/tags/$GITHUB_REF_NAME" --jq .sha)
+          if [ "$tagged" != "$GITHUB_SHA" ]; then
+            echo "::error::$GITHUB_REF_NAME points to $tagged now, this run built $GITHUB_SHA. Start a new run from the tag instead of re-running this one."
+            exit 1
+          fi
+
+      - name: Sign on addons.mozilla.org
+        if: github.event_name == 'push'
+        run: npm run sign -- --yes
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
+          WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
+
+      - name: Dry run of signing
+        if: github.event_name == 'workflow_dispatch'
+        run: npm run sign -- --dry-run
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
+          WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
+
+      - name: Upload the signed file
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed
+          path: artifacts/${{ needs.build.outputs.version }}-amo/signed/
+          if-no-files-found: ignore
+          overwrite: true
+
+      - name: Upload the release files
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-files
+          path: artifacts/${{ needs.build.outputs.version }}/
+          if-no-files-found: error
+          overwrite: true
+
+  draft:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    name: Draft release
+    needs: [build, sign]
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download the release files
+        uses: actions/download-artifact@v4
+        with:
+          name: release-files
+          path: files
+
+      - name: Download the release notes
+        uses: actions/download-artifact@v4
+        with:
+          name: notes
+          path: notes
+
+      - name: Create the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event_name == 'push' && github.ref_name || format('dry-run-{0}', github.run_id) }}
+          RELEASE: ${{ github.event_name == 'push' }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          drafts() {
+            gh api --paginate "repos/$GITHUB_REPOSITORY/releases" --jq '.[] | select(.draft) | "\(.id) \(.tag_name)"' |
+              while read -r id tag; do
+                if [ "$tag" = "$TAG" ]; then
+                  echo "$id"
+                fi
+              done
+          }
+          delete_drafts() {
+            for id in $(drafts); do
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/$id"
+            done
+          }
+          if [ "$RELEASE" = true ]; then
+            tagged=$(gh api "repos/$GITHUB_REPOSITORY/commits/refs/tags/$TAG" --jq .sha)
+            if [ "$tagged" != "$GITHUB_SHA" ]; then
+              echo "::error::$TAG points to $tagged now, this run built $GITHUB_SHA. Start a new run from the tag instead of re-running this one."
+              exit 1
+            fi
+          fi
+          delete_drafts
+          if [ "$RELEASE" = true ]; then
+            target=(--verify-tag)
+          else
+            target=(--target "$GITHUB_SHA")
+          fi
+          gh release create "$TAG" files/* --repo "$GITHUB_REPOSITORY" --draft "${target[@]}" \
+            --title "2FAuthenticator $VERSION" --notes-file notes/notes.md
+          count=$(drafts | wc -l)
+          if [ "$count" != 1 ]; then
+            echo "::error::Expected one draft for $TAG, found $count."
+            exit 1
+          fi
+          if [ "$RELEASE" != true ]; then
+            delete_drafts
+            echo "Created and deleted the draft $TAG."
+          fi
+
+  published:
+    if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')
+    runs-on: ubuntu-latest
+    name: Check updates.json
+    timeout-minutes: 15
+
+    steps:
+      - name: Check that Firefox finds the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version="${TAG#v}"
+          xpi="2fauthenticator-$version-firefox.xpi"
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "$xpi" --dir "$RUNNER_TEMP"
+          hash="sha256:$(sha256sum "$RUNNER_TEMP/$xpi" | cut -d ' ' -f 1)"
+          link="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/$TAG/$xpi"
+          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/latest/download/updates.json"
+          for attempt in $(seq 1 10); do
+            if curl -fsSL "$url" -o "$RUNNER_TEMP/updates.json" &&
+              jq -e --arg version "$version" --arg link "$link" --arg hash "$hash" \
+                '.addons[].updates[0] | .version == $version and .update_link == $link and .update_hash == $hash' \
+                "$RUNNER_TEMP/updates.json"; then
+              exit 0
+            fi
+            sleep 60
+          done
+          echo "::error::$url does not offer $version with the hash of $xpi. Check that the release is published and marked as the latest."
+          cat "$RUNNER_TEMP/updates.json"
+          exit 1

@@ -1,6 +1,13 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   style:
@@ -48,6 +55,18 @@ jobs:
 
       - name: Build
         run: npm run ${{ matrix.platform }}
+        env:
+          DRIVE_DESKTOP_SECRET: test-secret
+
+      - name: Upload the build
+        if: matrix.platform != 'edge'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: ${{ matrix.platform }}/
+          if-no-files-found: error
+          overwrite: true
+
   run-tests:
     runs-on: ubuntu-latest
     name: Run tests
@@ -67,3 +86,92 @@ jobs:
 
       - name: Test code
         run: npm test
+
+  update-check-chrome:
+    runs-on: ubuntu-latest
+    name: Update check chrome
+    needs: [build]
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Cache browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-chrome-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download the build
+        uses: actions/download-artifact@v4
+        with:
+          name: chrome
+          path: chrome
+
+      - name: Download the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download --repo "$GITHUB_REPOSITORY" --pattern '*-chrome.zip' --dir "$RUNNER_TEMP/latest"
+
+      - name: Check the update
+        run: npm run update-check -- chrome "$RUNNER_TEMP"/latest/*-chrome.zip chrome
+
+  update-check-firefox:
+    runs-on: ubuntu-latest
+    name: Update check firefox
+    needs: [build]
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Cache browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-firefox-${{ hashFiles('package-lock.json', '.github/firefox-devedition-version') }}
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+
+      - name: Install Firefox Developer Edition
+        run: |
+          version=$(cat .github/firefox-devedition-version)
+          for attempt in 1 2 3; do
+            if npx puppeteer browsers install "firefox@devedition_$version"; then
+              exit 0
+            fi
+            sleep 15
+          done
+          exit 1
+
+      - name: Download the build
+        uses: actions/download-artifact@v4
+        with:
+          name: firefox
+          path: firefox
+
+      - name: Download the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download --repo "$GITHUB_REPOSITORY" --pattern '*-firefox.xpi' --dir "$RUNNER_TEMP/latest"
+
+      - name: Check the update
+        run: npm run update-check -- firefox "$RUNNER_TEMP"/latest/*-firefox.xpi firefox

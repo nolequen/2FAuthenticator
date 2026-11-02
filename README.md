@@ -101,7 +101,7 @@ npm run edge
 
 Each command builds the extension into the `chrome/`, `firefox/` or `edge/` folder. `npm run prod` builds all three into `release/`. The package submitted to addons.mozilla.org is the `release/firefox` folder built by `npm ci` and `npm run prod`.
 
-Google Drive in Firefox needs the secret of the Desktop OAuth client in `secrets/google-oauth.json` (`{"desktopClientSecret": "..."}`). The folder is ignored by git; without the file the Firefox build shows Google Drive as unavailable. Chrome and Edge do not use it.
+Google Drive in Firefox needs the secret of the Desktop OAuth client in `secrets/google-oauth.json` (`{"desktopClientSecret": "..."}`) or in the `DRIVE_DESKTOP_SECRET` environment variable. The folder is ignored by git; without the secret the Firefox build shows Google Drive as unavailable. Chrome and Edge do not use it.
 
 `npm test` rebuilds the test build and runs the tests in headless Chrome started by Puppeteer.
 
@@ -113,30 +113,64 @@ Google Drive in Firefox needs the secret of the Desktop OAuth client in `secrets
 
 `npm run start:firefox` starts Firefox with a temporary profile and the extension from `firefox/`. Run it together with `npm run dev:firefox` in a second terminal.
 
+Changes reach `main` only through pull requests merged with squash. CI checks every pull request: style, the three builds, the tests and the update from the latest release in Chrome and in Firefox Developer Edition.
+
+The update check installs the old package in a fresh browser profile, adds test accounts, sets a password, installs the new package over it and checks the accounts, the password and the backup page:
+
+```
+npm run update-check -- chrome <old .zip> <new folder or .zip>
+npm run update-check -- firefox <old .xpi> <new folder or .xpi>
+```
+
+When both packages have the same version, the new one is installed as `<version>.1`. Firefox has to accept unsigned add-ons, so the check uses Firefox Developer Edition of the version in `.github/firefox-devedition-version`: install it with `npx puppeteer browsers install firefox@devedition_<version>`, or set `UPDATE_CHECK_FIREFOX` to another Firefox that accepts unsigned add-ons. The steps in the old version follow the interface of the latest release; when a change moves the menu or the password form, keep a branch for the old interface in `scripts/update-check.mjs` until the next release.
+
 ## Releasing
 
-The version lives only in `package.json`, the build writes it into the manifests. Firefox builds are signed on addons.mozilla.org as unlisted; the API key comes from **Developer Hub** > **Manage API Keys** and never goes into files.
+The version lives only in `package.json`, the build writes it into the manifests. Firefox builds are signed on addons.mozilla.org (AMO) as unlisted. The **Release** workflow in GitHub Actions builds, checks and signs a release when a version tag is pushed.
 
-1. Bump the version and commit:
-
-   ```powershell
-   npm version 8.1.1 --no-git-tag-version
-   git commit -am "release 8.1.1"
-   ```
-
-2. Build the packages from the clean commit: `npm ci`, then `npm run package`. It builds `release/`, runs `web-ext lint` and puts the Chrome and Edge ZIPs into `artifacts/<version>/`.
-3. Test the builds before signing: load the ZIPs unpacked in Chrome and Edge and run `npx web-ext run --source-dir release/firefox`. addons.mozilla.org accepts every version number only once, so a bug found after signing needs a new version.
-4. Sign the Firefox build. The key exists only in this PowerShell window and only while `npm run sign` runs:
+1. In a branch from `main`, bump the version, update the date in `PRIVACY.md` if the policy changed, and open a pull request titled `release X.Y.Z`:
 
    ```powershell
-   $env:WEB_EXT_API_KEY = Read-Host 'JWT issuer'
-   $env:WEB_EXT_API_SECRET = [Net.NetworkCredential]::new('', (Read-Host 'JWT secret' -AsSecureString)).Password
-   try { npm run sign } finally { Remove-Item Env:WEB_EXT_API_KEY, Env:WEB_EXT_API_SECRET -ErrorAction SilentlyContinue }
+   npm version 9.4.0 --no-git-tag-version
+   git commit -am "release 9.4.0"
    ```
 
-   `npm run sign` uploads `release/firefox` with the source code archive, waits for the signed `.xpi` and writes `updates.json` and `SHA256SUMS.txt` next to the ZIPs. If signing fails, follow the message it prints instead of running it again.
-5. Tag the commit that `npm run sign` printed as `v<version>` and push the tag.
-6. Create a GitHub release from the tag, attach the five files from `artifacts/<version>/` and keep **Set as the latest release** on. Firefox finds updates through `releases/latest/download/updates.json`, so every release needs its own `updates.json` and must not be a draft or a pre-release.
+   Merge it with squash when CI is green.
+
+2. Tag the commit the pull request left in `main`. Take it from the pull request, not from the tip of `main`, which may have moved on. Write the release notes into `notes.md` first: the tag message becomes the release notes, and `--cleanup=whitespace` keeps the Markdown lines that start with `#`.
+
+   ```powershell
+   git fetch origin
+   $commit = gh pr view <number> --json mergeCommit --jq .mergeCommit.oid
+   git log --oneline v9.3.0..$commit
+   git tag -a v9.4.0 $commit -F notes.md --cleanup=whitespace
+   git push origin v9.4.0
+   ```
+
+3. The workflow checks the tag (annotated, with a message, on `main`, named after the version in `package.json`, newer than the latest release), runs the tests, builds the packages, checks the update from the latest release in Chrome and Firefox Developer Edition, signs the Firefox package on AMO and creates a draft release with the five files and the notes. It takes about 20 minutes.
+4. Open the draft, check it and click **Publish release** with **Set as the latest release** on. Firefox finds updates through `releases/latest/download/updates.json`, so every release needs its own `updates.json` and must be the latest release, not a draft or a pre-release. After publishing, the workflow checks that `updates.json` offers the new version with the hash of the published `.xpi`; if not, GitHub emails you about the failed run.
+
+If the workflow fails before the **Sign** job, delete the tag (`git tag -d v9.4.0`, `git push origin :refs/tags/v9.4.0`), fix the problem in a pull request and tag the new commit. Once **Sign** has started, AMO may already have the version, and it accepts every version number only once: use **Re-run failed jobs** only. `npm run sign` finds a version AMO already has, uploads its source code if it is missing, downloads the signed file and checks it against the build. **Re-run all jobs** would build the packages again. If the draft cannot be created at all, take the five files from the `release-files` artifact of the run and create the release by hand.
+
+**Run workflow** on the **Release** workflow starts a dry run from `main`. It goes through every step without submitting anything to AMO: the tag checks on an optional throwaway annotated tag whose name does not start with `v`, the tests, the build, both update checks from the latest release to `main`, `npm run sign -- --dry-run` (it finds the latest version on AMO, checks that it has its source code and that its signed file matches the GitHub release), and a draft that is created and deleted. Run it after changing the workflow or `scripts/package.js` and after updating puppeteer or `.github/firefox-devedition-version`.
+
+One-time setup in the repository settings:
+
+1. **Environments**: environment `amo` with deployment branches and tags limited to the tag `v*` and the branch `main`, and the secrets `WEB_EXT_API_KEY` (JWT issuer) and `WEB_EXT_API_SECRET` (JWT secret) from AMO **Developer Hub** > **Manage API Keys**.
+2. **Secrets and variables** > **Actions**: repository secret `DRIVE_DESKTOP_SECRET` with the `desktopClientSecret` of `secrets/google-oauth.json`.
+3. **Rules** > **Rulesets**: a tag ruleset for `v*` that restricts creations, updates and deletions, with the Repository admin role allowed to bypass it.
+4. **General** > **Pull Requests**: only **Allow squash merging**, with **Pull request title** as the default message, and **Automatically delete head branches**.
+5. **Rules** > **Rulesets**: a branch ruleset for the default branch with **Restrict deletions**, **Block force pushes**, **Require a pull request before merging** (no approvals, squash only) and **Require status checks to pass** with the seven checks of the CI workflow (`Style checks`, `Build chrome`, `Build firefox`, `Build edge`, `Run tests`, `Update check chrome`, `Update check firefox`), without **Require branches to be up to date**, and nobody in the bypass list. Renaming a job of `main.yml` needs the same change in the ruleset.
+
+The AMO key is valid for the whole AMO account, and anyone who can push to this repository can now release a signed update that Firefox installs by itself. Keep two-factor sign-in on GitHub, keep no write tokens you do not need, and regenerate the key in Developer Hub at once if it may have leaked.
+
+`npm run package` and `npm run sign` also work locally as a fallback. Run them only after the release pull request is merged, in a clean checkout of the commit that gets the tag: `npm run sign` refuses a commit that is not in `origin/main`. `npm run package` builds `release/` and puts the Chrome and Edge ZIPs into `artifacts/<version>/`; `npm run sign` asks before submitting, signs the Firefox package and writes the `.xpi`, `updates.json` and `SHA256SUMS.txt` next to them. The key exists only in this PowerShell window and only while `npm run sign` runs:
+
+```powershell
+$env:WEB_EXT_API_KEY = Read-Host 'JWT issuer'; $env:WEB_EXT_API_SECRET = [Net.NetworkCredential]::new('', (Read-Host 'JWT secret' -AsSecureString)).Password; try { npm run sign } finally { Remove-Item Env:WEB_EXT_API_KEY, Env:WEB_EXT_API_SECRET -ErrorAction SilentlyContinue }
+```
+
+After a local signing, tag the commit as above and create the release by hand from the five files in `artifacts/<version>/`. Cancel the workflow run the tag starts: it would compare the AMO file with its own build, which is not always byte for byte the same as the local one.
 
 ## Acknowledgements
 
